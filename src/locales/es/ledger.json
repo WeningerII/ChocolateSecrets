@@ -1,0 +1,24 @@
+{
+  "title": "Libro de Inventario",
+  "subtitle": "Historial detallado de todos los movimientos y ajustes de stock",
+  "searchPlaceholder": "Buscar por ingrediente o razón...",
+  "allTypes": "Todos los tipos de transacción",
+  "receive": "Recibir",
+  "consume": "Consumir",
+  "waste": "Desperdicio",
+  "transfer": "Transferir",
+  "auditAdjustment": "Ajuste de Auditoría",
+  "date": "Fecha",
+  "item": "Artículo",
+  "type": "Tipo",
+  "amount": "Cantidad",
+  "reason": "Razón",
+  "cost": "Costo Total",
+  "noTransactions": "No se encontraron transacciones que coincidan con sus filtros.",
+  "dateFilter": {
+    "allTime": "Todo el tiempo",
+    "last7Days": "Últimos 7 días",
+    "last30Days": "Últimos 30 días",
+    "last90Days": "Últimos 90 días"
+  }
+}

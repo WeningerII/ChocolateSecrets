@@ -1,0 +1,22 @@
+{
+  "trigger": "¿Algo no va bien?",
+  "headlineGeneric": "¿Algo no va bien con el chocolate?",
+  "headlineTempering": "¿Algo no va bien con el templado?",
+  "headlineMolding": "¿Algo no va bien con el moldeado?",
+  "headlineEnrobing": "¿Algo no va bien con el bañado?",
+  "headlineDipping": "¿Algo no va bien con el remojado?",
+  "headlineDefault": "¿Algo no va bien con {{action}}?",
+  "subtitle": "Toca un síntoma para ver causa, recuperación y prevención.",
+  "close": "Cerrar",
+  "noModes": "Ningún modo de fallo coincide con este paso.",
+  "cause": "Causa",
+  "recovery": "Recuperación",
+  "prevention": "Evitar la próxima vez",
+  "cannotRepair": "No se puede reparar completamente",
+  "severity": {
+    "fatal": "Fatal — no se puede recuperar completamente",
+    "safety": "Problema de seguridad",
+    "quality": "Problema de calidad",
+    "cosmetic": "Problema cosmético"
+  }
+}

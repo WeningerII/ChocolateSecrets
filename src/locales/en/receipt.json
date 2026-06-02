@@ -1,0 +1,17 @@
+{
+  "import": "Import Receipt",
+  "upload": "Upload Invoice or Receipt",
+  "uploadDesc": "Take a photo of a document to automatically extract line items, quantities, and costs.",
+  "analyzing": "Analyzing document with AI...",
+  "extractedItems": "Extracted Items",
+  "reviewItems": "Review the items before committing to inventory.",
+  "scanAnother": "Scan Another",
+  "item": "Item",
+  "qty": "Qty",
+  "costPerUnit": "Cost/Unit",
+  "matched": "Matched",
+  "new": "New",
+  "unknownSupplier": "Unknown Supplier",
+  "commit": "Commit to Inventory",
+  "noMatchWillCreate": "No match — will create new"
+}

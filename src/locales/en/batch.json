@@ -1,0 +1,23 @@
+{
+  "processing": "Processing extracted recipes...",
+  "review": "Batch Import Review",
+  "extracted": "We extracted {{count}} recipe(s).",
+  "newIngredients": "We found {{count}} new ingredient(s) that aren't in your database. Please review them before continuing.",
+  "allMatched": "All ingredients matched your database!",
+  "newIngredientsTitle": "New Ingredients to Add",
+  "name": "Name",
+  "unit": "Unit",
+  "category": "Category",
+  "initialStock": "Initial Stock",
+  "discreteItem": "Discrete Item (e.g. whole cherry)",
+  "recipesToImport": "Recipes to Import",
+  "bulkActions": "Bulk Actions",
+  "setCategory": "Set Category",
+  "setUnit": "Set Unit",
+  "apply": "Apply",
+  "components": "components",
+  "cancel": "Cancel Import",
+  "saveAll": "Save All to Recipe Book",
+  "rawExtractionData": "Raw Extraction Data",
+  "importSuccess": "Successfully imported {{count}} recipe(s)."
+}

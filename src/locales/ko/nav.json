@@ -1,0 +1,15 @@
+{
+  "dashboard": "대시보드",
+  "ingredients": "재료",
+  "suppliers": "공급업체",
+  "purchaseOrders": "구매 주문",
+  "inventory": "재고",
+  "transactions": "거래 내역",
+  "recipes": "레시피",
+  "prepList": "준비 목록",
+  "shoppingList": "쇼핑 목록",
+  "reports": "보고서",
+  "expenses": "Expenses",
+  "admin": "관리자",
+  "restaurantSettings": "식당 설정"
+}

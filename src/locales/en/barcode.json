@@ -1,0 +1,16 @@
+{
+  "scan": "Scan Barcode",
+  "pointCamera": "Point camera at barcode",
+  "scannedCode": "Scanned Code",
+  "rescan": "Rescan",
+  "noBrand": "No Brand",
+  "updateStock": "Update Stock",
+  "unknown": "Unknown Barcode",
+  "notInDatabase": "This item is not in your database.",
+  "snapLabel": "Snap Product Label to Add",
+  "extractedName": "Extracted Name",
+  "brand": "Brand",
+  "unit": "Unit",
+  "initialStock": "Initial Stock",
+  "saveNew": "Save New Ingredient"
+}

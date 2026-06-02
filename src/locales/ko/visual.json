@@ -1,0 +1,13 @@
+{
+  "audit": "시각적 재고 감사",
+  "snap": "선반 또는 냉장고 촬영",
+  "snapDesc": "보관 구역의 사진을 찍으세요. AI가 알려진 재료를 식별하고 현재 재고 수준을 추정합니다.",
+  "analyzing": "AI로 이미지 분석 중...",
+  "estimatedStock": "추정 재고",
+  "reviewEstimates": "재고를 업데이트하기 전에 AI 추정치를 검토하세요.",
+  "scanAnother": "다른 항목 스캔",
+  "item": "품목",
+  "current": "현재",
+  "estimated": "추정",
+  "updateInventory": "재고 업데이트"
+}

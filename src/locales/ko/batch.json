@@ -1,0 +1,23 @@
+{
+  "processing": "추출된 레시피 처리 중...",
+  "review": "일괄 가져오기 검토",
+  "extracted": "{{count}}개의 레시피를 추출했습니다.",
+  "newIngredients": "데이터베이스에 없는 {{count}}개의 새 재료를 찾았습니다. 계속하기 전에 검토해 주세요.",
+  "allMatched": "모든 재료가 데이터베이스와 일치합니다!",
+  "newIngredientsTitle": "추가할 새 재료",
+  "name": "이름",
+  "unit": "단위",
+  "category": "카테고리",
+  "initialStock": "초기 재고",
+  "discreteItem": "개별 품목 (예: 체리 한 알)",
+  "recipesToImport": "가져올 레시피",
+  "bulkActions": "일괄 작업",
+  "setCategory": "카테고리 설정",
+  "setUnit": "단위 설정",
+  "apply": "적용",
+  "components": "구성 요소",
+  "cancel": "가져오기 취소",
+  "saveAll": "레시피북에 모두 저장",
+  "rawExtractionData": "원시 추출 데이터",
+  "importSuccess": "성공적으로 {{count}}개의 레시피를 가져왔습니다."
+}

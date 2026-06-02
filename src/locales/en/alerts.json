@@ -1,0 +1,17 @@
+{
+  "missingBill": {
+    "title": "Missing bill",
+    "body": "Expected a bill from this vendor by {{expectedDate}} ({{graceDays}}-day grace exceeded)"
+  },
+  "dueSoon": {
+    "title": "Bill due soon",
+    "body": "{{amount}} due in {{daysUntil}} days"
+  },
+  "anomaly": {
+    "title": "Bill amount anomaly",
+    "body_expectation_band_high": "{{amount}} is above the expected band of {{low}} – {{high}}",
+    "body_expectation_band_low": "{{amount}} is below the expected band of {{low}} – {{high}}",
+    "body_rolling_avg_high": "{{amount}} is above the historical range of {{low}} – {{high}}",
+    "body_rolling_avg_low": "{{amount}} is below the historical range of {{low}} – {{high}}"
+  }
+}

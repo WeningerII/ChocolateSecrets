@@ -1,0 +1,309 @@
+{
+  "tier": {
+    "aw": "Actividad de agua",
+    "ph": "pH",
+    "aqueousSugar": "Azúcar acuosa",
+    "freeWater": "Agua libre",
+    "totalFat": "Grasa total",
+    "showCalculation": "Mostrar cálculo",
+    "hideCalculation": "Ocultar cálculo"
+  },
+  "bands": {
+    "aw": {
+      "very-fragile": "Muy frágil fresco",
+      "fragile": "Frágil fresco",
+      "stabilized": "Estabilizado",
+      "shelf-stable": "Estable en estante",
+      "functionally-stable": "Funcionalmente estable"
+    },
+    "fatRegime": {
+      "firm-set": "Agua en aceite de fraguado firme",
+      "standard": "Agua en aceite estándar",
+      "inversion-approaching": "Acercándose a la inversión de emulsión",
+      "oil-in-water": "Aceite en agua (fluido)"
+    },
+    "interpretation": {
+      "very-fragile": "Producto fresco muy frágil. Requiere refrigeración, ~1–2 semanas.",
+      "fragile": "Frágil. Requiere refrigeración, ~3–4 semanas. Formulación fresca estándar.",
+      "stabilized": "Estabilizado. Temperatura ambiente 6–8 semanas.",
+      "shelf-stable": "Estable en estante. Temperatura ambiente 4–6 meses.",
+      "functionally-stable": "Funcionalmente estable. Indefinido a temperatura ambiente."
+    }
+  },
+  "warnings": {
+    "composition_incomplete": "{{count}} ingredientes usan la composición predeterminada de categoría. Los números a continuación son aproximados — ingrese composiciones explícitas para predicciones precisas.",
+    "no_water": "Sin presencia de agua. El cálculo de actividad de agua no aplica.",
+    "extreme_saturation": "La saturación de azúcar acuosa del {{aqueousSugarPct}}% está en el límite del rango confiable del modelo Norrish. Considere el Aw como límite inferior.",
+    "declared_diverges": "Vida útil declarada ({{declaredDays}} días) y estimada ({{predictedWeeks}} semanas) difieren en más de una banda. Verifique el valor o refine la receta."
+  },
+  "shelfLife": {
+    "label": "Vida útil predeterminada",
+    "weeksOne": "{{count}} semana",
+    "weeksOther": "{{count}} semanas",
+    "alcoholBonus": "+ {{weeks}} semanas por {{abv}}% ABV",
+    "declared": "Declarada: {{days}} días"
+  },
+  "detail": {
+    "compositionTable": {
+      "title": "Composición de fase acuosa",
+      "species": "Especie",
+      "mass": "Masa (g)",
+      "moles": "Moles",
+      "moleFraction": "Fracción molar"
+    },
+    "norrish": {
+      "title": "Ecuación de Norrish (Chirife et al. 1980)",
+      "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",
+      "footnoteLactose": "Lactosa K=10.2 es límite superior; datos limitados de solubilidad.",
+      "footnoteEthanol": "Etanol K=1.60 es estimado; pérmida de volatilidad de {{lossPct}}% aplicada.",
+      "constants": "Constantes Norrish (escala log. natural): sacarosa 6.47, maltosa 4.54, glucosa y fructosa 2.25, lactosa 10.2, sorbitol 1.66, glicerol 1.15, etanol 1.60. Fuente: Chirife et al. 1980 vía Ergun, Lietha y Hartel. Exactitud de ±1.5%."
+    },
+    "ph": {
+      "title": "Equilibrio de pH (Cálculo de balance de cargas)",
+      "table": {
+        "component": "Componente",
+        "waterMass": "Agua (g)",
+        "fraction": "Fracc. acuosa",
+        "naturalPH": "pH natural"
+      },
+      "explanation": "Cada componente aporta ácidos y contraiones con base en su fracción hídrica. El solucionador encuentra cruce neutro de polipróticos. Equilibrio del sistema mixto: pH {{pH}}.",
+      "interpretation": {
+        "high": "Por encima del punto isoeléctrico de la caseína (4.6) — sin riesgo de corte por pH solo.",
+        "moderate": "Por encima del punto isoeléctrico de caseína pero en área sensible — técnica regular.",
+        "low": "Por debajo del punto isoeléctrico (4.6) — riesgo de corte necesita temperatura medida.",
+        "veryLow": "Muy por debajo del punto isoeléctrico (4.6) — corte garantizado a alta temperatura."
+      }
+    },
+    "bands": {
+      "title": "Interpretación de la banda Aw",
+      "current": "Actual"
+    },
+    "source": {
+      "label": "Fuentes de la composición",
+      "explicit": "Ingresado por usuario: {{count}}",
+      "usda_fdc": "USDA FoodData Central: {{count}}",
+      "chocolate_spec": "Especificación del chocolate: {{count}}",
+      "alcohol_spec": "Especificación de alcohol: {{count}}",
+      "category_default": "Por defecto de categoría: {{count}}",
+      "unknown": "Desconocida: {{count}}"
+    }
+  },
+  "strip": {
+    "ingredient": "{{name}}",
+    "totalMass": "Masa total",
+    "yield": "Porcion. / Rendimiento",
+    "shelfLife": "Vida útil",
+    "scale": "Escala"
+  },
+  "editor": {
+    "ribbon": {
+      "empty": "Agrega ingredientes para ver la simulación en vivo."
+    }
+  },
+  "confectionery": {
+    "warnings": {
+      "curdle_risk_medium": "La crema puede cortarse por la acidez (pH {{pH}}). Mantenla por debajo de {{foldTempCeiling}}°C al integrarla.",
+      "curdle_risk_high": "Riesgo alto de cortado (pH {{pH}}). La crema debe permanecer por debajo de {{foldTempCeiling}}°C durante el fold; considera añadir un amortiguador (miel, manteca de cacao) antes del ácido.",
+      "fat_regime_inversion": "El contenido de grasa {{fatPct}}% se acerca a la inversión de fase. Mezcla gradualmente y vigila el corte.",
+      "fat_regime_oil_in_water": "El contenido de grasa {{fatPct}}% cuajará fluido (aceite en agua). No logrará un corte limpio.",
+      "no_chocolate_in_confectionery": "Se detectó confitería sin chocolate — verifica que la etiqueta de la categoría sea correcta.",
+      "multiple_chocolate_classes": "Se detectaron múltiples clases de chocolate ({{classes}}). Atrémpera a la ventana de la clase dominante.",
+      "ethanol_above_tolerance": "Etanol {{abv}}% excede la tolerancia operativa tras la retención. Reduce alcohol o asume menor confianza de vida útil.",
+      "ethanol_long_shelf_low": "Etanol {{abv}}% está bajo el 4–6% para vida útil larga. Aumenta la fracción o retírala para evitar interferencia organoléptica vacía.",
+      "sorbet_detected_in_confectionery": "Composición parecida a un sorbete detectada (sin grasa) — verifica la categoría.",
+      "inclusion_oversized_for_truffle": "Inclusiones detectadas — para trufas, apunta a 60-mesh de partícula o más fina."
+    },
+    "subtype": {
+      "chocolate": "Chocolate",
+      "cream": "Crema",
+      "butter": "Mantequilla",
+      "cocoa_butter": "Manteca de cacao",
+      "sugar_add": "Azúcar",
+      "puree": "Puré",
+      "powder": "Polvo",
+      "milk_powder": "Leche en polvo",
+      "glucose_syrup": "Jarabe de glucosa",
+      "flavor_oil": "Aceite de sabor",
+      "infusion": "Infusión",
+      "stabilizer": "Estabilizante",
+      "gelatin": "Gelatina",
+      "praline_paste": "Pasta de praliné",
+      "fondant": "Fondant",
+      "inclusion": "Inclusión"
+    }
+  },
+  "frozen": {
+    "live_metrics": "Métricas de Helado",
+    "tier_title": "Perfil de Helado",
+    "pac": "PAC",
+    "pac_tooltip": "Poder anticongelante. Controla la facilidad de servido a temperatura de exposición.",
+    "pac_unit": "g eq sacarosa",
+    "pod": "POD",
+    "pod_tooltip": "Poder edulcorante relativo.",
+    "pod_unit": "% relativo",
+    "msnf": "SNGM",
+    "msnf_tooltip": "Sólidos no grasos de la leche.",
+    "ts": "ST",
+    "ts_tooltip": "Sólidos totales. Afecta textura y calidez.",
+    "fat": "Grasa",
+    "dairy_solids": "Sólidos lácteos",
+    "dry_matter": "Materia seca",
+    "scoopability": "Servibilidad",
+    "scoopability_desc": "Firmeza modelada del helado",
+    "serving_temp": "Temp. de Servicio",
+    "subtypes": {
+      "gelato": "Gelato",
+      "ice_cream": "Helado",
+      "sorbet": "Sorbete",
+      "sherbet": "Sorbete con leche",
+      "semifreddo": "Semifrío",
+      "frozen_yogurt": "Yogur Helado",
+      "granita": "Granizado"
+    },
+    "scoop_standard": "Estándar",
+    "scoop_soft": "Blando",
+    "scoop_too_soft": "Sopa",
+    "scoop_firm": "Firme",
+    "scoop_brick": "Piedra",
+    "subtypeOverride": "Anular Subtipo",
+    "autoDetect": "Auto Detectar",
+    "warnings": {
+      "pod_out_of_band": "El POD ({{pod}}%) está fuera del rango típico para {{subtype}} ({{min}}-{{max}}%).",
+      "total_solids_high": "Los sólidos totales ({{ts}}%) superan el máximo para {{subtype}} ({{maxTs}}%).",
+      "total_solids_low": "Los sólidos totales ({{ts}}%) están por debajo del mínimo para {{subtype}} ({{minTs}}%).",
+      "fat_out_of_band": "La grasa ({{fat}}%) está fuera del rango típico para {{subtype}} ({{min}}-{{max}}%).",
+      "msnf_out_of_band": "SNGM ({{msnf}}%) fuera del rango típico para {{subtype}} ({{min}}-{{max}}%).",
+      "sorbet_dairy_present": "Sorbete detectado, pero contiene lácteos ({{msnf}}% SNGM). Considere clasificar como Helado o Gelato.",
+      "gelato_no_milk_powder": "El gelato suele requerir un 3-5 % de leche en polvo desnatada. No se detectó ninguna.",
+      "sandiness_risk": "La lactosa supera el 11 % de la fase SNGM ({{pct}} %). Riesgo de textura arenosa.",
+      "scoopability_brick": "El PAC y los componentes estructurales indican que se congelará como una piedra en la vitrina estándar.",
+      "scoopability_soup": "El PAC y los componentes indican que será demasiado blando a temperatura de vitrina."
+    }
+  },
+  "bread": {
+    "recipeSubtype": {
+      "standard_bread": "Pan Simple",
+      "ciabatta": "Chapata (Ciabatta)",
+      "baguette": "Baguette",
+      "bagel": "Bagel",
+      "pizza_dough": "Masa de Pizza",
+      "brioche": "Brioche",
+      "sourdough": "Masa Madre",
+      "pan_loaf": "Pan de Molde",
+      "whole_wheat": "Pan Integral"
+    },
+    "recipeSubtypeProvenance": {
+      "inferred_name": "Deducido por el nombre de la receta",
+      "inferred_composition": "Deducido por hidratación/grasa",
+      "fallback": "Valor por defecto"
+    },
+    "tier": {
+      "title": "Física y Química del Pan",
+      "totalFlour": "Masa Total de Harina",
+      "hydration": "Hidratación (% Panadero)",
+      "salt": "Sal %",
+      "yeast": "Levadura % (Eq. Seca Inst.)",
+      "starter": "Masa Madre %",
+      "wholeGrain": "Grano Entero %",
+      "glutenScore": "Desarrollo de Gluten",
+      "ddt": "Temp. de Masa Deseada (DDT)",
+      "waterTemp": "Temp. del Agua a Usar",
+      "frictionFactor": "Factor de Fricción"
+    },
+    "gluten": {
+      "weak": "Débil",
+      "developing": "En desarrollo",
+      "strong": "Fuerte",
+      "over_developed": "Sobredesarrollado"
+    },
+    "warnings": {
+      "no_flour": "No se detecta harina. No se pueden calcular porcentajes de panadero.",
+      "hydration_low": "La hidratación ({{pct}}%) está por debajo del mínimo para {{subtype}} ({{min}}%).",
+      "hydration_high": "La hidratación ({{pct}}%) excede el máximo para {{subtype}} ({{max}}%).",
+      "salt_low": "La sal ({{pct}}%) está por debajo del mínimo estándar (1.4%). La fermentación puede ser muy rápida.",
+      "salt_high": "La sal ({{pct}}%) excede el máximo estándar (2.4%). La levadura puede verse suprimida.",
+      "yeast_low": "La levadura instantánea equivalente ({{pct}}%) está por debajo del mínimo para {{subtype}} ({{min}}%).",
+      "yeast_high": "La levadura instantánea equivalente ({{pct}}%) excede el máximo para {{subtype}} ({{max}}%).",
+      "sourdough_has_instant": "La formulación de masa madre típicamente no tiene levadura instantánea añadida.",
+      "gluten_weak": "El índice de matriz de gluten ({{score}}) es demasiado débil para un pan estructural.",
+      "gluten_over_developed": "El índice de matriz de gluten ({{score}}) es muy alto. La masa puede colapsar o hacerse de goma.",
+      "water_temp_cold": "Temperatura calculada para el agua ({{temp}}°C) cerca del nivel de congelación. Ajuste la temperatura ambiente o de harina.",
+      "water_temp_hot": "Temperatura calculada para el agua ({{temp}}°C) matará a la levadura. Disminuya la temperatura ambiente o de harina.",
+      "fat_in_lean_dough": "Grasa agregada detectada en masa magra ({{subtype}}). Revise la categoría.",
+      "missing_whole_wheat": "Subtipo Pan Integral especificado, pero cuenta con un {{pct}}% de grano entero. El mínimo recomendado es >50%."
+    },
+    "mixingParameters": "Mezcla y Entorno",
+    "mixingMethod": "Método de Mezcla",
+    "roomTempC": "Temp. Ambiente (°C)",
+    "flourTempC": "Temp. Harina (°C)",
+    "targetDdtC": "Anular DDT Deseado (°C)",
+    "frictionFactorOverride": "Anular Fricción (°C)",
+    "mix": {
+      "hand": "A Mano (Fricción 0°F)",
+      "stand_mixer": "Amasadora Planetaria (Fricción 10°F)",
+      "spiral_mixer": "Amasadora Espiral (Fricción 25°F)",
+      "no_knead": "Sin Amasado (Fricción 0°F)"
+    },
+    "ddtAuto": "Auto",
+    "subtypeOverride": "Anular Subtipo de Pan",
+    "autoDetect": "Auto Detectar"
+  },
+  "optimizer": {
+    "pageTitle": "Laboratorio de formulación",
+    "basedOn": "Basado en",
+    "noBaseRecipe": "Sin receta base seleccionada",
+    "noBaseRecipeHelp": "Abre una receta de confitería y usa el botón Optimizar para comenzar.",
+    "run": "Ejecutar optimización",
+    "cancel": "Cancelar",
+    "progressLabel": "Generación {{gen}}/{{total}} — Frente de Pareto: {{front}}",
+    "targets": {
+      "header": "Objetivos",
+      "awTarget": "Aw objetivo",
+      "shelfLifeWeeksMin": "Vida útil (semanas, mínimo)",
+      "costPerGramMaxUsd": "Costo por gramo (USD, máx)"
+    },
+    "weights": {
+      "header": "Pesos de los objetivos"
+    },
+    "objectives": {
+      "aw_distance_to_target": "Aw en objetivo",
+      "aw_below_threshold": "Aw bajo umbral",
+      "shelf_life_weeks": "Vida útil",
+      "cost_per_gram": "Costo",
+      "curdle_safety_margin": "Margen anti-cortado",
+      "fat_regime_distance": "Régimen graso",
+      "warning_count": "Advertencias",
+      "composition_completeness": "Datos de composición"
+    },
+    "searchSpace": {
+      "title": "Espacio de búsqueda",
+      "header": "Dimensiones ajustables",
+      "dimensions": "dimensiones",
+      "empty": "Sin dimensiones ajustables para esta receta.",
+      "lock": "Bloquear",
+      "unlock": "Desbloquear",
+      "dimensionKind": {
+        "continuous_mass": "masa",
+        "continuous_pct_of_role": "% de la receta",
+        "parametric_choice": "% de cacao",
+        "discrete_swap": "cambio",
+        "presence_with_variant": "agregar"
+      }
+    },
+    "candidate": {
+      "titlePrefix": "Variante",
+      "closenessLabel": "Cercanía",
+      "saveAsNew": "Guardar como nueva receta",
+      "noChange": "Sin cambios respecto a la base.",
+      "diffHeader": "Cambios",
+      "cocoaChange": "Porcentaje de cacao",
+      "variantSuffix": "Variante",
+      "derivedNote": "Derivada por el optimizador de formulación a partir de la receta {{id}}",
+      "savedToast": "Variante guardada como nueva receta.",
+      "saveFailedToast": "Falló al guardar. Inténtalo de nuevo."
+    },
+    "results": {
+      "header": "Top {{count}} candidatas"
+    }
+  }
+}

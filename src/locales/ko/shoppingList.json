@@ -1,0 +1,22 @@
+{
+  "title": "쇼핑 목록",
+  "subtitle": "수동으로 추가되거나 재고 부족 알림으로 생성된 품목입니다.",
+  "printList": "목록 인쇄",
+  "unassigned": "미지정 / 일반",
+  "estTotal": "예상 합계:",
+  "minOrderAlert": "최소 주문:",
+  "generatePO": "PO 생성",
+  "moqAdjusted": "MOQ 조정됨 (필요량: {{qty}} {{unit}})",
+  "noPending": "대기 중인 품목이 없습니다.",
+  "purchased": "구매 완료 ({{count}})",
+  "addItem": "품목 추가",
+  "selectIngredient": "재료 선택",
+  "manualEntry": "수동 입력",
+  "itemName": "품목 이름",
+  "quantity": "수량",
+  "unit": "단위",
+  "supplier": "공급업체",
+  "addToList": "목록에 추가",
+  "removeItem": "품목 제거",
+  "removeMessage": "이 품목을 제거하시겠습니까?"
+}

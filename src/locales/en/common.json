@@ -1,0 +1,96 @@
+{
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "ko": "한국어"
+  },
+  "translationTabs": {
+    "hasContent": "Has translation",
+    "translationHint": "Translation. The {{sourceLanguage}} text in the first tab is the canonical version."
+  },
+  "search": "Search",
+  "add": "Add",
+  "edit": "Edit",
+  "delete": "Delete",
+  "save": "Save",
+  "saving": "Saving...",
+  "cancel": "Cancel",
+  "name": "Name",
+  "status": "Status",
+  "unknown": "Unknown",
+  "actions": "Actions",
+  "print": "Print",
+  "notes": "Notes",
+  "optional": "Optional",
+  "update": "Update",
+  "apply": "Apply",
+  "allCategories": "All Categories",
+  "loading": "Loading...",
+  "success": "Success",
+  "confirm": "Confirm",
+  "error": "Error",
+  "somethingWentWrong": "Something went wrong",
+  "somethingWentWrongBody": "An error occurred. Please try refreshing the page.",
+  "databaseErrorHint": "Failed to {{operation}} {{path}}",
+  "errorSupportHint": "If this keeps happening, contact support with the time this occurred.",
+  "reload": "Reload Application",
+  "unknownError": "An unknown error occurred",
+  "databaseError": "A database error occurred while trying to {{operation}} data at {{path}}.",
+  "companyName": "Chocolate Secrets",
+  "companyAddress1": "123 Cacao Lane",
+  "companyAddress2": "Sweet City, SC 12345",
+  "app": {
+    "title": {
+      "chocolate": "Chocolate",
+      "secrets": "Secrets"
+    },
+    "subtitle": "Inventory & Recipe Management"
+  },
+  "user": {
+    "signOut": "Sign out"
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Spanish",
+    "korean": "Korean"
+  },
+  "typeToSearchOrCreate": "Type to search or create new...",
+  "willBeCreatedAsNew": "will be created as new",
+  "orCreateNew": "Or save to create as new",
+  "back": "Back",
+  "loading_ellipsis": "Loading...",
+  "restaurantSettingsTitle": "Restaurant settings",
+  "restaurantSettingsSubtitle": "Kitchen-wide configuration that applies across all recipes.",
+  "basicsSection": "Basics",
+  "restaurantNameLabel": "Restaurant name",
+  "restaurantNamePlaceholder": "The name displayed on reports and labels",
+  "zipCodeLabel": "ZIP code",
+  "zipCodePlaceholder": "e.g. 75219",
+  "zipCodeHelper": "Used for sourcing nearby suppliers. Not shared externally except with sourcing queries.",
+  "standingDisclaimerTitle": "Standing allergen disclaimer",
+  "standingDisclaimerBody": "Allergens that the kitchen may cross-contact across all recipes, regardless of whether a specific recipe contains them. These will be shown as \"may contain\" on every recipe in addition to the recipe's derived allergens.",
+  "saveSettings": "Save settings",
+  "settingsSaved": "Settings saved",
+  "settingsSaveFailed": "Failed to save",
+  "dates": {
+    "unknown": "Unknown",
+    "none": "None"
+  },
+  "translationUnavailable": "Translation unavailable — showing original text",
+  "dataMigration": {
+    "title": "Data Migration",
+    "description": "One-time: upgrade all recipes to the current schema version. Safe to run multiple times — only recipes that need updating will be touched.",
+    "running": "Running migration...",
+    "run": "Run recipe migration",
+    "result": "Migrated: {{migrated}} recipes. Lifted legacy ingredients: {{lifted}}. Skipped (already current): {{skipped}}.",
+    "completeToast": "Migration complete: {{migrated}} migrated, {{skipped}} skipped.",
+    "failedToast": "Migration failed. See console for details."
+  },
+  "admin": {
+    "roleMigration": {
+      "button": "Tag recipe ingredient roles",
+      "running": "Tagging in progress...",
+      "success": "Role tagging complete: {{recipesUpdated}} recipes updated, {{ingredientsTagged}} ingredients tagged, {{ambiguous}} ambiguous (skipped)."
+    }
+  }
+}

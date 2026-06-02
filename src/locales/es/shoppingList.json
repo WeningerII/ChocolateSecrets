@@ -1,0 +1,22 @@
+{
+  "title": "Lista de Compras",
+  "subtitle": "Artículos añadidos manualmente o por alertas de bajo stock.",
+  "printList": "Imprimir Lista",
+  "unassigned": "Sin Asignar / General",
+  "estTotal": "Total Est.:",
+  "minOrderAlert": "Pedido mín:",
+  "generatePO": "Generar OC",
+  "moqAdjusted": "MOQ Ajustado (Necesario: {{qty}} {{unit}})",
+  "noPending": "No hay artículos pendientes.",
+  "purchased": "Comprados ({{count}})",
+  "addItem": "Añadir Artículo",
+  "selectIngredient": "Seleccionar Ingrediente",
+  "manualEntry": "Entrada Manual",
+  "itemName": "Nombre del Artículo",
+  "quantity": "Cantidad",
+  "unit": "Unidad",
+  "supplier": "Proveedor",
+  "addToList": "Añadir a la Lista",
+  "removeItem": "Eliminar Artículo",
+  "removeMessage": "¿Está seguro de que desea eliminar este artículo?"
+}

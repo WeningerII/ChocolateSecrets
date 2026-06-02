@@ -1,0 +1,309 @@
+{
+  "tier": {
+    "aw": "Water activity",
+    "ph": "pH",
+    "aqueousSugar": "Aqueous sugar",
+    "freeWater": "Free water",
+    "totalFat": "Total fat",
+    "showCalculation": "Show calculation",
+    "hideCalculation": "Hide calculation"
+  },
+  "bands": {
+    "aw": {
+      "very-fragile": "Very fragile fresh",
+      "fragile": "Fragile fresh",
+      "stabilized": "Stabilized",
+      "shelf-stable": "Shelf-stable",
+      "functionally-stable": "Functionally stable"
+    },
+    "fatRegime": {
+      "firm-set": "Firm-set water-in-oil",
+      "standard": "Standard water-in-oil",
+      "inversion-approaching": "Approaching emulsion inversion",
+      "oil-in-water": "Oil-in-water (fluid)"
+    },
+    "interpretation": {
+      "very-fragile": "Very fragile fresh product. Refrigeration required, ~1–2 weeks shelf.",
+      "fragile": "Fragile. Refrigeration required, ~3–4 weeks. Standard fresh formulation.",
+      "stabilized": "Stabilized. Room temperature 6–8 weeks.",
+      "shelf-stable": "Shelf-stable. Room temperature 4–6 months.",
+      "functionally-stable": "Functionally shelf-stable. Indefinite at room temperature."
+    }
+  },
+  "warnings": {
+    "composition_incomplete": "{{count}} ingredients are using category-default composition. Numbers below are approximate — fill in explicit composition for accurate predictions.",
+    "no_water": "No water present. Water activity calculation does not apply.",
+    "extreme_saturation": "Aqueous sugar saturation at {{aqueousSugarPct}}% is at the edge of the Norrish model's reliable range. Treat predicted Aw as a lower bound.",
+    "declared_diverges": "Declared shelf life ({{declaredDays}} days) and predicted shelf life ({{predictedWeeks}} weeks) disagree by more than one band. Verify the declared value or refine the recipe."
+  },
+  "shelfLife": {
+    "label": "Predicted shelf life",
+    "weeksOne": "{{count}} week",
+    "weeksOther": "{{count}} weeks",
+    "alcoholBonus": "+ {{weeks}} weeks from {{abv}}% ABV",
+    "declared": "Declared: {{days}} days"
+  },
+  "detail": {
+    "compositionTable": {
+      "title": "Aqueous-phase composition",
+      "species": "Species",
+      "mass": "Mass (g)",
+      "moles": "Moles",
+      "moleFraction": "Mole fraction"
+    },
+    "norrish": {
+      "title": "Norrish equation (Chirife et al. 1980)",
+      "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",
+      "footnoteLactose": "Lactose K=10.2 is an upper-bound estimate; limited solubility data.",
+      "footnoteEthanol": "Ethanol K=1.60 is estimated; {{lossPct}}% volatility loss applied to recipe mass.",
+      "constants": "Norrish constants (natural log scale): sucrose 6.47, maltose 4.54, glucose & fructose 2.25, lactose 10.2, sorbitol 1.66, glycerol 1.15, ethanol 1.60. Source: Chirife et al. 1980 via Ergun, Lietha & Hartel, Critical Reviews in Food Science 50:162–192 (2010). Model accuracy ±1.5% within calibration range; underestimates depression at extreme saturation (>75% solute by mass in aqueous phase)."
+    },
+    "ph": {
+      "title": "pH equilibrium (charge-balance solver)",
+      "table": {
+        "component": "Component",
+        "waterMass": "Water (g)",
+        "fraction": "Aqueous fraction",
+        "naturalPH": "Natural pH"
+      },
+      "explanation": "Each component contributes acids and counterions weighted by its water mass in the aqueous phase. The solver finds the pH where total charge balance is zero across all polyprotic species. Mixed system equilibrium: pH {{pH}}.",
+      "interpretation": {
+        "high": "Above casein's isoelectric point (4.6) — no curdle risk from pH alone.",
+        "moderate": "Above casein's isoelectric point but in a sensitized range — standard technique works.",
+        "low": "Below casein's isoelectric point (4.6) — curdle risk requires careful temperature control during fold.",
+        "veryLow": "Well below casein's isoelectric point (4.6) — curdle is essentially guaranteed if cream contacts at high temperature."
+      }
+    },
+    "bands": {
+      "title": "Aw band interpretation",
+      "current": "Current"
+    },
+    "source": {
+      "label": "Composition sources",
+      "explicit": "User-entered: {{count}}",
+      "usda_fdc": "USDA FoodData Central: {{count}}",
+      "chocolate_spec": "Chocolate spec: {{count}}",
+      "alcohol_spec": "Alcohol spec: {{count}}",
+      "category_default": "Category default: {{count}}",
+      "unknown": "Unknown: {{count}}"
+    }
+  },
+  "strip": {
+    "ingredient": "{{name}}",
+    "totalMass": "Total mass",
+    "yield": "Yield",
+    "shelfLife": "Shelf life",
+    "scale": "Scale"
+  },
+  "editor": {
+    "ribbon": {
+      "empty": "Add ingredients to see live physics."
+    }
+  },
+  "confectionery": {
+    "warnings": {
+      "curdle_risk_medium": "Cream may curdle from acidity (pH {{pH}}). Hold cream below {{foldTempCeiling}}°C during the fold.",
+      "curdle_risk_high": "High curdle risk (pH {{pH}}). Cream must stay below {{foldTempCeiling}}°C during the fold; consider adding a buffering ingredient (honey, cocoa butter) before the acid.",
+      "fat_regime_inversion": "Fat content {{fatPct}}% is approaching emulsion inversion. Mix gradually and watch for breaking.",
+      "fat_regime_oil_in_water": "Fat content {{fatPct}}% will set fluid (oil-in-water). Will not cut clean.",
+      "no_chocolate_in_confectionery": "Confectionery without chocolate detected — verify category tag is correct.",
+      "multiple_chocolate_classes": "Multiple chocolate classes detected ({{classes}}). Temper to the dominant class's window.",
+      "ethanol_above_tolerance": "Ethanol {{abv}}% post-retention exceeds operational tolerance. Reduce alcohol or accept reduced shelf prediction confidence.",
+      "ethanol_long_shelf_low": "Ethanol {{abv}}% is below the 4–6% long-shelf band. Increase alcohol fraction for additional shelf bonus, or reduce it to zero.",
+      "sorbet_detected_in_confectionery": "Sorbet-like composition (no fat, fruit puree dominant) inside confectionery — verify category tag.",
+      "inclusion_oversized_for_truffle": "Inclusions detected — for truffles, target a 60-mesh particle size or smaller."
+    },
+    "subtype": {
+      "chocolate": "Chocolate",
+      "cream": "Cream",
+      "butter": "Butter",
+      "cocoa_butter": "Cocoa butter",
+      "sugar_add": "Sugar",
+      "puree": "Purée",
+      "powder": "Powder",
+      "milk_powder": "Milk powder",
+      "glucose_syrup": "Glucose syrup",
+      "flavor_oil": "Flavor oil",
+      "infusion": "Infusion",
+      "stabilizer": "Stabilizer",
+      "gelatin": "Gelatin",
+      "praline_paste": "Praline paste",
+      "fondant": "Fondant",
+      "inclusion": "Inclusion"
+    }
+  },
+  "frozen": {
+    "live_metrics": "Frozen Metrics",
+    "tier_title": "Frozen Profile",
+    "pac": "PAC",
+    "pac_tooltip": "Sweetness/Anti-freezing Power. Controls serving temperature scoopability.",
+    "pac_unit": "g sucrose eq",
+    "pod": "POD",
+    "pod_tooltip": "Relative sweetness power compared to sucrose.",
+    "pod_unit": "% relative flavor",
+    "msnf": "MSNF",
+    "msnf_tooltip": "Milk Solids Non-Fat. Provides body but causes sandiness if too high.",
+    "ts": "TS",
+    "ts_tooltip": "Total Solids. Affects texture, warmth, and chew.",
+    "fat": "Fat",
+    "dairy_solids": "Dairy bulk",
+    "dry_matter": "Dry matter",
+    "scoopability": "Scoopability",
+    "scoopability_desc": "Modeled scoop firmness at standard service temp range.",
+    "serving_temp": "Rec. Serving Temp",
+    "subtypes": {
+      "gelato": "Gelato",
+      "ice_cream": "Ice Cream",
+      "sorbet": "Sorbet",
+      "sherbet": "Sherbet",
+      "semifreddo": "Semifreddo",
+      "frozen_yogurt": "Frozen Yogurt",
+      "granita": "Granita"
+    },
+    "scoop_standard": "Standard",
+    "scoop_soft": "Soft",
+    "scoop_too_soft": "Too Soft / Melty",
+    "scoop_firm": "Firm",
+    "scoop_brick": "Brick (Unscoopable)",
+    "subtypeOverride": "Override Subtype",
+    "autoDetect": "Auto Detect",
+    "warnings": {
+      "pod_out_of_band": "POD ({{pod}}%) is outside typical {{subtype}} range ({{min}}-{{max}}%). May taste too sweet or not sweet enough.",
+      "total_solids_high": "Total Solids ({{ts}}%) exceeds {{subtype}} maximum ({{maxTs}}%). May yield a gummy, warm texture.",
+      "total_solids_low": "Total Solids ({{ts}}%) is below {{subtype}} minimum ({{minTs}}%). May yield a weak, icy structure.",
+      "fat_out_of_band": "Fat ({{fat}}%) is outside typical {{subtype}} range ({{min}}-{{max}}%).",
+      "msnf_out_of_band": "MSNF ({{msnf}}%) is outside typical {{subtype}} range ({{min}}-{{max}}%).",
+      "sorbet_dairy_present": "Sorbet inferred but dairy ({{msnf}}% MSNF) detected. Consider Sherbet or Gelato classification.",
+      "gelato_no_milk_powder": "Gelato composition generally requires 3-5% skim milk powder to absorb free water. None detected.",
+      "sandiness_risk": "Lactose exceeds 11% of MSNF phase ({{pct}}%). Sandiness risk due to lactose crystallization.",
+      "scoopability_brick": "PAC and structural factors indicate the mix will freeze solid (brick) at standard display cabinet temperatures.",
+      "scoopability_soup": "PAC and structural factors indicate the mix will be too soft (soupy) at standard display cabinet temperatures."
+    }
+  },
+  "bread": {
+    "recipeSubtype": {
+      "standard_bread": "Standard Bread",
+      "ciabatta": "Ciabatta",
+      "baguette": "Baguette",
+      "bagel": "Bagel",
+      "pizza_dough": "Pizza Dough",
+      "brioche": "Brioche",
+      "sourdough": "Sourdough",
+      "pan_loaf": "Pan Loaf",
+      "whole_wheat": "Whole Wheat"
+    },
+    "recipeSubtypeProvenance": {
+      "inferred_name": "Inferred from recipe name",
+      "inferred_composition": "Inferred from hydration/fat rules",
+      "fallback": "Default fallback"
+    },
+    "tier": {
+      "title": "Bread Physics",
+      "totalFlour": "Total Flour Mass",
+      "hydration": "Hydration (Baker's %)",
+      "salt": "Salt %",
+      "yeast": "Yeast % (Instant Eq)",
+      "starter": "Starter %",
+      "wholeGrain": "Whole Grain %",
+      "glutenScore": "Gluten Matrix Score",
+      "ddt": "Target DDT",
+      "waterTemp": "Req. Water Temp",
+      "frictionFactor": "Friction Factor"
+    },
+    "gluten": {
+      "weak": "Weak",
+      "developing": "Developing",
+      "strong": "Strong",
+      "over_developed": "Over-developed"
+    },
+    "warnings": {
+      "no_flour": "No flour detected. Baker's percentages cannot be calculated.",
+      "hydration_low": "Hydration ({{pct}}%) is below the {{subtype}} minimum ({{min}}%).",
+      "hydration_high": "Hydration ({{pct}}%) exceeds the {{subtype}} maximum ({{max}}%).",
+      "salt_low": "Salt ({{pct}}%) is below the standard minimum (1.4%). Fermentation may be too rapid and flavor lacking.",
+      "salt_high": "Salt ({{pct}}%) exceeds the standard maximum (2.4%). Yeast activity may be severely suppressed.",
+      "yeast_low": "Instant yeast equivalent ({{pct}}%) is below the {{subtype}} minimum ({{min}}%).",
+      "yeast_high": "Instant yeast equivalent ({{pct}}%) exceeds the {{subtype}} maximum ({{max}}%).",
+      "sourdough_has_instant": "Sourdough formulation typically relies only on natural starter, but instant/fresh yeast was detected.",
+      "gluten_weak": "Gluten matrix score ({{score}}) is too weak for structural bread. Increase protein or hydration.",
+      "gluten_over_developed": "Gluten matrix score ({{score}}) is dangerously high. Dough may collapse or become rubbery.",
+      "water_temp_cold": "Calculated water temperature ({{temp}}°C) is near freezing. Adjust room or flour temp.",
+      "water_temp_hot": "Calculated water temperature ({{temp}}°C) will kill yeast. Adjust room or flour temp.",
+      "fat_in_lean_dough": "Added fat detected in a lean dough subtype ({{subtype}}). Recheck categorization.",
+      "missing_whole_wheat": "Whole wheat bread specified but whole grain fraction is only {{pct}}%. Target is >50%."
+    },
+    "mixingParameters": "Mixing & Environment",
+    "mixingMethod": "Mixing Method",
+    "roomTempC": "Room Temp (°C)",
+    "flourTempC": "Flour Temp (°C)",
+    "targetDdtC": "Override Target DDT (°C)",
+    "frictionFactorOverride": "Override Friction (°C)",
+    "mix": {
+      "hand": "By Hand (0°F Friction)",
+      "stand_mixer": "Stand Mixer (10°F Friction)",
+      "spiral_mixer": "Spiral Mixer (25°F Friction)",
+      "no_knead": "No-Knead / Fold (0°F Friction)"
+    },
+    "ddtAuto": "Auto",
+    "subtypeOverride": "Bread Subtype Override",
+    "autoDetect": "Auto Detect"
+  },
+  "optimizer": {
+    "pageTitle": "Formulation Lab",
+    "basedOn": "Based on",
+    "noBaseRecipe": "No Base Recipe",
+    "noBaseRecipeHelp": "Open a confectionery recipe and click Optimize to begin.",
+    "run": "Run",
+    "cancel": "Cancel",
+    "progressLabel": "Progress {{gen}} of {{total}} — Pareto Front: {{front}}",
+    "targets": {
+      "header": "Targets",
+      "awTarget": "Aw target",
+      "shelfLifeWeeksMin": "Shelf life (weeks, min)",
+      "costPerGramMaxUsd": "Cost per gram (USD, max)"
+    },
+    "weights": {
+      "header": "Objective weights"
+    },
+    "objectives": {
+      "aw_distance_to_target": "Aw diff",
+      "aw_below_threshold": "Aw below threshold",
+      "shelf_life_weeks": "Shelf life",
+      "cost_per_gram": "Cost",
+      "curdle_safety_margin": "Curdle safety",
+      "fat_regime_distance": "Fat regime",
+      "warning_count": "Warnings",
+      "composition_completeness": "Composition data"
+    },
+    "searchSpace": {
+      "title": "Search Space",
+      "header": "Search Space Header",
+      "dimensions": "dimensions",
+      "empty": "No adjustable dimensions for this recipe.",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "dimensionKind": {
+        "continuous_mass": "mass",
+        "continuous_pct_of_role": "% of recipe",
+        "parametric_choice": "cacao %",
+        "discrete_swap": "swap",
+        "presence_with_variant": "add"
+      }
+    },
+    "candidate": {
+      "titlePrefix": "Variant",
+      "closenessLabel": "Closeness",
+      "saveAsNew": "Save as new recipe",
+      "noChange": "No change from base.",
+      "diffHeader": "Changes",
+      "cocoaChange": "Cocoa percentage",
+      "variantSuffix": "Variant",
+      "derivedNote": "Derived from {{id}} by optimizer",
+      "savedToast": "Saved!",
+      "saveFailedToast": "Failed!"
+    },
+    "results": {
+      "header": "Results ({{count}})"
+    }
+  }
+}

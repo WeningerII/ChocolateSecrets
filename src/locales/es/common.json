@@ -1,0 +1,96 @@
+{
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "ko": "한국어"
+  },
+  "translationTabs": {
+    "hasContent": "Tiene traducción",
+    "translationHint": "Traducción. El texto en {{sourceLanguage}} de la primera pestaña es la versión canónica."
+  },
+  "search": "Buscar",
+  "add": "Añadir",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "save": "Guardar",
+  "saving": "Guardando...",
+  "cancel": "Cancelar",
+  "name": "Nombre",
+  "status": "Estado",
+  "unknown": "Desconocido",
+  "actions": "Acciones",
+  "print": "Imprimir",
+  "notes": "Notas",
+  "optional": "Opcional",
+  "update": "Actualizar",
+  "apply": "Aplicar",
+  "allCategories": "Todas las Categorías",
+  "loading": "Cargando...",
+  "success": "Éxito",
+  "confirm": "Confirmar",
+  "error": "Error",
+  "somethingWentWrong": "Algo salió mal",
+  "somethingWentWrongBody": "Ocurrió un error. Por favor, intenta actualizar la página.",
+  "databaseErrorHint": "Error al {{operation}} {{path}}",
+  "errorSupportHint": "Si esto sigue ocurriendo, contacta con soporte indicando la hora en que ocurrió.",
+  "reload": "Recargar Aplicación",
+  "unknownError": "Ocurrió un error desconocido",
+  "databaseError": "Ocurrió un error en la base de datos al intentar {{operation}} datos en {{path}}.",
+  "companyName": "Chocolate Secrets",
+  "companyAddress1": "123 Cacao Lane",
+  "companyAddress2": "Sweet City, SC 12345",
+  "app": {
+    "title": {
+      "chocolate": "Chocolate",
+      "secrets": "Secretos"
+    },
+    "subtitle": "Gestión de Inventario y Recetas"
+  },
+  "user": {
+    "signOut": "Cerrar sesión"
+  },
+  "language": {
+    "english": "Inglés",
+    "spanish": "Español",
+    "korean": "Coreano"
+  },
+  "typeToSearchOrCreate": "Escribe para buscar o crear nuevo...",
+  "willBeCreatedAsNew": "se creará como nuevo",
+  "orCreateNew": "O guarda para crear nuevo",
+  "back": "Volver",
+  "loading_ellipsis": "Cargando...",
+  "restaurantSettingsTitle": "Configuración del restaurante",
+  "restaurantSettingsSubtitle": "Configuración de toda la cocina que se aplica a todas las recetas.",
+  "basicsSection": "Básicos",
+  "restaurantNameLabel": "Nombre del restaurante",
+  "restaurantNamePlaceholder": "El nombre que se mostrará en informes y etiquetas",
+  "zipCodeLabel": "Código postal",
+  "zipCodePlaceholder": "p. ej. 75219",
+  "zipCodeHelper": "Se usa para encontrar proveedores cercanos. No se comparte fuera de las consultas de fuentes.",
+  "standingDisclaimerTitle": "Declaración permanente de alérgenos",
+  "standingDisclaimerBody": "Alérgenos con los que la cocina puede tener contacto cruzado en todas las recetas, independientemente de si una receta específica los contiene. Se mostrarán como \"puede contener\" en cada receta, además de los alérgenos derivados de la receta.",
+  "saveSettings": "Guardar configuración",
+  "settingsSaved": "Configuración guardada",
+  "settingsSaveFailed": "Error al guardar",
+  "dates": {
+    "unknown": "Desconocido",
+    "none": "Ninguno"
+  },
+  "translationUnavailable": "Traducción no disponible — mostrando texto original",
+  "dataMigration": {
+    "title": "Migración de datos",
+    "description": "Una sola vez: actualiza todas las recetas a la versión actual del esquema. Seguro para ejecutar varias veces — solo se tocarán las recetas que necesiten actualización.",
+    "running": "Ejecutando migración...",
+    "run": "Ejecutar migración de recetas",
+    "result": "Migradas: {{migrated}} recetas. Ingredientes heredados extraídos: {{lifted}}. Omitidas (ya actualizadas): {{skipped}}.",
+    "completeToast": "Migración completa: {{migrated}} migradas, {{skipped}} omitidas.",
+    "failedToast": "Migración fallida. Consulta la consola para más detalles."
+  },
+  "admin": {
+    "roleMigration": {
+      "button": "Tag recipe ingredient roles",
+      "running": "Tagging in progress...",
+      "success": "Role tagging complete: {{recipesUpdated}} recipes updated, {{ingredientsTagged}} ingredients tagged, {{ambiguous}} ambiguous (skipped)."
+    }
+  }
+}

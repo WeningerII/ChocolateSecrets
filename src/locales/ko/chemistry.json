@@ -1,0 +1,309 @@
+{
+  "tier": {
+    "aw": "수분 활성도",
+    "ph": "pH",
+    "aqueousSugar": "수성 당",
+    "freeWater": "자유 수분",
+    "totalFat": "총 지방",
+    "showCalculation": "계산 표시",
+    "hideCalculation": "계산 숨기기"
+  },
+  "bands": {
+    "aw": {
+      "very-fragile": "매우 취약함 (생)",
+      "fragile": "취약함 (생)",
+      "stabilized": "안정화",
+      "shelf-stable": "상온 안정",
+      "functionally-stable": "기능적 안정"
+    },
+    "fatRegime": {
+      "firm-set": "단단한 워터인오일",
+      "standard": "표준 워터인오일",
+      "inversion-approaching": "유화 역전에 접근 중",
+      "oil-in-water": "오일인워터 (액상)"
+    },
+    "interpretation": {
+      "very-fragile": "매우 취약한 생제품. 냉장해야 함, 약 1~2주 보관.",
+      "fragile": "취약함. 냉장해야 함, 약 3~4주 보관. 표준 신선 레시피.",
+      "stabilized": "안정화됨. 실온 보관 6~8주.",
+      "shelf-stable": "상온 보관 가능. 실온 4~6개월.",
+      "functionally-stable": "기능적으로 상온 보관. 실온 무기한."
+    }
+  },
+  "warnings": {
+    "composition_incomplete": "{{count}}개의 재료가 기본값을 사용 중입니다. 정확한 결과를 위해 직접 수치를 입력하세요.",
+    "no_water": "수분 없음. 수분 활성도 (Aw) 모델 미포함.",
+    "extreme_saturation": "수성 당 농도 ({{aqueousSugarPct}}%) 가 모델 정상 임계점을 넘었습니다. 최소한의 모델 예측으로 생각하십시오.",
+    "declared_diverges": "선언된 보관 기간 ({{declaredDays}} 일)과 예상 ({{predictedWeeks}} 주)이 모델 밴드에서 크게 벗어남."
+  },
+  "shelfLife": {
+    "label": "예상 보관 기간",
+    "weeksOne": "{{count}} 주",
+    "weeksOther": "{{count}} 주",
+    "alcoholBonus": "+ {{weeks}}주 (ABV {{abv}}% 추가분)",
+    "declared": "사용자 선언: {{days}}일"
+  },
+  "detail": {
+    "compositionTable": {
+      "title": "수용액 성분",
+      "species": "성분",
+      "mass": "질량 (g)",
+      "moles": "몰수",
+      "moleFraction": "몰 분율"
+    },
+    "norrish": {
+      "title": "Norrish 방정식",
+      "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",
+      "footnoteLactose": "Lactose K=10.2 상한치입니다; 데이터 한계.",
+      "footnoteEthanol": "Ethanol K=1.60 예측치, 알콜 증발 {{lossPct}}% 적용됨.",
+      "constants": "Norrish 상수 (자연 로그): sucrose 6.47, maltose 4.54, glucose & fructose 2.25, lactose 10.2, sorbitol 1.66, glycerol 1.15, ethanol 1.60. 출처: Chirife 등 1980."
+    },
+    "ph": {
+      "title": "pH 균형 (charge-balance)",
+      "table": {
+        "component": "요소",
+        "waterMass": "물 (g)",
+        "fraction": "비율",
+        "naturalPH": "고유 pH"
+      },
+      "explanation": "각 요소는 몰분율에 따라 산과 상대 이온을 가져옵니다. 총 충전 균형이 0인 pH를 찾습니다. 혼합 균형: pH {{pH}}.",
+      "interpretation": {
+        "high": "카제인 등전점(4.6) 위 – pH 응고 위험 없음.",
+        "moderate": "등전점(4.6) 위, 민감한 구간 - 보통 kỹ thuật로 조절 가능.",
+        "low": "등전점(4.6) 이하 - 응고 위험 높음 (온도 주의).",
+        "veryLow": "등전점(4.6) 한참 아래 - 따뜻한 반응 시 무조건 응고됨."
+      }
+    },
+    "bands": {
+      "title": "Aw 밴드",
+      "current": "현재"
+    },
+    "source": {
+      "label": "정보 출처",
+      "explicit": "직접 입력: {{count}}",
+      "usda_fdc": "USDA FoodData: {{count}}",
+      "chocolate_spec": "초콜릿 자동계산: {{count}}",
+      "alcohol_spec": "알코올 자동계산: {{count}}",
+      "category_default": "분류 기본값: {{count}}",
+      "unknown": "값 없음: {{count}}"
+    }
+  },
+  "strip": {
+    "ingredient": "{{name}}",
+    "totalMass": "총 질량",
+    "yield": "생산량",
+    "shelfLife": "보관 기간",
+    "scale": "배율 비율"
+  },
+  "editor": {
+    "ribbon": {
+      "empty": "재료를 추가하여 실시간 물리 시뮬레이션을 확인하세요."
+    }
+  },
+  "confectionery": {
+    "warnings": {
+      "curdle_risk_medium": "산도로 인해 크림이 응고될 수 있습니다 (pH {{pH}}). 폴드 시 크림을 {{foldTempCeiling}}°C 이하로 유지하세요.",
+      "curdle_risk_high": "응고 위험 높음 (pH {{pH}}). 폴드 시 크림 온도를 {{foldTempCeiling}}°C 이하로 유지하고, 산을 넣기 전에 완충제(꿀, 카카오 버터)를 고려하세요.",
+      "fat_regime_inversion": "지방 함량 {{fatPct}}%가 역전(inversion)에 접근 중입니다. 섞을 때 분리를 주의하세요.",
+      "fat_regime_oil_in_water": "지방 함량이 {{fatPct}}%로, 워터베이스(oil-in-water)가 되었습니다. 깔끔한 절단이 불가능합니다.",
+      "no_chocolate_in_confectionery": "초콜릿이 없는 초콜릿/봉봉 레시피입니다. 카테고리를 확인하세요.",
+      "multiple_chocolate_classes": "여러 초콜릿 종류가 섞여 있습니다 ({{classes}}). 주요 클래스에 맞춰 템퍼링하세요.",
+      "ethanol_above_tolerance": "잔류 알콜({{abv}}%)이 너무 높습니다. 알콜을 줄이거나 유통기한 감소를 감수하세요.",
+      "ethanol_long_shelf_low": "에탄올 {{abv}}%가 최적 밴드(4-6%) 미만입니다. 늘리거나 아예 없애는 것을 고려하세요.",
+      "sorbet_detected_in_confectionery": "크림 없이 퓨레만 들어간 셔벗 형태입니다. 분류를 확인하세요.",
+      "inclusion_oversized_for_truffle": "내용물이 너무 큽니다. 트러플 텍스처를 위해서는 입자를 더 작게 만드세요."
+    },
+    "subtype": {
+      "chocolate": "초콜릿",
+      "cream": "크림",
+      "butter": "버터",
+      "cocoa_butter": "카카오 버터",
+      "sugar_add": "설탕",
+      "puree": "퓨레",
+      "powder": "분말",
+      "milk_powder": "분유",
+      "glucose_syrup": "물엿/글루코스",
+      "flavor_oil": "향 오일",
+      "infusion": "인퓨전",
+      "stabilizer": "안정제",
+      "gelatin": "젤라틴",
+      "praline_paste": "프랄린 페이스트",
+      "fondant": "퐁당",
+      "inclusion": "첨가물"
+    }
+  },
+  "frozen": {
+    "live_metrics": "Frozen Metrics",
+    "tier_title": "Frozen Profile",
+    "pac": "PAC",
+    "pac_tooltip": "Sweetness/Anti-freezing Power. Controls serving temperature scoopability.",
+    "pac_unit": "g sucrose eq",
+    "pod": "POD",
+    "pod_tooltip": "Relative sweetness power compared to sucrose.",
+    "pod_unit": "% relative flavor",
+    "msnf": "MSNF",
+    "msnf_tooltip": "Milk Solids Non-Fat. Provides body but causes sandiness if too high.",
+    "ts": "TS",
+    "ts_tooltip": "Total Solids. Affects texture, warmth, and chew.",
+    "fat": "Fat",
+    "dairy_solids": "Dairy bulk",
+    "dry_matter": "Dry matter",
+    "scoopability": "Scoopability",
+    "scoopability_desc": "Modeled scoop firmness at standard service temp range.",
+    "serving_temp": "Rec. Serving Temp",
+    "subtypes": {
+      "gelato": "Gelato",
+      "ice_cream": "Ice Cream",
+      "sorbet": "Sorbet",
+      "sherbet": "Sherbet",
+      "semifreddo": "Semifreddo",
+      "frozen_yogurt": "Frozen Yogurt",
+      "granita": "Granita"
+    },
+    "scoop_standard": "Standard",
+    "scoop_soft": "Soft",
+    "scoop_too_soft": "Too Soft / Melty",
+    "scoop_firm": "Firm",
+    "scoop_brick": "Brick (Unscoopable)",
+    "subtypeOverride": "Override Subtype",
+    "autoDetect": "Auto Detect",
+    "warnings": {
+      "pod_out_of_band": "POD ({{pod}}%) is outside typical {{subtype}} range ({{min}}-{{max}}%). May taste too sweet or not sweet enough.",
+      "total_solids_high": "Total Solids ({{ts}}%) exceeds {{subtype}} maximum ({{maxTs}}%). May yield a gummy, warm texture.",
+      "total_solids_low": "Total Solids ({{ts}}%) is below {{subtype}} minimum ({{minTs}}%). May yield a weak, icy structure.",
+      "fat_out_of_band": "Fat ({{fat}}%) is outside typical {{subtype}} range ({{min}}-{{max}}%).",
+      "msnf_out_of_band": "MSNF ({{msnf}}%) is outside typical {{subtype}} range ({{min}}-{{max}}%).",
+      "sorbet_dairy_present": "Sorbet inferred but dairy ({{msnf}}% MSNF) detected. Consider Sherbet or Gelato classification.",
+      "gelato_no_milk_powder": "Gelato composition generally requires 3-5% skim milk powder to absorb free water. None detected.",
+      "sandiness_risk": "Lactose exceeds 11% of MSNF phase ({{pct}}%). Sandiness risk due to lactose crystallization.",
+      "scoopability_brick": "PAC and structural factors indicate the mix will freeze solid (brick) at standard display cabinet temperatures.",
+      "scoopability_soup": "PAC and structural factors indicate the mix will be too soft (soupy) at standard display cabinet temperatures."
+    }
+  },
+  "bread": {
+    "recipeSubtype": {
+      "standard_bread": "일반 빵 (Standard Bread)",
+      "ciabatta": "치아바타 (Ciabatta)",
+      "baguette": "바게트 (Baguette)",
+      "bagel": "베이글 (Bagel)",
+      "pizza_dough": "피자 도우 (Pizza Dough)",
+      "brioche": "브리오슈 (Brioche)",
+      "sourdough": "사워도우 (Sourdough)",
+      "pan_loaf": "팬 로프 (Pan Loaf)",
+      "whole_wheat": "통밀 빵 (Whole Wheat)"
+    },
+    "recipeSubtypeProvenance": {
+      "inferred_name": "이름에서 유추됨",
+      "inferred_composition": "구성에서 유추됨",
+      "fallback": "기본값"
+    },
+    "tier": {
+      "title": "빵 물리 특성",
+      "totalFlour": "총 밀가루 양(g)",
+      "hydration": "수분율 (베이커스 퍼센트)",
+      "salt": "소금 %",
+      "yeast": "효모 % (인스턴트 동등치)",
+      "starter": "스타터 %",
+      "wholeGrain": "통곡물 %",
+      "glutenScore": "글루텐 매트릭스 점수",
+      "ddt": "목표 반죽 온도(DDT)",
+      "waterTemp": "요구 물 온도",
+      "frictionFactor": "마찰 계수 (Friction Factor)"
+    },
+    "gluten": {
+      "weak": "약함 (Weak)",
+      "developing": "보통 (Developing)",
+      "strong": "강함 (Strong)",
+      "over_developed": "과도함 (Over-developed)"
+    },
+    "warnings": {
+      "no_flour": "밀가루가 발견되지 않아 베이커스 퍼센트를 계산할 수 없습니다.",
+      "hydration_low": "수분율({{pct}}%)이 {{subtype}}의 최소치({{min}}%)보다 낮습니다.",
+      "hydration_high": "수분율({{pct}}%)이 {{subtype}}의 최대치({{max}}%)를 초과합니다.",
+      "salt_low": "소금({{pct}}%)이 일반적인 최소치(1.4%)보다 낮습니다. 발효가 너무 빠를 수 있습니다.",
+      "salt_high": "소금({{pct}}%)이 일반적인 최대치(2.4%)를 초과합니다. 효모 활성이 심각하게 저하될 수 있습니다.",
+      "yeast_low": "인스턴트 효모 동등치({{pct}}%)가 {{subtype}}의 최소치({{min}}%)보다 낮습니다.",
+      "yeast_high": "인스턴트 효모 동등치({{pct}}%)가 {{subtype}}의 최대치({{max}}%)를 초과합니다.",
+      "sourdough_has_instant": "사워도우에는 일반적으로 천연 발효종만 사용되지만 인스턴트/생 이스트가 포함되어 있습니다.",
+      "gluten_weak": "글루텐 점수({{score}})가 구조적인 빵을 만들기에 너무 약합니다. 수분이나 단백질을 높여주세요.",
+      "gluten_over_developed": "글루텐 점수({{score}})가 강합니다. 반죽이 주저앉거나 너무 질겨질 수 있습니다.",
+      "water_temp_cold": "계산된 물 온도({{temp}}°C)가 너무 낮습니다. 실내 온도나 밀가루 온도를 조절하세요.",
+      "water_temp_hot": "계산된 물 온도({{temp}}°C)가 효모를 죽일 수 있습니다. 실내 온도나 밀가루 온도를 조절하세요.",
+      "fat_in_lean_dough": "지방이 없는 {{subtype}} 레시피에 지방이 추가되었습니다. 분류를 확인하세요.",
+      "missing_whole_wheat": "통밀 빵이지만 통곡물 비율이 {{pct}}%밖에 되지 않습니다. (50% 이상 권장)"
+    },
+    "mixingParameters": "믹싱 및 환경",
+    "mixingMethod": "믹싱 방법",
+    "roomTempC": "실내 온도 (°C)",
+    "flourTempC": "밀가루 온도 (°C)",
+    "targetDdtC": "목표 반죽 온도 (DDT, °C)",
+    "frictionFactorOverride": "마찰 계수 덮어쓰기 (°C)",
+    "mix": {
+      "hand": "손 반죽 (0°F 강도)",
+      "stand_mixer": "스탠드 믹서 (10°F 강도)",
+      "spiral_mixer": "스파이럴 믹서 (25°F 강도)",
+      "no_knead": "무반죽/폴딩 (0°F 강도)"
+    },
+    "ddtAuto": "자동(Auto)",
+    "subtypeOverride": "빵 하위분류 변경",
+    "autoDetect": "자동 유추"
+  },
+  "optimizer": {
+    "pageTitle": "배합 실험실",
+    "basedOn": "기준 레시피",
+    "noBaseRecipe": "기준 레시피가 선택되지 않았습니다",
+    "noBaseRecipeHelp": "초콜릿/봉봉 레시피를 열고 최적화 버튼을 눌러 시작하세요.",
+    "run": "최적화 실행",
+    "cancel": "취소",
+    "progressLabel": "{{gen}}/{{total}}세대 — 파레토 프론트: {{front}}",
+    "targets": {
+      "header": "목표",
+      "awTarget": "Aw 목표",
+      "shelfLifeWeeksMin": "유통 기한 (주, 최소)",
+      "costPerGramMaxUsd": "그램당 비용 (USD, 최대)"
+    },
+    "weights": {
+      "header": "목표 가중치"
+    },
+    "objectives": {
+      "aw_distance_to_target": "Aw 목표 적합도",
+      "aw_below_threshold": "Aw 임계 이하",
+      "shelf_life_weeks": "유통 기한",
+      "cost_per_gram": "비용",
+      "curdle_safety_margin": "응고 안전 여유",
+      "fat_regime_distance": "지방 영역",
+      "warning_count": "경고",
+      "composition_completeness": "조성 데이터"
+    },
+    "searchSpace": {
+      "title": "탐색 공간",
+      "header": "조정 가능 차원",
+      "dimensions": "차원",
+      "empty": "이 레시피에는 조정 가능한 차원이 없습니다.",
+      "lock": "잠금",
+      "unlock": "해제",
+      "dimensionKind": {
+        "continuous_mass": "질량",
+        "continuous_pct_of_role": "레시피 비율",
+        "parametric_choice": "카카오 %",
+        "discrete_swap": "교체",
+        "presence_with_variant": "추가"
+      }
+    },
+    "candidate": {
+      "titlePrefix": "변형",
+      "closenessLabel": "근접도",
+      "saveAsNew": "새 레시피로 저장",
+      "noChange": "기준에서 변경 없음.",
+      "diffHeader": "변경 사항",
+      "cocoaChange": "카카오 비율",
+      "variantSuffix": "변형",
+      "derivedNote": "레시피 {{id}}에서 배합 최적화로 파생됨",
+      "savedToast": "변형이 새 레시피로 저장되었습니다.",
+      "saveFailedToast": "저장 실패. 다시 시도하세요."
+    },
+    "results": {
+      "header": "상위 {{count}}개 후보"
+    }
+  }
+}

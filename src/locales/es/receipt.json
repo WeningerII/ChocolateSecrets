@@ -1,0 +1,17 @@
+{
+  "import": "Importar Recibo",
+  "upload": "Subir Factura o Recibo",
+  "uploadDesc": "Toma una foto de un documento para extraer automáticamente los artículos, cantidades y costos.",
+  "analyzing": "Analizando documento con IA...",
+  "extractedItems": "Artículos Extraídos",
+  "reviewItems": "Revisa los artículos antes de confirmarlos en el inventario.",
+  "scanAnother": "Escanear Otro",
+  "item": "Artículo",
+  "qty": "Cant",
+  "costPerUnit": "Costo/Unidad",
+  "matched": "Coincide",
+  "new": "Nuevo",
+  "unknownSupplier": "Proveedor Desconocido",
+  "commit": "Confirmar en Inventario",
+  "noMatchWillCreate": "Sin coincidencia — se creará nuevo"
+}

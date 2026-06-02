@@ -1,0 +1,13 @@
+{
+  "audit": "Auditoría Visual de Inventario",
+  "snap": "Capturar Estante o Refrigerador",
+  "snapDesc": "Toma una foto de tu área de almacenamiento. La IA identificará los ingredientes conocidos y estimará los niveles de stock actuales.",
+  "analyzing": "Analizando imagen con IA...",
+  "estimatedStock": "Stock Estimado",
+  "reviewEstimates": "Revisa las estimaciones de la IA antes de actualizar tu inventario.",
+  "scanAnother": "Escanear Otro",
+  "item": "Artículo",
+  "current": "Actual",
+  "estimated": "Estimado",
+  "updateInventory": "Actualizar Inventario"
+}

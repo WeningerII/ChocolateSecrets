@@ -1,0 +1,334 @@
+{
+  "entities": {
+    "Supplier": {
+      "title": "Supplier",
+      "description": "A vendor that supplies ingredients.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "contactName": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "leadTimeDays": { "type": "number" },
+        "minimumOrderValue": { "type": "number" },
+        "notes": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
+    "Ingredient": {
+      "title": "Ingredient",
+      "description": "A raw ingredient used in dishes.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "unit": { "type": "string", "description": "e.g., g, kg, pieces, oz" },
+        "stock": { "type": "number", "description": "Current stock level" },
+        "lowStockThreshold": { "type": "number", "description": "Threshold at which to reorder" },
+        "parLevel": { "type": "number", "description": "Target stock level to maintain" },
+        "category": { "type": "string", "description": "e.g., Chocolate, Dairy, Spices" },
+        "costPerUnit": { "type": "number" },
+        "weightedAverageCost": { "type": "number", "description": "Added for advanced costing" },
+        "supplier": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "moq": { "type": "number" },
+        "orderUnit": { "type": "string" },
+        "brand": { "type": "string" },
+        "barcode": { "type": "string" },
+        "allergens": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "nutritionalInfo": { "type": "object" },
+        "customFields": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dietary": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "needsReview": { "type": "boolean" },
+        "aiExtractionNotes": { "type": "string" },
+        "priceHistory": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "unit", "stock", "lowStockThreshold", "category"]
+    },
+    "Location": {
+      "title": "Location",
+      "description": "A physical storage location for inventory.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
+    "Lot": {
+      "title": "Lot",
+      "description": "A specific batch of an ingredient or prepped item.",
+      "type": "object",
+      "properties": {
+        "ingredientId": { "type": "string" },
+        "locationId": { "type": "string" },
+        "quantity": { "type": "number" },
+        "initialQuantity": { "type": "number" },
+        "costPerUnit": { "type": "number" },
+        "receivedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "poNumber": { "type": "string" },
+        "supplierId": { "type": "string" }
+      },
+      "required": ["ingredientId", "locationId", "quantity", "initialQuantity", "costPerUnit", "receivedAt"]
+    },
+    "ArchivedLot": {
+      "title": "ArchivedLot",
+      "description": "A specific batch of an ingredient or prepped item that has been depleted.",
+      "type": "object",
+      "properties": {
+        "ingredientId": { "type": "string" },
+        "locationId": { "type": "string" },
+        "quantity": { "type": "number" },
+        "initialQuantity": { "type": "number" },
+        "costPerUnit": { "type": "number" },
+        "receivedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "poNumber": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "archivedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ingredientId", "locationId", "quantity", "initialQuantity", "costPerUnit", "receivedAt", "archivedAt"]
+    },
+    "Audit": {
+      "title": "Audit",
+      "description": "A physical inventory count.",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["draft", "in_progress", "completed"] },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "locationId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ingredientId": { "type": "string" },
+              "lotId": { "type": "string" },
+              "expectedQty": { "type": "number" },
+              "actualQty": { "type": "number" },
+              "variance": { "type": "number" }
+            },
+            "required": ["ingredientId", "lotId", "expectedQty"]
+          }
+        }
+      },
+      "required": ["status", "startedAt", "items"]
+    },
+    "InventoryTransaction": {
+      "title": "InventoryTransaction",
+      "description": "A record of inventory movement.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["receive", "consume", "waste", "audit", "transfer", "audit_adjustment", "yield"] },
+        "ingredientId": { "type": "string" },
+        "amount": { "type": "number" },
+        "reason": { "type": "string" },
+        "costPerUnit": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" },
+        "lotId": { "type": "string" },
+        "fromLocationId": { "type": "string" },
+        "toLocationId": { "type": "string" },
+        "referenceId": { "type": "string" }
+      },
+      "required": ["type", "ingredientId", "amount", "costPerUnit", "date", "userId"]
+    },
+    "Recipe": {
+      "title": "Recipe",
+      "description": "A dish made from ingredients.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string" },
+        "components": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "yield": { "type": "object" },
+        "hardware": { "type": "object" },
+        "design": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dietary": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "customFields": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "retailPrice": { "type": "number" },
+        "targetMarginPercentage": { "type": "number" },
+        "laborTimeMinutes": { "type": "number" },
+        "hourlyRate": { "type": "number" },
+        "overheadPercentage": { "type": "number" },
+        "needsReview": { "type": "boolean" },
+        "aiExtractionNotes": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
+    "ProductionRun": {
+      "title": "ProductionRun",
+      "description": "A scheduled production run of recipes.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["draft", "active", "completed"] },
+        "notes": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "recipeId": { "type": "string" },
+              "quantity": { "type": "number" },
+              "notes": { "type": "string" }
+            },
+            "required": ["recipeId", "quantity"]
+          }
+        },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "status"]
+    },
+    "ShoppingListItem": {
+      "title": "ShoppingListItem",
+      "description": "An item on the shopping list.",
+      "type": "object",
+      "properties": {
+        "ingredientId": { "type": "string" },
+        "name": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "purchased"] },
+        "supplierId": { "type": "string" },
+        "moq": { "type": "number" },
+        "orderUnit": { "type": "string" },
+        "costPerUnit": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["ingredientId", "name", "quantity", "status"]
+    },
+    "PurchaseOrder": {
+      "title": "PurchaseOrder",
+      "description": "A formal order sent to a supplier.",
+      "type": "object",
+      "properties": {
+        "poNumber": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "sent", "partially_received", "fulfilled", "cancelled"] },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ingredientId": { "type": "string" },
+              "quantityOrdered": { "type": "number" },
+              "quantityReceived": { "type": "number" },
+              "unitPrice": { "type": "number" }
+            },
+            "required": ["ingredientId", "quantityOrdered"]
+          }
+        },
+        "totalAmount": { "type": "number" },
+        "expectedDeliveryDate": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["supplierId", "status", "items"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user of the application.",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["role", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles and roles"
+    },
+    "/shopping_list/{itemId}": {
+      "schema": { "$ref": "#/entities/ShoppingListItem" },
+      "description": "Items on the shopping list"
+    },
+    "/purchaseOrders/{poId}": {
+      "schema": { "$ref": "#/entities/PurchaseOrder" },
+      "description": "Purchase orders sent to suppliers"
+    },
+    "/productionRuns/{runId}": {
+      "schema": { "$ref": "#/entities/ProductionRun" },
+      "description": "Scheduled production runs"
+    },
+    "/suppliers/{supplierId}": {
+      "schema": { "$ref": "#/entities/Supplier" },
+      "description": "Vendors that supply ingredients"
+    },
+    "/ingredients/{ingredientId}": {
+      "schema": { "$ref": "#/entities/Ingredient" },
+      "description": "Raw ingredients inventory"
+    },
+    "/recipes/{recipeId}": {
+      "schema": { "$ref": "#/entities/Recipe" },
+      "description": "Dishes and their required ingredients"
+    },
+    "/locations/{locationId}": {
+      "schema": { "$ref": "#/entities/Location" },
+      "description": "Physical storage locations"
+    },
+    "/lots/{lotId}": {
+      "schema": { "$ref": "#/entities/Lot" },
+      "description": "Specific batches of ingredients or prepped items"
+    },
+    "/archivedLots/{lotId}": {
+      "schema": { "$ref": "#/entities/ArchivedLot" },
+      "description": "Archived batches of ingredients or prepped items"
+    },
+    "/audits/{auditId}": {
+      "schema": { "$ref": "#/entities/Audit" },
+      "description": "Physical inventory counts"
+    },
+    "/inventoryTransactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/InventoryTransaction" },
+      "description": "Records of inventory movement"
+    }
+  }
+}

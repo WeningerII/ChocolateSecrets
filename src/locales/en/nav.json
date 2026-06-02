@@ -1,0 +1,15 @@
+{
+  "dashboard": "Dashboard",
+  "ingredients": "Ingredients",
+  "suppliers": "Suppliers",
+  "purchaseOrders": "Purchase Orders",
+  "inventory": "Inventory",
+  "transactions": "Transactions",
+  "recipes": "Recipes",
+  "prepList": "Prep List",
+  "shoppingList": "Shopping List",
+  "reports": "Reports",
+  "expenses": "Expenses",
+  "admin": "Admin",
+  "restaurantSettings": "Restaurant settings"
+}

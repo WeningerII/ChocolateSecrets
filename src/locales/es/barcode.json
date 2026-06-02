@@ -1,0 +1,16 @@
+{
+  "scan": "Escanear Código de Barras",
+  "pointCamera": "Apunta la cámara al código de barras",
+  "scannedCode": "Código Escaneado",
+  "rescan": "Volver a escanear",
+  "noBrand": "Sin Marca",
+  "updateStock": "Actualizar Stock",
+  "unknown": "Código de Barras Desconocido",
+  "notInDatabase": "Este artículo no está en tu base de datos.",
+  "snapLabel": "Captura la etiqueta del producto para agregar",
+  "extractedName": "Nombre Extraído",
+  "brand": "Marca",
+  "unit": "Unidad",
+  "initialStock": "Stock Inicial",
+  "saveNew": "Guardar Nuevo Ingrediente"
+}

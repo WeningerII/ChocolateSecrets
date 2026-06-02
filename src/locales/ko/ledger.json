@@ -1,0 +1,24 @@
+{
+  "title": "재고 원장",
+  "subtitle": "모든 재고 이동 및 조정의 상세 내역",
+  "searchPlaceholder": "재료 또는 사유로 검색...",
+  "allTypes": "모든 거래 유형",
+  "receive": "수령",
+  "consume": "소비",
+  "waste": "폐기",
+  "transfer": "이전",
+  "auditAdjustment": "감사 조정",
+  "date": "날짜",
+  "item": "항목",
+  "type": "유형",
+  "amount": "수량",
+  "reason": "사유",
+  "cost": "총 비용",
+  "noTransactions": "필터와 일치하는 거래 내역이 없습니다.",
+  "dateFilter": {
+    "allTime": "전체 기간",
+    "last7Days": "최근 7일",
+    "last30Days": "최근 30일",
+    "last90Days": "최근 90일"
+  }
+}

@@ -1,0 +1,57 @@
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: TypeScript build check
+        run: npm run lint
+
+      - name: Schema drift check
+        run: npm run check:schema
+
+      - name: Functions secrets guard
+        run: npm run check:functions-secrets
+
+      - name: Locale parity check
+        run: npm run check:locale-parity
+
+      - name: Hardcoded-string sweep
+        run: npm run check:hardcoded-strings
+
+      - name: Unit tests
+        run: npm test
+
+  rules-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Firestore rules tests
+        run: npm run test:rules
+        env:
+          FIRESTORE_EMULATOR_HOST: localhost:8080

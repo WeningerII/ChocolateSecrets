@@ -1,0 +1,494 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields: role (string: admin|user), email (string)
+    //
+    // Collection: suppliers
+    // Fields: name (string, required, <200), contactName (string, <200), email (string, <200), phone (string, <50)
+    //
+    // Collection: ingredients
+    // Fields: name (string, required, <200), unit (string, required, <50), stock (number, required), 
+    //         category (string, required, <100), costPerUnit (number), supplierId (string)
+    //
+    // Collection: recipes
+    // Fields: name (string, required, <200), description (string, <2000), components (list), yield (map)
+    //
+    // Collection: productionRuns
+    // Fields: name (string, <200), status (string, required: draft|active|completed), items (list, required)
+    //
+    // Collection: inventoryTransactions (IMMUTABLE)
+    // Fields: type (string, required), ingredientId (string, required), amount (number, required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email.matches("(?i)weningerii@gmail\\.com") && request.auth.token.email_verified == true)
+        );
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isImmutable(field) {
+      return !(field in request.resource.data) || request.resource.data[field] == resource.data[field];
+    }
+
+    function isValidString(field, maxLen) {
+      return request.resource.data[field] is string && request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidOptionalString(field, maxLen) {
+      return !(field in request.resource.data) || (request.resource.data[field] is string && request.resource.data[field].size() <= maxLen);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidLocalizedString(v) {
+      return v is map &&
+             v.keys().hasAll(['source', 'sourceLanguage']) &&
+             v.source is string &&
+             v.sourceLanguage in ['en', 'es', 'ko'];
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    
+    function isValidIngredient() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'nameSpanish', 'nameI18n', 'unit', 'stock', 'category', 'brand', 'brandI18n', 'barcode', 'lowStockThreshold', 'parLevel', 'moq', 'orderUnit', 'costPerUnit', 'supplier', 'supplierId', 'allergens', 'dietary', 'updatedAt', 'createdAt', 'weightedAverageCost', 'priceHistory', 'tags', 'customFields', 'density', 'wasteFactor', 'originalState', 'isDiscrete', 'needsReview', 'aiExtractionNotes', 'chocolateSpec', 'meta', 'composition', 'bufferRef', 'alcoholSpec', 'usdaFdcId'];
+      return hasRequiredFields(['name']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('name', 200) && data.name.size() > 0 &&
+             (!('unit' in data) || isValidString('unit', 50)) &&
+             (!('category' in data) || isValidString('category', 100)) &&
+             (!('nameI18n' in data) || isValidLocalizedString(data.nameI18n)) &&
+             (!('brandI18n' in data) || isValidLocalizedString(data.brandI18n)) &&
+             (!('stock' in data) || data.stock is number) &&
+             (!('lowStockThreshold' in data) || data.lowStockThreshold is number) &&
+             (!('parLevel' in data) || data.parLevel is number) &&
+             (!('moq' in data) || data.moq is number) &&
+             (!('costPerUnit' in data) || data.costPerUnit is number) &&
+             (!('weightedAverageCost' in data) || data.weightedAverageCost is number) &&
+             isValidOptionalString('brand', 100) &&
+             isValidOptionalString('barcode', 100) &&
+             isValidOptionalString('orderUnit', 50) &&
+             isValidOptionalString('supplierId', 100) &&
+             (!('density' in data) || data.density is number || data.density == null) &&
+             (!('wasteFactor' in data) || data.wasteFactor is number || data.wasteFactor == null) &&
+             isValidOptionalString('originalState', 200) &&
+             (!('isDiscrete' in data) || data.isDiscrete is bool) &&
+             (!('needsReview' in data) || data.needsReview is bool) &&
+             isValidOptionalString('aiExtractionNotes', 5000) &&
+             (!('priceHistory' in data) || data.priceHistory is list) &&
+             (!('tags' in data) || data.tags is list) &&
+             (!('customFields' in data) || data.customFields is list) &&
+             (!('allergens' in data) || data.allergens is list) &&
+             (!('chocolateSpec' in data) || data.chocolateSpec is map) &&
+             (!('composition' in data) || data.composition is map) &&
+             (!('bufferRef' in data) || isValidString('bufferRef', 100)) &&
+             (!('alcoholSpec' in data) || data.alcoholSpec is map) &&
+             (!('usdaFdcId' in data) || data.usdaFdcId is number) &&
+             (!('meta' in data) || data.meta is map || data.meta == null) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function isValidRecipe() {
+      let data = request.resource.data;
+      let allowedFields = [
+        'id', 'name', 'nameSpanish', 'nameI18n', 'nameTranslations', 'description', 'descriptionI18n', 'type', 'hardware', 'equipment', 'design', 'components', 'ingredients', 'yield', 'tags', 'categories', 'frozenSubtype', 'breadSubtype', 'customFields',
+        'laborTimeMinutes', 'hourlyRate', 'overheadPercentage', 'updatedAt', 'createdAt',
+        'storageInstructions', 'storageInstructionsI18n', 'storageEnvironment', 'shelfLife', 'shelfLifeI18n', 'globalDisclaimers', 'allergens', 'dietary',
+        'packagingOptions', 'sensoryProfile', 'reconstitutionInstructions', 'needsReview', 'aiExtractionNotes', 'aiExtractionNotesI18n', 'rawExtractionData',
+        'retailPrice', 'targetMarginPercentage', 'outputIngredientId',
+        'confidence', 'ocrTranscript', 'lowConfidenceFields', 'meta', 'mixingParams', 'extractionVersion', 'stationTag', 'haccp', 'enrobing', 'crossContactRisks'
+      ];
+      return hasRequiredFields(['name']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('name', 200) && data.name.size() > 0 &&
+             isValidOptionalString('nameSpanish', 200) &&
+             (!('categories' in data) || data.categories is list) &&
+             (!('nameI18n' in data) || isValidLocalizedString(data.nameI18n)) &&
+             (!('nameTranslations' in data) || data.nameTranslations is map) &&
+             (!('descriptionI18n' in data) || isValidLocalizedString(data.descriptionI18n)) &&
+             (!('storageInstructionsI18n' in data) || isValidLocalizedString(data.storageInstructionsI18n)) &&
+             (!('shelfLifeI18n' in data) || isValidLocalizedString(data.shelfLifeI18n)) &&
+             (!('aiExtractionNotesI18n' in data) || isValidLocalizedString(data.aiExtractionNotesI18n)) &&
+             isValidOptionalString('description', 5000) &&
+             isValidOptionalString('type', 100) &&
+             (!('storageEnvironment' in data) || data.storageEnvironment in ['ambient', 'refrigerated', 'frozen', 'dry_dark']) &&
+             isValidOptionalString('shelfLife', 200) &&
+             (!('allergens' in data) || data.allergens is list) &&
+             (!('packagingOptions' in data) || data.packagingOptions is list) &&
+             (!('sensoryProfile' in data) || data.sensoryProfile is map || data.sensoryProfile == null) &&
+             (!('hardware' in data) || data.hardware is map || data.hardware == null) &&
+             (!('yield' in data) || data.yield is map || data.yield == null) &&
+             isValidOptionalString('reconstitutionInstructions', 2000) &&
+             (!('needsReview' in data) || data.needsReview is bool) &&
+             isValidOptionalString('aiExtractionNotes', 5000) &&
+             isValidOptionalString('rawExtractionData', 10000) &&
+             (!('components' in data) || data.components is list) &&
+             (!('ingredients' in data) || data.ingredients is list) &&
+             (!('design' in data) || data.design is list) &&
+             (!('equipment' in data) || data.equipment is list) &&
+             (!('tags' in data) || data.tags is list) &&
+             (!('customFields' in data) || data.customFields is list) &&
+             (!('globalDisclaimers' in data) || data.globalDisclaimers is list) &&
+             (!('retailPrice' in data) || data.retailPrice is number) &&
+             (!('targetMarginPercentage' in data) || data.targetMarginPercentage is number) &&
+             (!('laborTimeMinutes' in data) || data.laborTimeMinutes is number) &&
+             (!('hourlyRate' in data) || data.hourlyRate is number) &&
+             (!('overheadPercentage' in data) || data.overheadPercentage is number) &&
+             (!('confidence' in data) || data.confidence is map || data.confidence == null) &&
+             isValidOptionalString('ocrTranscript', 50000) &&
+             (!('lowConfidenceFields' in data) || data.lowConfidenceFields is list) &&
+             (!('meta' in data) || data.meta is map || data.meta == null) &&
+             (!('mixingParams' in data) || data.mixingParams is map || data.mixingParams == null) &&
+             (!('extractionVersion' in data) || data.extractionVersion is number) &&
+             (!('stationTag' in data) || data.stationTag is map) &&
+             (!('haccp' in data) || data.haccp is map) &&
+             (!('enrobing' in data) || data.enrobing is map) &&
+             // Phase 5 introduced structured CrossContactRisk records as map-shaped
+             // list items. Legacy string-shaped items remain valid during the
+             // transition window. A future cleanup tightens this to maps only.
+             (!('crossContactRisks' in data) || data.crossContactRisks is list) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+             (!('createdAt' in data) || data.createdAt is timestamp);
+    }
+
+    function isValidSupplier() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'contactName', 'email', 'phone', 'address', 'website', 'leadTimeDays', 'minimumOrderValue', 'tags', 'customFields', 'notes', 'notesI18n', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['name']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('name', 200) && data.name.size() > 0 &&
+             isValidOptionalString('contactName', 200) &&
+             isValidOptionalString('email', 200) &&
+             isValidOptionalString('phone', 50) &&
+             (!('minimumOrderValue' in data) || data.minimumOrderValue is number) &&
+             (!('notesI18n' in data) || isValidLocalizedString(data.notesI18n)) &&
+             isValidOptionalString('notes', 2000);
+    }
+
+    function isValidProductionRun() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'status', 'items', 'plannedDate', 'completedAt', 'notes', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['status']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.status in ['draft', 'active', 'completed'] &&
+             (!('items' in data) || data.items is list) &&
+             isValidOptionalString('name', 200) &&
+             isValidOptionalString('notes', 2000);
+    }
+
+    function isValidInventoryTransaction() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'ingredientId', 'type', 'amount', 'date', 'reason', 'lotId', 'lotNumber', 'userId', 'costPerUnit', 'fromLocationId', 'toLocationId', 'referenceId', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['ingredientId', 'type', 'amount', 'date']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.type in ['receive', 'consume', 'waste', 'audit', 'transfer', 'audit_adjustment', 'yield'] &&
+             data.amount is number &&
+             isValidOptionalString('reason', 500) &&
+             isValidOptionalString('ingredientId', 100) &&
+             isValidOptionalString('lotId', 100) &&
+             isValidOptionalString('lotNumber', 100) &&
+             (!('costPerUnit' in data) || data.costPerUnit is number) &&
+             isValidOptionalString('fromLocationId', 100) &&
+             isValidOptionalString('toLocationId', 100) &&
+             isValidOptionalString('referenceId', 200);
+    }
+
+    function isValidShoppingListItem() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'ingredientId', 'name', 'quantity', 'unit', 'status', 'supplierId', 'moq', 'orderUnit', 'costPerUnit', 'createdAt', 'updatedAt'];
+      return hasRequiredFields(['name', 'status']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('name', 200) &&
+             (!('quantity' in data) || data.quantity is number) &&
+             data.status in ['pending', 'purchased', 'ordered', 'received', 'cancelled'] &&
+             isValidOptionalString('unit', 50) &&
+             isValidOptionalString('orderUnit', 50);
+    }
+
+    function isValidLot() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'ingredientId', 'locationId', 'quantity', 'initialQuantity', 'costPerUnit', 'receivedAt', 'expiresAt', 'lotNumber', 'poNumber', 'supplierId', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['ingredientId', 'quantity']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.quantity is number &&
+             isValidString('ingredientId', 100) &&
+             (!('locationId' in data) || isValidString('locationId', 100)) &&
+             isValidOptionalString('lotNumber', 100) &&
+             (!('initialQuantity' in data) || data.initialQuantity is number) &&
+             (!('poNumber' in data) || isValidString('poNumber', 100));
+    }
+
+    function isValidAudit() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'status', 'items', 'startedAt', 'locationId', 'completedAt', 'notes', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['status', 'items']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.status in ['draft', 'in_progress', 'completed'] &&
+             data.items is list &&
+             isValidOptionalString('notes', 2000);
+    }
+
+    function isValidPurchaseOrder() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'poNumber', 'supplierId', 'status', 'items', 'totalAmount', 'notes', 'receivedAt', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['poNumber', 'supplierId', 'status', 'items']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('poNumber', 100) &&
+             isValidString('supplierId', 100) &&
+             data.status in ['draft', 'sent', 'partially_received', 'fulfilled', 'received', 'cancelled'] &&
+             data.items is list;
+    }
+
+    function isValidRestaurant() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'zipCode', 'standingAllergenDisclaimer', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['name']) && hasOnlyAllowedFields(allowedFields);
+    }
+    
+    function isValidSourcingNote() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'address', 'website', 'phone', 'priceUsd', 'priceUnit', 'observedAt', 'sourceUrl', 'sourceDomain', 'notes', 'ingredientId', 'restaurantId', 'keptAt', 'keptBy', 'promotedToSupplierId', 'updatedAt', 'createdAt'];
+      return hasRequiredFields(['ingredientId', 'name', 'keptBy']) && hasOnlyAllowedFields(allowedFields);
+    }
+
+    function isValidExpenseCategory() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'parent', 'glAccountCode', 'description', 'isActive', 'createdAt', 'updatedAt'];
+      return hasRequiredFields(['name', 'parent', 'glAccountCode', 'isActive']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('name', 100) &&
+             data.parent in ['operating', 'non_operating', 'cogs'] &&
+             data.glAccountCode is string && data.glAccountCode.size() == 4 &&
+             data.isActive is bool;
+    }
+
+    function isValidVendor() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'name', 'expenseCategoryId', 'accountIdentifier', 'address', 'website', 'phone', 'defaultPaymentMethod', 'contacts', 'linkedSupplierId', 'tags', 'notes', 'isActive', 'createdAt', 'updatedAt'];
+      return hasRequiredFields(['name', 'expenseCategoryId', 'isActive']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             isValidString('name', 200) &&
+             data.expenseCategoryId is string &&
+             (!('defaultPaymentMethod' in data) || data.defaultPaymentMethod in ['ach', 'card', 'check', 'wire', 'auto_debit', 'cash', 'other']) &&
+             data.isActive is bool;
+    }
+
+    function isValidBill() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'vendorId', 'expenseCategoryId', 'billDate', 'dueDate', 'periodStart', 'periodEnd', 'invoiceNumber', 'accountNumber', 'extractedVendorName', 'totalAmount', 'amountDue', 'paidAmount', 'currency', 'lineItems', 'taxes', 'paymentInstructions', 'status', 'notes', 'imageStoragePath', 'extractedJson', 'fieldMeta', 'vendorResolution', 'recurringExpectationId', 'tags', 'createdBy', 'createdAt', 'updatedAt'];
+      return hasRequiredFields(['billDate', 'totalAmount', 'status', 'vendorResolution', 'fieldMeta', 'lineItems']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.totalAmount is number &&
+             data.status in ['extracted', 'reviewed', 'scheduled', 'paid', 'partially_paid', 'reconciled', 'disputed', 'void'] &&
+             (!('currency' in data) || (data.currency is string && data.currency.size() == 3)) &&
+             data.lineItems is list &&
+             data.fieldMeta is map &&
+             data.vendorResolution is map;
+    }
+
+    function isValidPayment() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'paymentDate', 'amount', 'method', 'reference', 'billAllocations', 'notes', 'createdBy', 'createdAt', 'updatedAt'];
+      return hasRequiredFields(['paymentDate', 'amount', 'method', 'billAllocations']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.amount is number &&
+             data.method in ['ach', 'card', 'check', 'wire', 'auto_debit', 'cash', 'other'] &&
+             data.billAllocations is list;
+    }
+
+    function isValidRecurringExpectation() {
+      let data = request.resource.data;
+      let allowedFields = ['id', 'vendorId', 'expenseCategoryId', 'rrule', 'nextExpectedDate', 'expectedAmount', 'tolerance', 'lastSatisfiedBillId', 'isActive', 'notes', 'lastCheckedAt', 'createdAt', 'updatedAt'];
+      return hasRequiredFields(['vendorId', 'rrule', 'nextExpectedDate', 'expectedAmount', 'tolerance', 'isActive']) &&
+             hasOnlyAllowedFields(allowedFields) &&
+             data.vendorId is string &&
+             data.rrule is string &&
+             data.expectedAmount is number &&
+             data.isActive is bool;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Default deny
+    match /{path=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow create: if isAuthenticated() && request.auth.uid == userId && 
+                      request.resource.data.role == 'user' &&
+                      isValidEmail(request.resource.data.email) &&
+                      hasOnlyAllowedFields(['role', 'email', 'createdAt', 'updatedAt']);
+      allow update: if isAdmin() || (request.auth.uid == userId && isImmutable('role'));
+    }
+
+    match /restaurants/{restaurantId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() && isValidRestaurant();
+      allow delete: if isAdmin();
+    }
+
+    match /suppliers/{supplierId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isValidSupplier());
+      allow delete: if isAdmin();
+    }
+
+    match /ingredients/{ingredientId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || isValidIngredient());
+      allow delete: if isAdmin();
+    }
+
+    match /recipes/{recipeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isAdmin() || (isValidRecipe() && 
+                      (!('components' in request.resource.data) || request.resource.data.components.size() <= 50)));
+      allow delete: if isAdmin();
+    }
+
+    match /productionRuns/{runId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidProductionRun() && 
+                      request.resource.data.items.size() <= 100;
+      allow delete: if isAdmin();
+    }
+
+    match /shopping_list/{itemId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidShoppingListItem();
+      allow delete: if isAuthenticated();
+    }
+
+    match /locations/{locationId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidString('name', 200) && hasOnlyAllowedFields(['name', 'updatedAt', 'createdAt']);
+      allow delete: if isAdmin();
+    }
+
+    match /lots/{lotId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidLot();
+      allow delete: if isAdmin();
+    }
+
+    match /archivedLots/{lotId} {
+      allow read: if isAuthenticated();
+      allow create, update: if false; // Only written by Cloud Function
+      allow delete: if isAdmin();
+    }
+
+    match /audits/{auditId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidAudit();
+      allow delete: if isAdmin();
+    }
+
+    match /inventoryTransactions/{transactionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidInventoryTransaction();
+      allow update, delete: if false; // Immutable ledger
+    }
+
+    match /purchaseOrders/{poId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidPurchaseOrder();
+      allow delete: if isAdmin();
+    }
+    
+    match /sourcing_notes/{noteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidSourcingNote()
+        && request.resource.data.keptBy == request.auth.uid;
+      allow update: if isAuthenticated() && isValidSourcingNote()
+        && request.resource.data.keptBy == request.auth.uid;
+      allow delete: if isAuthenticated();
+    }
+
+    match /translationCache/{hash} {
+      allow read: if isAuthenticated();
+      allow write: if false;  // only the cloud function (admin SDK) writes
+    }
+
+    match /userQuotas/{uid} {
+      allow read: if isAuthenticated() && request.auth.uid == uid;
+      allow write: if false;  // only the cloud function (admin SDK) writes
+    }
+
+    match /expenseCategories/{categoryId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() && isValidExpenseCategory();
+    }
+
+    match /vendors/{vendorId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidVendor();
+      allow delete: if isAdmin();
+    }
+
+    match /bills/{billId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidBill();
+      allow delete: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated();
+      allow create, update: if false; // Only the recordPayment Cloud Function writes
+      allow delete: if isAdmin();
+    }
+
+    match /recurringExpectations/{expectationId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidRecurringExpectation();
+      allow delete: if isAdmin();
+    }
+
+    match /alerts/{alertId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Only Cloud Functions create or hard-update alerts. Clients can ONLY
+      // toggle dismissedAt (see below).
+      allow create: if false;
+      allow update: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid &&
+        // The only field difference between before and after must be dismissedAt
+        // and updatedAt (server fields managed by the same write).
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['dismissedAt', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+  }
+}

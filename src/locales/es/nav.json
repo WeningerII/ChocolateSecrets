@@ -1,0 +1,15 @@
+{
+  "dashboard": "Tablero",
+  "ingredients": "Ingredientes",
+  "suppliers": "Proveedores",
+  "purchaseOrders": "Órdenes de Compra",
+  "inventory": "Inventario",
+  "transactions": "Transacciones",
+  "recipes": "Recetas",
+  "prepList": "Lista de Prep",
+  "shoppingList": "Lista de Compras",
+  "reports": "Informes",
+  "expenses": "Expenses",
+  "admin": "Administración",
+  "restaurantSettings": "Configuración del restaurante"
+}

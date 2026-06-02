@@ -1,0 +1,154 @@
+{
+  "fat_bloom": {
+    "title": "Fat bloom",
+    "symptom": "Whitish streaky or greasy film on the surface. Soft, not fully crystallized.",
+    "cause": "Under-crystallized chocolate — insufficient Form V seed — or temperature cycling after tempering. Cocoa butter migrates to the surface and re-crystallizes in unstable polymorphs.",
+    "recovery": [
+      "Re-melt affected chocolate to T1 (45–55°C dark, 45–50°C milk, 43–45°C white) to dissolve all crystals",
+      "Re-temper from scratch following the brand curve",
+      "Test on parchment: glossy in 3 min at 68°F = good temper; dull = still bad"
+    ],
+    "prevention": [
+      "Hit T2 (cool) fully before bringing up to T3 (work)",
+      "Maintain T3 ±0.5°C during working — excess heat destroys Form V",
+      "Store finished chocolate at 15–18°C with stable temperature (no cycling between warm and cold)"
+    ]
+  },
+  "sugar_bloom": {
+    "title": "Sugar bloom",
+    "symptom": "Gritty, dull, whitish-grey dusty surface. Rough to touch.",
+    "cause": "Humidity condensation dissolved surface sugar, then the sugar re-crystallized when the chocolate dried. Usually from moving chocolate between cold refrigeration and warm room — condensation forms on the cold surface.",
+    "recovery": [
+      "Cannot be repaired — the sugar texture is permanently compromised",
+      "Re-melt and re-temper to salvage the chocolate for a non-finished use (ganache, hot chocolate)",
+      "Do not serve or sell as finished chocolate"
+    ],
+    "prevention": [
+      "Never refrigerate finished tempered chocolate unless absolutely necessary",
+      "If you must chill, wrap airtight and bring to room temp slowly before unwrapping",
+      "Target 50–60% ambient relative humidity in the chocolate room"
+    ]
+  },
+  "seized_water": {
+    "title": "Seized from water contact",
+    "symptom": "Chocolate suddenly thickens into a dull, gritty paste. Completely unworkable.",
+    "cause": "Even 1% water causes cocoa solids and sugar to agglomerate. A single drop from a whisk, lid condensation, or steam is enough.",
+    "recovery": [
+      "Option A: Add MORE water (20%+ of total weight) as hot cream or milk — forces the mass into a sauce or ganache base",
+      "Option B: Save for hot chocolate — whisk gradually into hot milk",
+      "Cannot be recovered back to tempering use once seized"
+    ],
+    "prevention": [
+      "Dry all tools, bowls, and spatulas completely before use",
+      "Keep bain-marie water below the chocolate bowl rim (no splashing)",
+      "Simmer bain-marie water, do not boil (steam causes condensation)",
+      "Work with dry hands or gloves"
+    ]
+  },
+  "thick_overcrystallized": {
+    "title": "Thick / unworkable during tempering",
+    "symptom": "Chocolate becomes viscous and paste-like, difficult to coat or enrobe smoothly. Temperature may still be in range.",
+    "cause": "Over-crystallized — too much Form V has formed. Usually from adding too much seed, holding at T3 too long, or T3 drifted too low.",
+    "recovery": [
+      "Warm to T1 + 2°C briefly (e.g. 50°C for dark) to melt excess crystals",
+      "Verify thermometer calibration — it may have drifted",
+      "Re-seed minimally (5–10%) and bring back to T3",
+      "Keep in gentle motion to prevent re-over-crystallization"
+    ],
+    "prevention": [
+      "Add seed gradually — 20–25% for most dark, 5% for the Callets method",
+      "Monitor viscosity with a scraper every few minutes",
+      "Keep bowl on warm plate or over tempering machine (not on room-temp counter)"
+    ]
+  },
+  "dull_undercrystallized": {
+    "title": "Dull finish after tempering",
+    "symptom": "Finished chocolate looks matte, streaky, or soft. No shine, no snap.",
+    "cause": "Under-crystallized — insufficient Form V seed, T2 not hit fully, or T3 held too high during working.",
+    "recovery": [
+      "Re-melt entire batch to T1 — this batch cannot be rescued in place",
+      "Re-temper from scratch"
+    ],
+    "prevention": [
+      "Hit T2 fully, even if it means waiting longer",
+      "Confirm T3 with a calibrated thermometer every 10 minutes",
+      "Test a small sample on parchment: glossy in 3 min at 68°F = good temper"
+    ]
+  },
+  "soft_no_snap": {
+    "title": "Chocolate doesn't set / too soft",
+    "symptom": "Molded or enrobed chocolate stays soft after chilling. Never develops firm snap.",
+    "cause": "Under-tempered, ambient temperature too warm (>22°C), or the couverture has low cocoa butter content (compound chocolate).",
+    "recovery": [
+      "Move to 15–18°C space and wait 30 minutes",
+      "If still soft, re-melt and re-temper",
+      "Check the couverture brand — compound chocolate (coating chocolate) will never snap regardless of technique"
+    ],
+    "prevention": [
+      "Work in a cool space (18–20°C room temperature ideal)",
+      "Use true couverture with 31%+ cocoa butter, not coating chocolate",
+      "Confirm temper on parchment before molding"
+    ]
+  },
+  "shell_cracks": {
+    "title": "Shell cracks or breaks during demolding",
+    "symptom": "Molded chocolate cracks or fractures as you release it from the mold.",
+    "cause": "Contraction mismatch — chocolate hasn't fully contracted — or demolding too early, or temperature shock from moving cold molds to warm room.",
+    "recovery": [
+      "Salvage the broken pieces for re-melting",
+      "Clean mold thoroughly before next batch"
+    ],
+    "prevention": [
+      "Wait 10–15 min chill in 15°C space for full contraction",
+      "Look for whitish halo around each shell cavity — that's the pull-away that indicates full contraction",
+      "Demold smoothly by inverting and tapping gently, not by pushing or twisting",
+      "Don't move cold molds directly into a warm room"
+    ]
+  },
+  "sticky_mold": {
+    "title": "Chocolate sticks to the mold",
+    "symptom": "Shell won't release cleanly — leaves residue, tears, or stays stuck.",
+    "cause": "Mold wasn't at the right temperature when filled, chocolate hasn't fully contracted, or the mold has micro-scratches from poor cleaning.",
+    "recovery": [
+      "Wait longer — contraction may still be in progress",
+      "If fully set and still stuck, place mold in freezer 3–5 min, then try again",
+      "If the shell is damaged, salvage chocolate for re-melting"
+    ],
+    "prevention": [
+      "Temper mold to 18–20°C before filling (slightly warmer than ambient)",
+      "Polish mold cavities with a clean cotton pad before each use",
+      "Never wash molds with detergent or abrasive sponges — use warm water only",
+      "Wait for the whitish contraction halo before demolding"
+    ]
+  },
+  "shell_uneven": {
+    "title": "Shell too thick or uneven",
+    "symptom": "Molded chocolate has a heavy bottom or uneven wall thickness between cavities.",
+    "cause": "Chocolate was too cold when poured (thick viscosity), inversion was too slow, or mold was too cold.",
+    "recovery": [
+      "Usable for applications where appearance is secondary (crumble, ganache inclusion)",
+      "For presentation-grade work, re-melt and start over"
+    ],
+    "prevention": [
+      "Pour at T3 mid-range, not the low end (e.g. 31°C for dark rather than 30°C)",
+      "Tap mold sharply to release bubbles within 10 seconds of filling",
+      "Invert mold and scrape excess within 30–60 seconds",
+      "Warm mold slightly if room is cold (~18–20°C)"
+    ]
+  },
+  "overheated_separated": {
+    "title": "Cocoa butter separated from solids",
+    "symptom": "Oily layer on the surface, grainy texture below. Mass no longer homogeneous.",
+    "cause": "Overheated above T1 max during initial melt. Emulsion of cocoa butter and cocoa solids broke.",
+    "recovery": [
+      "Stir slowly to re-emulsify — may or may not recover depending on how badly separated",
+      "If stable emulsion doesn't return, use only for ganache or hot chocolate (not tempering or molding)"
+    ],
+    "prevention": [
+      "Never exceed T1 max (55°C dark, 50°C milk, 45°C white)",
+      "Use bain-marie with simmering water only, never boiling",
+      "Stir every 60 seconds during the melt",
+      "If microwaving, use 30-second pulses on medium power (never high)"
+    ]
+  }
+}

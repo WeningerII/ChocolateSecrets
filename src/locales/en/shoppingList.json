@@ -1,0 +1,22 @@
+{
+  "title": "Shopping List",
+  "subtitle": "Items added manually or from low stock alerts.",
+  "printList": "Print List",
+  "unassigned": "Unassigned / General",
+  "estTotal": "Est. Total:",
+  "minOrderAlert": "Min order:",
+  "generatePO": "Generate PO",
+  "moqAdjusted": "MOQ Adjusted (Needed: {{qty}} {{unit}})",
+  "noPending": "No pending items.",
+  "purchased": "Purchased ({{count}})",
+  "addItem": "Add Item",
+  "selectIngredient": "Select Ingredient",
+  "manualEntry": "Manual Entry",
+  "itemName": "Item Name",
+  "quantity": "Quantity",
+  "unit": "Unit",
+  "supplier": "Supplier",
+  "addToList": "Add to List",
+  "removeItem": "Remove Item",
+  "removeMessage": "Are you sure you want to remove this item?"
+}

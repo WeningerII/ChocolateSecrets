@@ -1,0 +1,96 @@
+{
+  "languages": {
+    "en": "English",
+    "es": "Español",
+    "ko": "한국어"
+  },
+  "translationTabs": {
+    "hasContent": "번역 있음",
+    "translationHint": "번역. {{sourceLanguage}} 탭의 내용이 원본 버전입니다."
+  },
+  "search": "검색",
+  "add": "추가",
+  "edit": "수정",
+  "delete": "삭제",
+  "save": "저장",
+  "saving": "저장 중...",
+  "cancel": "취소",
+  "name": "이름",
+  "status": "상태",
+  "unknown": "알 수 없음",
+  "actions": "작업",
+  "print": "인쇄",
+  "notes": "메모",
+  "optional": "선택 사항",
+  "update": "업데이트",
+  "apply": "적용",
+  "allCategories": "모든 카테고리",
+  "loading": "로딩 중...",
+  "success": "성공",
+  "confirm": "확인",
+  "error": "오류",
+  "somethingWentWrong": "문제가 발생했습니다",
+  "somethingWentWrongBody": "오류가 발생했습니다. 페이지를 새로 고침해 주세요.",
+  "databaseErrorHint": "{{path}}을(를) {{operation}}하는 데 실패했습니다.",
+  "errorSupportHint": "이 문제가 계속 발생하면, 발생한 시간과 함께 지원팀에 문의하세요.",
+  "reload": "애플리케이션 다시 로드",
+  "unknownError": "알 수 없는 오류가 발생했습니다",
+  "databaseError": "{{path}}에서 데이터를 {{operation}}하는 동안 데이터베이스 오류가 발생했습니다.",
+  "companyName": "Chocolate Secrets",
+  "companyAddress1": "123 Cacao Lane",
+  "companyAddress2": "Sweet City, SC 12345",
+  "app": {
+    "title": {
+      "chocolate": "초콜릿",
+      "secrets": "시크릿"
+    },
+    "subtitle": "재고 및 레시피 관리"
+  },
+  "user": {
+    "signOut": "로그아웃"
+  },
+  "language": {
+    "english": "영어",
+    "spanish": "스페인어",
+    "korean": "한국어"
+  },
+  "typeToSearchOrCreate": "검색하거나 새로 만들려면 입력하세요...",
+  "willBeCreatedAsNew": "새로 생성됩니다",
+  "orCreateNew": "저장하면 새로 생성됩니다",
+  "back": "뒤로",
+  "loading_ellipsis": "로딩 중...",
+  "restaurantSettingsTitle": "식당 설정",
+  "restaurantSettingsSubtitle": "모든 레시피에 적용되는 주방 전체 설정입니다.",
+  "basicsSection": "기본 정보",
+  "restaurantNameLabel": "식당 이름",
+  "restaurantNamePlaceholder": "보고서와 라벨에 표시되는 이름",
+  "zipCodeLabel": "우편번호",
+  "zipCodePlaceholder": "예: 75219",
+  "zipCodeHelper": "인근 공급업체를 찾는 데 사용됩니다. 공급원 조회 외에는 외부에 공유되지 않습니다.",
+  "standingDisclaimerTitle": "상시 알레르기 고지",
+  "standingDisclaimerBody": "특정 레시피에 포함되어 있는지 여부와 관계없이 모든 레시피에서 주방이 교차 접촉할 수 있는 알레르기 항목입니다. 레시피에서 파생된 알레르기 항목 외에도 모든 레시피에 \"함유 가능\"으로 표시됩니다.",
+  "saveSettings": "설정 저장",
+  "settingsSaved": "설정이 저장되었습니다",
+  "settingsSaveFailed": "저장 실패",
+  "dates": {
+    "unknown": "알 수 없음",
+    "none": "없음"
+  },
+  "translationUnavailable": "번역을 사용할 수 없음 — 원문 표시",
+  "dataMigration": {
+    "title": "데이터 마이그레이션",
+    "description": "일회성: 모든 레시피를 현재 스키마 버전으로 업그레이드합니다. 여러 번 실행해도 안전 — 업데이트가 필요한 레시피만 처리됩니다.",
+    "running": "마이그레이션 실행 중...",
+    "run": "레시피 마이그레이션 실행",
+    "result": "마이그레이션됨: {{migrated}}개 레시피. 추출된 레거시 재료: {{lifted}}개. 건너뜀 (이미 최신): {{skipped}}개.",
+    "completeToast": "마이그레이션 완료: {{migrated}}개 마이그레이션, {{skipped}}개 건너뜀.",
+    "failedToast": "마이그레이션 실패. 자세한 내용은 콘솔을 참조하세요."
+  },
+  "admin": {
+    "roleMigration": {
+      "button": "Tag recipe ingredient roles",
+      "running": "Tagging in progress...",
+      "success": "Role tagging complete: {{recipesUpdated}} recipes updated, {{ingredientsTagged}} ingredients tagged, {{ambiguous}} ambiguous (skipped)."
+    }
+  }
+}

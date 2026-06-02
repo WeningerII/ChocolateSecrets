@@ -1,0 +1,154 @@
+{
+  "fat_bloom": {
+    "title": "Eflorescencia grasa",
+    "symptom": "Película blanquecina, veteada o grasosa en la superficie. Blanda, no completamente cristalizada.",
+    "cause": "Chocolate sub-cristalizado — semilla insuficiente de Forma V — o ciclo térmico después del templado. La manteca de cacao migra a la superficie y se re-cristaliza en polimorfos inestables.",
+    "recovery": [
+      "Volver a fundir el chocolate afectado a T1 (45–55°C oscuro, 45–50°C con leche, 43–45°C blanco) para disolver todos los cristales",
+      "Re-templar desde cero siguiendo la curva de la marca",
+      "Probar en papel de horno: brillante en 3 min a 20°C = buen templado; opaco = aún mal templado"
+    ],
+    "prevention": [
+      "Alcanzar T2 (enfriar) completamente antes de subir a T3 (trabajar)",
+      "Mantener T3 ±0.5°C durante el trabajo — el calor excesivo destruye la Forma V",
+      "Almacenar el chocolate terminado a 15–18°C con temperatura estable (sin ciclos entre cálido y frío)"
+    ]
+  },
+  "sugar_bloom": {
+    "title": "Eflorescencia de azúcar",
+    "symptom": "Superficie granulosa, opaca, gris-blanquecina y polvorienta. Áspera al tacto.",
+    "cause": "La condensación de humedad disolvió el azúcar de la superficie y luego el azúcar re-cristalizó al secarse el chocolate. Generalmente al mover chocolate entre refrigeración fría y una sala cálida — se forma condensación en la superficie fría.",
+    "recovery": [
+      "No se puede reparar — la textura del azúcar está permanentemente comprometida",
+      "Volver a fundir y re-templar para aprovechar el chocolate en un uso no terminado (ganache, chocolate caliente)",
+      "No servir ni vender como chocolate terminado"
+    ],
+    "prevention": [
+      "Nunca refrigerar el chocolate templado terminado a menos que sea absolutamente necesario",
+      "Si debe refrigerarlo, envolverlo herméticamente y llevarlo lentamente a temperatura ambiente antes de desenvolverlo",
+      "Apuntar a 50–60% de humedad relativa ambiental en la sala de chocolate"
+    ]
+  },
+  "seized_water": {
+    "title": "Agarrotado por contacto con agua",
+    "symptom": "El chocolate se espesa repentinamente en una pasta opaca y granulosa. Completamente intrabajable.",
+    "cause": "Incluso un 1% de agua causa que los sólidos de cacao y el azúcar se aglomeren. Una sola gota de un batidor, condensación de la tapa o vapor es suficiente.",
+    "recovery": [
+      "Opción A: Añadir MÁS agua (20%+ del peso total) como crema o leche caliente — fuerza la masa a convertirse en una salsa o base de ganache",
+      "Opción B: Guardar para chocolate caliente — mezclar gradualmente en leche caliente",
+      "No se puede recuperar para uso de templado una vez agarrotado"
+    ],
+    "prevention": [
+      "Secar completamente todas las herramientas, tazones y espátulas antes de usar",
+      "Mantener el agua del baño maría por debajo del borde del tazón de chocolate (sin salpicaduras)",
+      "Hervir a fuego lento el agua del baño maría, no dejar que hierva (el vapor causa condensación)",
+      "Trabajar con las manos secas o con guantes"
+    ]
+  },
+  "thick_overcrystallized": {
+    "title": "Espeso / intrabajable durante el templado",
+    "symptom": "El chocolate se vuelve viscoso y pastoso, difícil de bañar o enrober suavemente. La temperatura puede estar aún en rango.",
+    "cause": "Sobre-cristalizado — se ha formado demasiada Forma V. Generalmente por añadir demasiada semilla, mantener T3 demasiado tiempo, o T3 derivó demasiado bajo.",
+    "recovery": [
+      "Calentar a T1 + 2°C brevemente (p. ej. 50°C para oscuro) para fundir los cristales en exceso",
+      "Verificar la calibración del termómetro — puede haberse desviado",
+      "Re-sembrar mínimamente (5–10%) y volver a T3",
+      "Mantener en movimiento suave para prevenir re-sobre-cristalización"
+    ],
+    "prevention": [
+      "Añadir semilla gradualmente — 20–25% para la mayoría de oscuros, 5% para el método Callets",
+      "Monitorear la viscosidad con una espátula cada pocos minutos",
+      "Mantener el tazón sobre una placa cálida o sobre una máquina templadora (no sobre una encimera a temperatura ambiente)"
+    ]
+  },
+  "dull_undercrystallized": {
+    "title": "Acabado opaco tras el templado",
+    "symptom": "El chocolate terminado se ve mate, veteado o blando. Sin brillo, sin crujido.",
+    "cause": "Sub-cristalizado — semilla insuficiente de Forma V, T2 no alcanzado completamente, o T3 mantenido demasiado alto durante el trabajo.",
+    "recovery": [
+      "Volver a fundir todo el lote a T1 — este lote no puede ser rescatado in situ",
+      "Re-templar desde cero"
+    ],
+    "prevention": [
+      "Alcanzar T2 completamente, incluso si eso significa esperar más",
+      "Confirmar T3 con un termómetro calibrado cada 10 minutos",
+      "Probar una pequeña muestra en papel de horno: brillante en 3 min a 20°C = buen templado"
+    ]
+  },
+  "soft_no_snap": {
+    "title": "El chocolate no endurece / demasiado blando",
+    "symptom": "El chocolate moldeado o bañado permanece blando tras enfriar. Nunca desarrolla un crujido firme.",
+    "cause": "Sub-templado, temperatura ambiente demasiado cálida (>22°C), o la cobertura tiene bajo contenido de manteca de cacao (chocolate compuesto).",
+    "recovery": [
+      "Mover a un espacio de 15–18°C y esperar 30 minutos",
+      "Si aún está blando, volver a fundir y re-templar",
+      "Revisar la marca de la cobertura — el chocolate compuesto (chocolate de cobertura) nunca crujirá sin importar la técnica"
+    ],
+    "prevention": [
+      "Trabajar en un espacio fresco (18–20°C temperatura ambiente ideal)",
+      "Usar cobertura verdadera con 31%+ manteca de cacao, no chocolate de cobertura",
+      "Confirmar el templado en papel de horno antes de moldear"
+    ]
+  },
+  "shell_cracks": {
+    "title": "La cáscara se agrieta o rompe al desmoldar",
+    "symptom": "El chocolate moldeado se agrieta o fractura al liberarlo del molde.",
+    "cause": "Desajuste de contracción — el chocolate no se ha contraído completamente — o desmoldar demasiado pronto, o choque térmico al mover moldes fríos a una sala cálida.",
+    "recovery": [
+      "Aprovechar las piezas rotas para volver a fundir",
+      "Limpiar el molde a fondo antes del siguiente lote"
+    ],
+    "prevention": [
+      "Esperar 10–15 min de enfriamiento en un espacio de 15°C para contracción completa",
+      "Buscar un halo blanquecino alrededor de cada cavidad — ese es el despegue que indica contracción completa",
+      "Desmoldar suavemente invirtiendo y golpeando ligeramente, no empujando ni torciendo",
+      "No mover moldes fríos directamente a una sala cálida"
+    ]
+  },
+  "sticky_mold": {
+    "title": "El chocolate se pega al molde",
+    "symptom": "La cáscara no se libera limpiamente — deja residuo, se rompe o permanece pegada.",
+    "cause": "El molde no estaba a la temperatura correcta al llenarse, el chocolate no se ha contraído completamente, o el molde tiene micro-rayones por mala limpieza.",
+    "recovery": [
+      "Esperar más — la contracción puede estar aún en progreso",
+      "Si está completamente endurecido y aún pegado, colocar el molde en el congelador 3–5 min, luego intentar de nuevo",
+      "Si la cáscara está dañada, aprovechar el chocolate para volver a fundir"
+    ],
+    "prevention": [
+      "Templar el molde a 18–20°C antes de llenar (ligeramente más cálido que el ambiente)",
+      "Pulir las cavidades del molde con un paño de algodón limpio antes de cada uso",
+      "Nunca lavar los moldes con detergente o esponjas abrasivas — usar solo agua tibia",
+      "Esperar el halo blanquecino de contracción antes de desmoldar"
+    ]
+  },
+  "shell_uneven": {
+    "title": "Cáscara demasiado gruesa o desigual",
+    "symptom": "El chocolate moldeado tiene un fondo pesado o grosor de pared desigual entre cavidades.",
+    "cause": "El chocolate estaba demasiado frío al verterse (viscosidad espesa), la inversión fue demasiado lenta, o el molde estaba demasiado frío.",
+    "recovery": [
+      "Utilizable para aplicaciones donde la apariencia es secundaria (crumble, inclusión en ganache)",
+      "Para trabajo de presentación, volver a fundir y empezar de nuevo"
+    ],
+    "prevention": [
+      "Verter a T3 rango medio, no el extremo inferior (p. ej. 31°C para oscuro en lugar de 30°C)",
+      "Golpear el molde bruscamente para liberar burbujas dentro de 10 segundos del llenado",
+      "Invertir el molde y raspar el exceso dentro de 30–60 segundos",
+      "Calentar el molde ligeramente si la sala está fría (~18–20°C)"
+    ]
+  },
+  "overheated_separated": {
+    "title": "Manteca de cacao separada de los sólidos",
+    "symptom": "Capa aceitosa en la superficie, textura granulosa debajo. La masa ya no es homogénea.",
+    "cause": "Sobrecalentado por encima de T1 máx durante la fusión inicial. La emulsión de manteca de cacao y sólidos de cacao se rompió.",
+    "recovery": [
+      "Revolver lentamente para re-emulsionar — puede o no recuperarse dependiendo de qué tan mal separado está",
+      "Si la emulsión estable no vuelve, usar solo para ganache o chocolate caliente (no para templado ni moldeado)"
+    ],
+    "prevention": [
+      "Nunca exceder T1 máx (55°C oscuro, 50°C con leche, 45°C blanco)",
+      "Usar baño maría con agua a fuego lento únicamente, nunca hirviendo",
+      "Revolver cada 60 segundos durante la fusión",
+      "Si se usa microondas, usar pulsos de 30 segundos a potencia media (nunca alta)"
+    ]
+  }
+}

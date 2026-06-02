@@ -1,0 +1,24 @@
+{
+  "title": "Inventory Ledger",
+  "subtitle": "Detailed history of all stock movements and adjustments",
+  "searchPlaceholder": "Search by ingredient or reason...",
+  "allTypes": "All Transaction Types",
+  "receive": "Receive",
+  "consume": "Consume",
+  "waste": "Waste",
+  "transfer": "Transfer",
+  "auditAdjustment": "Audit Adjustment",
+  "date": "Date",
+  "item": "Item",
+  "type": "Type",
+  "amount": "Amount",
+  "reason": "Reason",
+  "cost": "Total Cost",
+  "noTransactions": "No transactions found matching your filters.",
+  "dateFilter": {
+    "allTime": "All Time",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days"
+  }
+}

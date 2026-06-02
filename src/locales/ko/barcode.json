@@ -1,0 +1,16 @@
+{
+  "scan": "바코드 스캔",
+  "pointCamera": "바코드에 카메라를 비추세요",
+  "scannedCode": "스캔된 코드",
+  "rescan": "다시 스캔",
+  "noBrand": "브랜드 없음",
+  "updateStock": "재고 업데이트",
+  "unknown": "알 수 없는 바코드",
+  "notInDatabase": "이 품목은 데이터베이스에 없습니다.",
+  "snapLabel": "추가할 제품 라벨 촬영",
+  "extractedName": "추출된 이름",
+  "brand": "브랜드",
+  "unit": "단위",
+  "initialStock": "초기 재고",
+  "saveNew": "새 재료 저장"
+}

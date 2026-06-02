@@ -1,0 +1,22 @@
+{
+  "trigger": "Something's off?",
+  "headlineGeneric": "Something's off with the chocolate?",
+  "headlineTempering": "Something's off with the tempering?",
+  "headlineMolding": "Something's off with the molding?",
+  "headlineEnrobing": "Something's off with the enrobing?",
+  "headlineDipping": "Something's off with the dipping?",
+  "headlineDefault": "Something's off with the {{action}}?",
+  "subtitle": "Tap a symptom to see cause, recovery, and prevention.",
+  "close": "Close",
+  "noModes": "No failure modes match this step.",
+  "cause": "Cause",
+  "recovery": "Recovery",
+  "prevention": "Prevent next time",
+  "cannotRepair": "Cannot be fully repaired",
+  "severity": {
+    "fatal": "Fatal — cannot be fully recovered",
+    "safety": "Safety issue",
+    "quality": "Quality issue",
+    "cosmetic": "Cosmetic issue"
+  }
+}

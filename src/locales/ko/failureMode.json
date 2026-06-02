@@ -1,0 +1,22 @@
+{
+  "trigger": "뭔가 잘못됐나요?",
+  "headlineGeneric": "초콜릿에 문제가 있나요?",
+  "headlineTempering": "템퍼링에 문제가 있나요?",
+  "headlineMolding": "몰딩에 문제가 있나요?",
+  "headlineEnrobing": "엔로빙에 문제가 있나요?",
+  "headlineDipping": "디핑에 문제가 있나요?",
+  "headlineDefault": "{{action}}에 문제가 있나요?",
+  "subtitle": "증상을 탭하여 원인, 복구 방법, 예방법을 확인하세요.",
+  "close": "닫기",
+  "noModes": "이 단계에 해당하는 실패 모드가 없습니다.",
+  "cause": "원인",
+  "recovery": "복구",
+  "prevention": "다음번 예방",
+  "cannotRepair": "완전히 복구할 수 없음",
+  "severity": {
+    "fatal": "치명적 — 완전히 복구 불가",
+    "safety": "안전 문제",
+    "quality": "품질 문제",
+    "cosmetic": "외관 문제"
+  }
+}

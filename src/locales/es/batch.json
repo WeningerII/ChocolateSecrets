@@ -1,0 +1,23 @@
+{
+  "processing": "Procesando recetas extraídas...",
+  "review": "Revisión de Importación por Lotes",
+  "extracted": "Extrajimos {{count}} receta(s).",
+  "newIngredients": "Encontramos {{count}} ingrediente(s) nuevo(s) que no están en tu base de datos. Por favor, revísalos antes de continuar.",
+  "allMatched": "¡Todos los ingredientes coinciden con tu base de datos!",
+  "newIngredientsTitle": "Nuevos Ingredientes para Agregar",
+  "name": "Nombre",
+  "unit": "Unidad",
+  "category": "Categoría",
+  "initialStock": "Stock Inicial",
+  "discreteItem": "Artículo Discreto (ej. cereza entera)",
+  "recipesToImport": "Recetas para Importar",
+  "bulkActions": "Acciones en Lote",
+  "setCategory": "Establecer Categoría",
+  "setUnit": "Establecer Unidad",
+  "apply": "Aplicar",
+  "components": "componentes",
+  "cancel": "Cancelar Importación",
+  "saveAll": "Guardar Todo en el Libro de Recetas",
+  "rawExtractionData": "Datos Brutos de Extracción",
+  "importSuccess": "Se importaron correctamente {{count}} receta(s)."
+}

@@ -1,0 +1,13 @@
+{
+  "audit": "Visual Inventory Audit",
+  "snap": "Snap Shelf or Fridge",
+  "snapDesc": "Take a photo of your storage area. AI will identify known ingredients and estimate current stock levels.",
+  "analyzing": "Analyzing image with AI...",
+  "estimatedStock": "Estimated Stock",
+  "reviewEstimates": "Review the AI estimates before updating your inventory.",
+  "scanAnother": "Scan Another",
+  "item": "Item",
+  "current": "Current",
+  "estimated": "Estimated",
+  "updateInventory": "Update Inventory"
+}
