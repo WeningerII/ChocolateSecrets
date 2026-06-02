@@ -31,11 +31,13 @@ Whoever does the deploy is responsible for verifying.
 ## 5. Cloud Function deployment
 - [ ] `cd functions && npm install && npm run build`
 - [ ] `firebase deploy --only functions`
+- [ ] Confirm the `GEMINI_API_KEY` secret is set — the AI functions (`extractBill`, `geminiGenerate`, `translateBatch`) read it from Secret Manager, not from any client env var: `firebase functions:secrets:set GEMINI_API_KEY`
 - [ ] Test: create a receive transaction manually in Firestore console, watch the ingredient doc update within 5 seconds
+- [ ] Test: in the deployed app, run a receipt/label scan and a sourcing search — both now call the `geminiGenerate` function (the key is no longer in the browser)
 
 ## 6. Environment variables
-- [ ] `.env.production` has VITE_GEMINI_API_KEY set to production key
-- [ ] Any other env vars the app expects are set
+- [ ] The Gemini API key is NO LONGER bundled into the client. Do **not** set `GEMINI_API_KEY` / `VITE_GEMINI_API_KEY` for the web build — all Gemini calls are proxied through the `geminiGenerate` / `extractBill` Cloud Functions, which read the key from the `GEMINI_API_KEY` server secret (see section 5).
+- [ ] Any other env vars the app expects (Firebase web config) are set
 
 ## 7. Post-deploy smoke check
 - [ ] Log in via the deployed app
