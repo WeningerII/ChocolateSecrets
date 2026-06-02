@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { collection, onSnapshot, query, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, Timestamp, increment, runTransaction, limit } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { db, auth, handleFirestoreError, reportFirestoreError, OperationType } from '../firebase';
 import { Ingredient, Recipe, ProductionRun, PrepItem, Location, Lot } from '../types';
 import { Calculator, Send, Plus, Trash2, AlertCircle, CheckCircle2, ClipboardList, GripVertical, Save, FolderOpen, FilePlus, Printer, X, ShoppingCart } from 'lucide-react';
 import { convertUnit } from '../utils/units';
@@ -104,7 +104,7 @@ export default function PrepList() {
         setProductionRuns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionRun)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'productionRuns')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'productionRuns'); setLoading(false); }
     );
 
     return () => {

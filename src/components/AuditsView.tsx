@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { db, auth, handleFirestoreError, reportFirestoreError, OperationType } from '../firebase';
 import { Audit, AuditItem, Location } from '../types';
 import { ClipboardCheck, Plus, Play, CheckCircle2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,7 @@ export default function AuditsView({ locations }: AuditsViewProps) {
         setAudits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Audit)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'audits')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'audits'); setLoading(false); }
     );
 
     return () => {

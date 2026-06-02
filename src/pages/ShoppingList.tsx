@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { collection, onSnapshot, query, deleteDoc, doc, updateDoc, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType, auth } from '../firebase';
+import { db, handleFirestoreError, reportFirestoreError, OperationType, auth } from '../firebase';
 import { ShoppingListItem, Ingredient } from '../types';
 import { Trash2, CheckCircle2, Circle, Printer, AlertCircle, Building2, FileText, Plus, X } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
@@ -56,7 +56,7 @@ export default function ShoppingList() {
         setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ShoppingListItem)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'shopping_list')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'shopping_list'); setLoading(false); }
     );
 
     return () => {

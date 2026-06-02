@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { collection, onSnapshot, query, orderBy, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db, handleFirestoreError, reportFirestoreError, OperationType } from '../firebase';
 import { PurchaseOrder } from '../types';
 import { FileText, CheckCircle2, Clock, Trash2, PackagePlus } from 'lucide-react';
 import ConfirmModal from '../components/ConfirmModal';
@@ -39,7 +39,7 @@ export default function PurchaseOrders() {
         setPurchaseOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PurchaseOrder)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'purchaseOrders')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'purchaseOrders'); setLoading(false); }
     );
 
     return () => {
