@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Package, BookOpen, ClipboardList, LayoutDashboard, ShoppingCart, Building2, Globe, MapPin, History, BarChart3, LogIn, LogOut, User, Menu, X as CloseIcon, Settings, BookMarked, Receipt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import { auth, signInWithGoogle, logOut } from '../firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUserRole } from '../hooks/useUserRole';
+import PageSpinner from './PageSpinner';
 
 export default function Layout() {
   const location = useLocation();
@@ -217,7 +218,9 @@ export default function Layout() {
               <div className="w-8 h-8 border-4 border-amber-700 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : user ? (
-            <Outlet />
+            <Suspense fallback={<PageSpinner />}>
+              <Outlet />
+            </Suspense>
           ) : (
             <div className="flex flex-col h-[400px] items-center justify-center text-center px-4">
               <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-6">
