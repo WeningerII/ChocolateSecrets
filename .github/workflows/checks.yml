@@ -23,6 +23,11 @@ jobs:
       - name: Install
         run: npm ci
 
+      # The root `tsc` type-checks functions/src too, and the functions tests run
+      # under the root vitest pass, so the functions package deps must be present.
+      - name: Install functions deps
+        run: npm --prefix functions ci
+
       - name: TypeScript build check
         run: npm run lint
 
@@ -54,7 +59,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Install
         run: npm ci
