@@ -4,6 +4,7 @@ import { X, Upload, AlertCircle, Check, ChevronRight } from 'lucide-react';
 import { Ingredient } from '../types';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../contexts/ToastContext';
+import { parseLocaleNumber } from '../utils/number';
 
 interface CsvImportModalProps {
   isOpen: boolean;
@@ -83,19 +84,28 @@ export default function CsvImportModal({ isOpen, onClose, onImport }: CsvImportM
     setIsImporting(true);
     try {
       const ingredientsToImport: Partial<Ingredient>[] = parsedData.map(row => {
+        // Locale-tolerant parsing: a comma-decimal cell ("1,50") or a currency-
+        // formatted value must not be silently coerced to 0. When a mapped numeric
+        // column contains non-numeric junk, flag the row for review instead.
+        const parseNum = (key: string) => (key ? parseLocaleNumber(row[key]) : { value: 0, ok: true });
+        const stock = parseNum(fieldMapping.stock);
+        const lowStockThreshold = parseNum(fieldMapping.lowStockThreshold);
+        const costPerUnit = parseNum(fieldMapping.costPerUnit);
+        const numericParseFailed = !stock.ok || !lowStockThreshold.ok || !costPerUnit.ok;
+
         return {
           name: row[fieldMapping.name] || t('inventory:csv.unnamed'),
           category: row[fieldMapping.category] || t('inventory:csv.uncategorized'),
           unit: row[fieldMapping.unit] || 'g',
-          stock: Number(row[fieldMapping.stock]) || 0,
-          lowStockThreshold: Number(row[fieldMapping.lowStockThreshold]) || 0,
-          costPerUnit: Number(row[fieldMapping.costPerUnit]) || 0,
+          stock: stock.value,
+          lowStockThreshold: lowStockThreshold.value,
+          costPerUnit: costPerUnit.value,
           supplier: row[fieldMapping.supplier] || '',
           brand: row[fieldMapping.brand] || '',
           barcode: row[fieldMapping.barcode] || '',
           customFields: [],
           tags: [],
-          needsReview: false
+          needsReview: numericParseFailed
         };
       });
 

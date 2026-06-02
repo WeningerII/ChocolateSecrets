@@ -6,6 +6,8 @@ import { Receipt } from 'lucide-react';
 import { format } from 'date-fns';
 import { getVendorsByIds } from '../services/vendorsService';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../hooks/useLanguage';
+import { formatCurrency } from '../utils/formatters';
 
 interface BillsListProps {
   onCardClick: (bill: Bill) => void;
@@ -14,6 +16,7 @@ interface BillsListProps {
 export default function BillsList({ onCardClick }: BillsListProps) {
   const { t } = useTranslation(['expenses']);
   const { toast } = useToast();
+  const language = useLanguage();
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
   const [vendorNames, setVendorNames] = useState<Record<string, string>>({});
@@ -63,9 +66,6 @@ export default function BillsList({ onCardClick }: BillsListProps) {
     );
   }
 
-  const formatCurrency = (amount: number, currency: string) => 
-    new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount);
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'extracted': return 'bg-amber-100 text-amber-800';
@@ -107,7 +107,7 @@ export default function BillsList({ onCardClick }: BillsListProps) {
               </div>
             </div>
             <div className="font-medium text-cocoa-900">
-              {formatCurrency(bill.totalAmount, bill.currency || 'USD')}
+              {formatCurrency(bill.totalAmount, language, bill.currency || 'USD')}
             </div>
           </div>
         );
