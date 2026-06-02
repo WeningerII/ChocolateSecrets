@@ -12,7 +12,7 @@
     "migrate:i18n": "node scripts/migrate-localized-strings.mjs",
     "migrate:cross-contact": "node scripts/migrate-cross-contact-risks.mjs",
     "test": "vitest run --exclude 'functions/lib/**' --exclude '**/*.smoke.test.ts'",
-    "test:rules": "vitest run test/rules",
+    "test:rules": "vitest run -c vitest.config.rules.ts",
     "test:e2e": "playwright test",
     "check:schema": "node scripts/check-schema-drift.mjs",
     "check:locale-parity": "node scripts/check-locale-parity.mjs",
