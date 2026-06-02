@@ -7,6 +7,13 @@ import { getStorage } from 'firebase-admin/storage';
 import { getGeminiModel } from './constants';
 import { BILL_EXTRACTION_SCHEMA } from './billExtractionSchema';
 import { runVendorResolution } from './vendorResolution';
+import {
+  sanitizeAmount,
+  finiteOrNull,
+  sanitizeCurrency,
+  parsePlausibleDate,
+  isAllowedStoragePath,
+} from './utils/billValidation';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 const RATE_LIMIT_PER_HOUR = 100;
@@ -65,6 +72,12 @@ export const extractBill = onCall(
     if (input.base64Data && input.storagePath) {
       throw new HttpsError('invalid-argument', 'Provide base64Data OR storagePath, not both');
     }
+    // Confine storagePath reads to the caller's own upload prefix. Without this a
+    // caller could have the function download (and AI-transcribe) any object in the
+    // default bucket — an IDOR over other users' uploads.
+    if (input.storagePath && !isAllowedStoragePath(input.storagePath, userId)) {
+      throw new HttpsError('permission-denied', 'storagePath must be within your own bills/ upload prefix');
+    }
     
     // Rate limiting (follow translateBatch pattern)
     const db = getFirestore();
@@ -117,21 +130,27 @@ If the document is not a bill or invoice, return totalAmount: 0 with confidence 
 
 Return JSON matching the schema. No prose, no markdown.`;
     
-    const response = await client.models.generateContent({
-      model,
-      contents: [{
-        role: 'user',
-        parts: [
-          { inlineData: { mimeType: input.mimeType, data: base64 } },
-          { text: PROMPT }
-        ]
-      }],
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: BILL_EXTRACTION_SCHEMA,
-      },
-    });
-    
+    let response;
+    try {
+      response = await client.models.generateContent({
+        model,
+        contents: [{
+          role: 'user',
+          parts: [
+            { inlineData: { mimeType: input.mimeType, data: base64 } },
+            { text: PROMPT }
+          ]
+        }],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: BILL_EXTRACTION_SCHEMA,
+        },
+      });
+    } catch (err: any) {
+      logger.error('Gemini bill extraction call failed', { err: err?.message || String(err) });
+      throw new HttpsError('unavailable', 'Bill extraction is temporarily unavailable. Please try again.');
+    }
+
     const rawText = response.text ?? '';
     let parsed: any;
     try {
@@ -141,12 +160,12 @@ Return JSON matching the schema. No prose, no markdown.`;
       throw new HttpsError('internal', 'Extraction returned unparseable response');
     }
     
-    // Convert ISO date strings to Timestamps; build fieldMeta from fieldConfidences
+    // Convert ISO date strings to Timestamps; build fieldMeta from fieldConfidences.
+    // parsePlausibleDate rejects garbage / out-of-range years so Timestamp.fromDate
+    // can't throw and absurd dates can't poison anomaly baselines.
     const toTimestamp = (iso?: string): Timestamp | null => {
-      if (!iso) return null;
-      const d = new Date(iso);
-      if (isNaN(d.getTime())) return null;
-      return Timestamp.fromDate(d);
+      const d = parsePlausibleDate(iso);
+      return d ? Timestamp.fromDate(d) : null;
     };
     
     const fieldMeta: Record<string, { provenance: 'ocr_high_confidence' | 'ocr_low_confidence'; confidence: number }> = {};
@@ -175,19 +194,19 @@ Return JSON matching the schema. No prose, no markdown.`;
         vendorAddress: parsed.vendorAddress || null,
         accountNumber: parsed.accountNumber || null,
         invoiceNumber: parsed.invoiceNumber || null,
-        totalAmount: typeof parsed.totalAmount === 'number' ? parsed.totalAmount : 0,
-        amountDue: typeof parsed.amountDue === 'number' ? parsed.amountDue : (parsed.totalAmount || 0),
-        currency: parsed.currency || 'USD',
-        lineItems: (parsed.lineItems || []).map((li: any) => ({
-          description: li.description || '',
-          amount: typeof li.amount === 'number' ? li.amount : 0,
-          quantity: typeof li.quantity === 'number' ? li.quantity : null,
-          unitPrice: typeof li.unitPrice === 'number' ? li.unitPrice : null,
+        totalAmount: sanitizeAmount(parsed.totalAmount),
+        amountDue: typeof parsed.amountDue === 'number' ? sanitizeAmount(parsed.amountDue) : sanitizeAmount(parsed.totalAmount),
+        currency: sanitizeCurrency(parsed.currency),
+        lineItems: (Array.isArray(parsed.lineItems) ? parsed.lineItems : []).map((li: any) => ({
+          description: typeof li?.description === 'string' ? li.description : '',
+          amount: sanitizeAmount(li?.amount),
+          quantity: finiteOrNull(li?.quantity),
+          unitPrice: finiteOrNull(li?.unitPrice),
         })),
-        taxes: (parsed.taxes || []).map((t: any) => ({
-          description: t.description || '',
-          amount: typeof t.amount === 'number' ? t.amount : 0,
-          rate: typeof t.rate === 'number' ? t.rate : null,
+        taxes: (Array.isArray(parsed.taxes) ? parsed.taxes : []).map((t: any) => ({
+          description: typeof t?.description === 'string' ? t.description : '',
+          amount: sanitizeAmount(t?.amount),
+          rate: finiteOrNull(t?.rate),
         })),
         paymentInstructions: parsed.paymentInstructions ? {
           method: parsed.paymentInstructions.method || 'other',
