@@ -1,4 +1,6 @@
+import { httpsCallable } from 'firebase/functions';
 import { LruStorageCache } from '../utils/lruCache';
+import { functions } from '../firebase';
 
 type Lang = 'en' | 'es' | 'ko';
 
@@ -114,6 +116,8 @@ async function processBatch(): Promise<void> {
     byPair.get(k)!.push(item);
   }
 
+  const translate = httpsCallable<TranslateRequest, TranslateResponse>(functions, 'translateBatch');
+
   for (const [, items] of byPair) {
     const src = items[0].sourceLanguage;
     const tgt = items[0].targetLanguage;
@@ -123,58 +127,23 @@ async function processBatch(): Promise<void> {
     const map = new Map<string, TranslationResult>();
 
     try {
-      for (let i = 0; i < unique.length; i += 50) {
-        const chunk = unique.slice(i, i + 50);
-        
-        const client = await import('./geminiClient').then(m => m.getGeminiClient());
-        const { Type } = await import('@google/genai');
-        
-        const sourceName = src === 'en' ? 'English' : src === 'es' ? 'Spanish' : 'Korean';
-        const targetName = tgt === 'en' ? 'English' : tgt === 'es' ? 'Spanish' : 'Korean';
+      // Translation runs server-side via the `translateBatch` Cloud Function,
+      // which holds the Gemini key in Secret Manager, enforces the per-user
+      // quota, and persists a shared Firestore cache. The browser only sends its
+      // local cache-misses; the server dedups/chunks internally and returns
+      // results aligned 1:1 with the input order.
+      const resp = await translate({ texts: unique, sourceLanguage: src, targetLanguage: tgt });
+      const translations = resp.data?.translations ?? [];
 
-        const prompt = `Translate the following ${sourceName} strings into ${targetName}.
-Return a JSON array of strings, one translation per input, in the same order.
-
-Rules:
-- Preserve brand names exactly (Valrhona, Callebaut, Kerrygold, Plugrá, etc.).
-- Preserve unit abbreviations (g, kg, oz, lb, ml, L) as-is.
-- Translate ingredient names, recipe names, and step instructions naturally and idiomatically.
-- For Korean target, use natural Korean cooking terminology, not direct Latin transliteration.
-- For Spanish target, use neutral Spanish (no regional slang).
-- Do not return commentary. Just the JSON array.
-
-Input (${chunk.length} ${sourceName} strings):
-${JSON.stringify(chunk)}`;
-
-        const resp = await client.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt,
-          config: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-            },
-          },
-        });
-
-        const textOutput = resp.text;
-        const translations = JSON.parse(textOutput || '[]');
-
-        chunk.forEach((text, chunkIndex) => {
-          const resultText = translations[chunkIndex];
-          const result: TranslationResult = { text: resultText || text, status: resultText ? 'success' : 'error' };
-          
-          if (result) {
-            map.set(text, result);
-            const key = cacheKey(text, src, tgt);
-            memoryCache.set(key, result);
-            if (result.status !== 'error') {
-              persistentCache.set(key, result.text);
-            }
-          }
-        });
-      }
+      unique.forEach((text, index) => {
+        const result: TranslationResult = translations[index] ?? { text, status: 'error' };
+        map.set(text, result);
+        const key = cacheKey(text, src, tgt);
+        memoryCache.set(key, result);
+        if (result.status !== 'error') {
+          persistentCache.set(key, result.text);
+        }
+      });
 
       for (const item of items) {
         const result = map.get(item.text) ?? { text: item.text, status: 'error' as const };
