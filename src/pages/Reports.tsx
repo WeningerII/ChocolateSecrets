@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { collection, onSnapshot, query, orderBy, where, Timestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db, reportFirestoreError, OperationType } from '../firebase';
 import { InventoryTransaction, ProductionRun } from '../types';
 import { BarChart3, TrendingDown, AlertTriangle, DollarSign, Calculator, ArrowRightLeft, Target } from 'lucide-react';
 import { format, subDays, isAfter, startOfDay, endOfDay } from 'date-fns';
@@ -35,7 +35,7 @@ export default function Reports() {
       (snapshot) => {
         setTransactions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as InventoryTransaction)));
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'inventoryTransactions')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'inventoryTransactions'); setLoading(false); }
     );
 
     const unsubRuns = onSnapshot(
@@ -48,7 +48,7 @@ export default function Reports() {
         setProductionRuns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionRun)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'productionRuns')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'productionRuns'); setLoading(false); }
     );
 
     return () => {

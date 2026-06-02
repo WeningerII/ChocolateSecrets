@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { collection, onSnapshot, query, where, limit, orderBy, Timestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db, reportFirestoreError, OperationType } from '../firebase';
 import { ProductionRun, InventoryTransaction, Ingredient } from '../types';
 import { Plus, PackagePlus, ClipboardList, Play, ShoppingCart, BarChart3, TrendingDown, AlertTriangle, Package, BookOpen, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -41,7 +41,7 @@ export default function Dashboard() {
       (snapshot) => {
         setProductionRuns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ProductionRun)));
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'productionRuns')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'productionRuns'); setLoading(false); }
     );
 
     const unsubTransactions = onSnapshot(
@@ -50,7 +50,7 @@ export default function Dashboard() {
         setTransactions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as InventoryTransaction)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'inventoryTransactions')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'inventoryTransactions'); setLoading(false); }
     );
 
     return () => {

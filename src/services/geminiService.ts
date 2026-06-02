@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import { Type } from '@google/genai';
 import { getGeminiClient } from './geminiClient';
 import { INGREDIENT_CATEGORIES, RECIPE_TYPES, COMPONENT_TYPES, ACTION_TYPES, CANONICAL_UNITS } from '../constants';
 import { 

@@ -43,7 +43,7 @@ export function computeShoppingListQuantity(
 
 export const onTransactionCreate = functions.firestore
   .document('inventoryTransactions/{transactionId}')
-  .onCreate(async (snap, context) => {
+  .onCreate(async (snap) => {
     const transaction = snap.data();
     const ingredientId = transaction.ingredientId;
     const amount = transaction.amount || 0;
@@ -52,17 +52,55 @@ export const onTransactionCreate = functions.firestore
 
     if (!ingredientId || amount === 0 || type === 'transfer') return;
 
+    const transactionRef = snap.ref;
     const ingredientRef = db.collection('ingredients').doc(ingredientId);
 
     await db.runTransaction(async (t) => {
-      const ingredientDoc = await t.get(ingredientRef);
-      if (!ingredientDoc.exists) return;
+      // --- Reads (Firestore requires ALL reads before ANY writes) ---
 
-      const ingredient = ingredientDoc.data()!;
-      const currentStock = ingredient.stock || 0;
-      const currentWAC = ingredient.weightedAverageCost || 0;
-      
-      const { newStock, newWac } = computeStockUpdate(type, amount, currentStock, currentWAC, costPerUnit);
+      // Idempotency guard: Cloud Functions deliver events at-least-once, so this
+      // handler can fire more than once for the same transaction. Re-read the
+      // source doc inside the Firestore transaction and bail if its inventory
+      // effect was already applied, so a redelivery cannot double-count stock/WAC.
+      const txnDoc = await t.get(transactionRef);
+      if (!txnDoc.exists || txnDoc.get('inventoryApplied') === true) return;
+
+      const ingredientDoc = await t.get(ingredientRef);
+      const ingredient = ingredientDoc.exists ? ingredientDoc.data()! : null;
+
+      let newStock = 0;
+      let newWac = 0;
+      let shoppingQuantity: number | null = null;
+      if (ingredient) {
+        const currentStock = ingredient.stock || 0;
+        const currentWAC = ingredient.weightedAverageCost || 0;
+        ({ newStock, newWac } = computeStockUpdate(type, amount, currentStock, currentWAC, costPerUnit));
+
+        // The reorder check is a read, so it must happen here, before any write
+        // below (a get() after a write throws READ_AFTER_WRITE).
+        const { shouldAdd, quantity: orderQty } = computeShoppingListQuantity(ingredient, newStock);
+        if (shouldAdd) {
+          const pendingQuery = await t.get(
+            db.collection('shopping_list')
+              .where('ingredientId', '==', ingredientId)
+              .where('status', 'in', ['pending', 'ordered', 'purchased'])
+          );
+          if (pendingQuery.empty) {
+            shoppingQuantity = orderQty;
+          }
+        }
+      }
+
+      // --- Writes ---
+
+      // Mark the source transaction as applied within the same atomic commit so
+      // the guard above no-ops on any future redelivery of this event.
+      t.update(transactionRef, {
+        inventoryApplied: true,
+        inventoryAppliedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      if (!ingredient) return;
 
       t.update(ingredientRef, {
         stock: newStock,
@@ -70,32 +108,21 @@ export const onTransactionCreate = functions.firestore
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
 
-      // Check shopping list
-      const { shouldAdd, quantity: orderQty } = computeShoppingListQuantity(ingredient, newStock);
-      
-      if (shouldAdd) {
-        const pendingQuery = await t.get(
-          db.collection('shopping_list')
-            .where('ingredientId', '==', ingredientId)
-            .where('status', 'in', ['pending', 'ordered', 'purchased'])
-        );
-
-        if (pendingQuery.empty) {
-          const shoppingListRef = db.collection('shopping_list').doc();
-          t.set(shoppingListRef, {
-            ingredientId,
-            name: ingredient.name,
-            quantity: orderQty,
-            unit: ingredient.orderUnit || ingredient.unit,
-            status: 'pending',
-            supplierId: ingredient.supplierId || null,
-            moq: ingredient.moq || null,
-            orderUnit: ingredient.orderUnit || null,
-            costPerUnit: ingredient.costPerUnit || null,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-          });
-        }
+      if (shoppingQuantity !== null) {
+        const shoppingListRef = db.collection('shopping_list').doc();
+        t.set(shoppingListRef, {
+          ingredientId,
+          name: ingredient.name,
+          quantity: shoppingQuantity,
+          unit: ingredient.orderUnit || ingredient.unit,
+          status: 'pending',
+          supplierId: ingredient.supplierId || null,
+          moq: ingredient.moq || null,
+          orderUnit: ingredient.orderUnit || null,
+          costPerUnit: ingredient.costPerUnit || null,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
       }
     });
   });

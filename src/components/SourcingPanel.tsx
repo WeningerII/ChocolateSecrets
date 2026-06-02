@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Search, MapPin, Phone, Globe, Plus, Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react';
@@ -24,6 +25,12 @@ export default function SourcingPanel({ ingredientId, ingredientName }: Sourcing
   const [candidates, setCandidates] = useState<SourcingCandidate[]>([]);
   const [summary, setSummary] = useState<string | undefined>();
   const [searchSuggestionsHtml, setSearchSuggestionsHtml] = useState<string | undefined>();
+  // The search-grounding HTML comes from Gemini/Google; sanitize before injecting
+  // it into the DOM so a malicious/unexpected payload can't execute script.
+  const safeSearchSuggestionsHtml = useMemo(
+    () => (searchSuggestionsHtml ? DOMPurify.sanitize(searchSuggestionsHtml) : ''),
+    [searchSuggestionsHtml],
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [askInput, setAskInput] = useState('');
@@ -164,11 +171,11 @@ export default function SourcingPanel({ ingredientId, ingredientName }: Sourcing
                 />
               ))}
             </div>
-            {searchSuggestionsHtml && (
+            {safeSearchSuggestionsHtml && (
               <div className="px-5 py-3 border-t border-cocoa-100">
                 <div
                   className="sourcing-search-chips"
-                  dangerouslySetInnerHTML={{ __html: searchSuggestionsHtml }}
+                  dangerouslySetInnerHTML={{ __html: safeSearchSuggestionsHtml }}
                 />
               </div>
             )}

@@ -46,6 +46,10 @@ export const onBillReviewed = onDocumentWritten('bills/{billId}', async (event) 
   
   for (const expDoc of expectationsSnap.docs) {
     const exp = expDoc.data();
+    // Idempotency guard: if this same bill already satisfied the expectation
+    // (e.g. an at-least-once retry of this review event), don't advance
+    // nextExpectedDate a second time.
+    if (exp.lastSatisfiedBillId === billId) continue;
     const nextDate = (exp.nextExpectedDate as Timestamp).toDate();
     const graceDays = exp.tolerance?.graceDays ?? SATISFACTION_WINDOW_DAYS_FALLBACK;
     const windowMs = graceDays * 24 * 60 * 60 * 1000;

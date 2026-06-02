@@ -5,12 +5,12 @@ export default defineConfig({
   timeout: 30_000,
   fullyParallel: false,  // Firestore writes are stateful; serialize
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:3000',
     headless: true,
   },
   webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:3000',
     reuseExistingServer: true,
     timeout: 120_000,
   },

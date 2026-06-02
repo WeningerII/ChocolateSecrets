@@ -1,14 +1,14 @@
 /**
  * ============================================================================
- * FIRESTORE RULES TESTS — NON-SANDBOX-EXECUTABLE
+ * FIRESTORE RULES TESTS
  * ============================================================================
- * These tests require the Firebase emulator, which requires Java.
- * They CANNOT run in the AI Studio sandbox.
+ * These talk to the Firestore emulator (requires Java 17+ and firebase-tools).
+ * They are excluded from the default `npm test` run and use their own config
+ * (vitest.config.rules.ts), so run them through the emulator:
  *
- * TO RUN:
- *   1. Install Java 11+ (`java -version` must work)
- *   2. `npx firebase emulators:start --only firestore` in one terminal
- *   3. `npx vitest run test/rules/firestore.rules.test.ts` in another
+ *   firebase emulators:exec --only firestore "npm run test:rules"
+ *
+ * CI runs exactly this in the `rules-tests` job.
  *
  * RUN BEFORE: every production deploy.
  * RUN AFTER: any change to firestore.rules.
@@ -157,7 +157,6 @@ describe('inventoryTransactions rules', () => {
       costPerUnit: 5,
       date: serverTimestamp(),
       userId: 'alice',
-      userName: 'Alice',
     }));
   });
 
@@ -229,9 +228,77 @@ describe('users collection rules', () => {
     await assertFails(setDoc(doc(ctx.firestore(), 'users', 'alice'), { role: 'admin' }));
   });
 
-  test('admin can write other users role docs', async () => {
+  test('admin can update other users role docs', async () => {
     await seedRole('admin-user', 'admin');
+    await seedRole('bob', 'user');
     const ctx = testEnv.authenticatedContext('admin-user');
-    await assertSucceeds(setDoc(doc(ctx.firestore(), 'users', 'bob'), { role: 'user', email: 'b@t.com' }));
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), 'users', 'bob'), { role: 'admin' }));
+  });
+
+  test('admin check does not error for tokens without an email claim', async () => {
+    // isAdmin() calls request.auth.token.email.matches(...); authenticatedContext
+    // tokens have no email claim, so this must not raise an evaluation error.
+    await seedRole('alice', 'user');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(getDoc(doc(ctx.firestore(), 'users', 'alice')));
+  });
+});
+
+describe('bills payment-field lockdown', () => {
+  function validBill(overrides: Record<string, unknown> = {}) {
+    return {
+      billDate: serverTimestamp(),
+      totalAmount: 100,
+      status: 'extracted',
+      vendorResolution: { status: 'unresolved', candidateVendorIds: [], rawExtractedVendorName: 'Acme' },
+      fieldMeta: {},
+      lineItems: [],
+      ...overrides,
+    };
+  }
+
+  async function seedBill(id: string, overrides: Record<string, unknown> = {}) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'bills', id), validBill(overrides));
+    });
+  }
+
+  test('user can create a valid extracted bill', async () => {
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(setDoc(doc(ctx.firestore(), 'bills', 'b1'), validBill()));
+  });
+
+  test('user cannot create a bill already marked paid', async () => {
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertFails(setDoc(doc(ctx.firestore(), 'bills', 'b1'), validBill({ status: 'paid' })));
+  });
+
+  test('user cannot create a bill with a nonzero paidAmount', async () => {
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertFails(setDoc(doc(ctx.firestore(), 'bills', 'b1'), validBill({ paidAmount: 50 })));
+  });
+
+  test('user cannot set paidAmount on update', async () => {
+    await seedBill('b1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertFails(updateDoc(doc(ctx.firestore(), 'bills', 'b1'), { paidAmount: 50 }));
+  });
+
+  test('user cannot mark a bill paid on update', async () => {
+    await seedBill('b1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertFails(updateDoc(doc(ctx.firestore(), 'bills', 'b1'), { status: 'paid' }));
+  });
+
+  test('user can transition a bill to reviewed', async () => {
+    await seedBill('b1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), 'bills', 'b1'), { status: 'reviewed' }));
+  });
+
+  test('user can edit a bill field without touching payment fields', async () => {
+    await seedBill('b1', { paidAmount: 0 });
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), 'bills', 'b1'), { notes: 'follow up' }));
   });
 });

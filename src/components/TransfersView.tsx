@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, doc, writeBatch, serverTimestamp, getDocs, where } from 'firebase/firestore';
-import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { db, auth, handleFirestoreError, reportFirestoreError, OperationType } from '../firebase';
 import { Location, Ingredient, Lot, InventoryTransaction } from '../types';
 import { ArrowRightLeft, Plus, Search, CheckCircle2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +39,7 @@ export default function TransfersView({ locations }: TransfersViewProps) {
         setTransfers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as InventoryTransaction)));
         setLoading(false);
       },
-      (error) => handleFirestoreError(error, OperationType.LIST, 'inventoryTransactions')
+      (error) => { reportFirestoreError(error, OperationType.LIST, 'inventoryTransactions'); setLoading(false); }
     );
 
     return () => {

@@ -4,16 +4,19 @@
  * Pre-deploy secret guard: verifies GEMINI_API_KEY is configured in
  * Firebase Secret Manager before allowing a production deploy to proceed.
  *
- * Skipped outside CI (local development uses process.env fallback).
+ * This requires the authenticated `firebase` CLI, so it must run ONLY in a
+ * deploy pipeline — not in the per-PR static-checks lane (where the CLI is
+ * absent and `CI=true`, which previously made this step fail on every PR).
+ * Opt in by setting CHECK_FUNCTIONS_SECRETS=1 in the deploy workflow.
  *
- * Exit 0: secret is configured (or running locally — skipped).
- * Exit 1: secret missing in CI environment — blocks deploy.
+ * Exit 0: secret is configured (or the check is not enabled — skipped).
+ * Exit 1: secret missing when the check is enabled — blocks deploy.
  */
 
 import { execSync } from 'node:child_process';
 
-if (!process.env.CI) {
-  console.log('check-functions-secrets: not in CI, skipping. Local dev uses process.env.GEMINI_API_KEY fallback.');
+if (process.env.CHECK_FUNCTIONS_SECRETS !== '1') {
+  console.log('check-functions-secrets: not enabled (set CHECK_FUNCTIONS_SECRETS=1 in the deploy pipeline). Skipping.');
   process.exit(0);
 }
 

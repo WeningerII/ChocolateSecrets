@@ -39,7 +39,7 @@ service cloud.firestore {
         (
           (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-          (request.auth.token.email.matches("(?i)weningerii@gmail\\.com") && request.auth.token.email_verified == true)
+          (request.auth.token.email != null && request.auth.token.email.matches("(?i)weningerii@gmail\\.com") && request.auth.token.email_verified == true)
         );
     }
 
@@ -53,6 +53,14 @@ service cloud.firestore {
 
     function isImmutable(field) {
       return !(field in request.resource.data) || request.resource.data[field] == resource.data[field];
+    }
+
+    // Stricter than isImmutable: the field may not be added, removed, or changed
+    // by this write (presence and value must match the existing document). Used to
+    // keep server-managed fields out of reach of client writes.
+    function unchanged(field) {
+      return (field in request.resource.data) == (field in resource.data) &&
+             (!(field in request.resource.data) || request.resource.data[field] == resource.data[field]);
     }
 
     function isValidString(field, maxLen) {
@@ -461,7 +469,17 @@ service cloud.firestore {
 
     match /bills/{billId} {
       allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated() && isValidBill();
+      // paidAmount and the payment-derived statuses are owned by the recordPayment
+      // Cloud Function (admin SDK, which bypasses these rules). Clients may manage
+      // the bill's own fields and the non-payment lifecycle statuses, but may not
+      // mark a bill paid or alter paidAmount — otherwise the server-only payment
+      // ledger could be bypassed.
+      allow create: if isAuthenticated() && isValidBill()
+                      && (!('paidAmount' in request.resource.data) || request.resource.data.paidAmount == 0)
+                      && request.resource.data.status in ['extracted', 'reviewed', 'scheduled', 'disputed', 'void'];
+      allow update: if isAuthenticated() && isValidBill()
+                      && unchanged('paidAmount')
+                      && (unchanged('status') || request.resource.data.status in ['extracted', 'reviewed', 'scheduled', 'disputed', 'void']);
       allow delete: if isAdmin();
     }
 

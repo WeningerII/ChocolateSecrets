@@ -111,6 +111,28 @@ describe('onBillReviewed', () => {
     expect(docMock).toHaveBeenCalledWith('bill_123_anomaly');
   });
 
+  it('does not re-advance an expectation already satisfied by this bill (idempotent retry)', async () => {
+    const expDocRef = { update: vi.fn(), id: 'exp_1' };
+    const expData = {
+      vendorId: 'v_1',
+      isActive: true,
+      rrule: 'FREQ=MONTHLY;BYMONTHDAY=15',
+      nextExpectedDate: { toDate: () => new Date('2026-05-18T10:00:00Z') },
+      expectedAmount: 400,
+      tolerance: { graceDays: 5, amountToleranceBand: { low: 50, high: 50 } },
+      lastSatisfiedBillId: 'bill_123', // already satisfied by this same bill
+    };
+    getMock.mockResolvedValueOnce({
+      docs: [{ id: 'exp_1', data: () => expData, ref: expDocRef }]
+    });
+
+    // Amount within band so no anomaly is written either.
+    const event = createEvent('extracted', 'reviewed', { totalAmount: 400 });
+    await (onBillReviewed as any)(event);
+
+    expect(expDocRef.update).not.toHaveBeenCalled();
+  });
+
   it('flags anomaly if rolling average exceeded when no expectation exists', async () => {
     // 1st getMock: expectations (empty)
     getMock.mockResolvedValueOnce({ docs: [] });

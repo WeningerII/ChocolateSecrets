@@ -82,3 +82,20 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new FirestoreOperationError(errInfo);
 }
+
+/**
+ * Non-throwing variant for realtime listener (onSnapshot) error callbacks.
+ * Firestore invokes those callbacks asynchronously, so throwing from them escapes
+ * React's render path — the ErrorBoundary cannot catch it, the tab logs an uncaught
+ * error, and (because loading is only cleared on success) the page hangs on its
+ * skeleton forever. This logs the same structured context but returns, so the
+ * caller can reset its loading/error state instead.
+ */
+export function reportFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  try {
+    handleFirestoreError(error, operationType, path);
+  } catch {
+    // handleFirestoreError logs then throws by design; swallow the throw here
+    // because a listener callback must not propagate.
+  }
+}
