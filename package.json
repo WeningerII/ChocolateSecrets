@@ -31,6 +31,7 @@
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",
     "date-fns": "^4.1.0",
+    "dompurify": "^3.4.7",
     "express": "^4.21.2",
     "firebase": "^12.11.0",
     "i18next": "^26.0.4",
