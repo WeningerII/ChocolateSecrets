@@ -18,6 +18,7 @@ import { TranslateRecipeModal } from '../components/TranslateRecipeModal';
 import { useRecipePhysics } from '../hooks/useRecipePhysics';
 import { evaluateStepCondition, renderStepTemplate, type DslContext } from '../services/foodScience/confectionery/stepDsl';
 import { RecipeOutputStrip } from '../components/RecipeOutputStrip';
+import { RecipeCostDrivers } from '../components/RecipeCostDrivers';
 import { RecipePhysicsTier } from '../components/RecipePhysicsTier';
 import { RecipePhysicsDetail } from '../components/RecipePhysicsDetail';
 import { RecipeWarningsList } from '../components/RecipeWarningsList';
@@ -320,6 +321,7 @@ export default function RecipeDetail() {
               onToggle={() => setPhysicsDetailOpen(o => !o)}
             />
             {physicsDetailOpen && <RecipePhysicsDetail physics={physics} recipe={recipe} />}
+            {physicsDetailOpen && <RecipeCostDrivers recipe={recipe} ingredients={ingredients} recipes={recipes} language={language} />}
             {recipe.categories?.includes('frozen') && physics.frozen && <RecipeFrozenTier physics={physics} />}
             {recipe.categories?.includes('bread') && physics.bread && <RecipeBreadTier bread={physics.bread} />}
             {(physics.warnings.length > 0 || physics.confectionery?.warnings.length || physics.frozen?.warnings.length || physics.bread?.warnings.length) && (
