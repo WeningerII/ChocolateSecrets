@@ -1,10 +1,33 @@
 import { initializeApp } from 'firebase/app';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import firebaseConfig from '../firebase-applet-config.json';
 
 export const app = initializeApp(firebaseConfig);
+
+// App Check attests that traffic originates from this app, not from a script
+// replaying a stolen auth token or hitting the project's APIs directly. It is the
+// missing layer in front of the (already auth-gated and rate-limited) callable
+// functions and Firestore. Gated on the reCAPTCHA site key so the app behaves
+// exactly as before until you opt in — see docs/security-hardening.md for the
+// console setup and how to turn on enforcement.
+const appCheckSiteKey: string | undefined = import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY;
+if (appCheckSiteKey) {
+  // A debug token lets App Check pass from localhost / CI without a real reCAPTCHA
+  // assessment. Only set one in development; never ship it to production.
+  const appCheckDebugToken: string | undefined = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN;
+  if (appCheckDebugToken) {
+    (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN?: string }).FIREBASE_APPCHECK_DEBUG_TOKEN =
+      appCheckDebugToken;
+  }
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(appCheckSiteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
