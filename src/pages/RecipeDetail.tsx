@@ -321,7 +321,7 @@ export default function RecipeDetail() {
               onToggle={() => setPhysicsDetailOpen(o => !o)}
             />
             {physicsDetailOpen && <RecipePhysicsDetail physics={physics} recipe={recipe} />}
-            {physicsDetailOpen && <RecipeCostDrivers recipe={recipe} ingredients={ingredients} recipes={recipes} language={language} />}
+            {physicsDetailOpen && <RecipeCostDrivers physics={physics} ingredients={ingredients} language={language} />}
             {recipe.categories?.includes('frozen') && physics.frozen && <RecipeFrozenTier physics={physics} />}
             {recipe.categories?.includes('bread') && physics.bread && <RecipeBreadTier bread={physics.bread} />}
             {(physics.warnings.length > 0 || physics.confectionery?.warnings.length || physics.frozen?.warnings.length || physics.bread?.warnings.length) && (

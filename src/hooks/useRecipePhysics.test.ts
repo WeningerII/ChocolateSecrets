@@ -244,3 +244,93 @@ describe('useRecipePhysics — confectionery module', () => {
     expect(subtypes['heavy-cream']).toBe('cream');
   });
 });
+
+describe('useRecipePhysics — production-aware physics (buffers / molds / volume units / sub-recipes)', () => {
+  const phys = (recipe: Recipe, ings: Ingredient[], recipes: Recipe[]) =>
+    renderHook(() => useRecipePhysics(recipe, ings, recipes, 1)).result.current!;
+
+  const GLUCOSE_SYRUP: Ingredient = {
+    id: 'glucose', name: 'Glucose Syrup DE60', stock: 0, lowStockThreshold: 0,
+    unit: 'g', category: 'Sweeteners',
+    composition: { water: 18, glucose: 82 }, density: 1.4,
+  } as Ingredient;
+
+  const ganacheComponent = (bufferPercentage: number) => ({
+    id: 'main', name: 'Ganache', type: 'base', percentageOfTotalWeight: 100, bufferPercentage,
+    ingredients: [
+      { ingredientId: 'dark-70', quantity: 100 },
+      { ingredientId: 'heavy-cream', quantity: 59 },
+    ],
+  });
+
+  test('component buffer scales total mass but leaves Aw invariant (ratios preserved)', () => {
+    const make = (b: number) => ({ id: `g-${b}`, name: 'G', components: [ganacheComponent(b)] } as Recipe);
+    const p0 = phys(make(0), [DARK_70, HEAVY_CREAM], [make(0)]);
+    const p25 = phys(make(25), [DARK_70, HEAVY_CREAM], [make(25)]);
+    expect(p25.totalMass).toBeCloseTo(p0.totalMass * 1.25, 6); // buffer applied to mass
+    expect(p25.aw.aw!).toBeCloseTo(p0.aw.aw!, 6);              // composition ratios unchanged
+  });
+
+  test('molded recipe resolves the full mold batch mass; Aw matches the unmolded ratio', () => {
+    const molded: Recipe = {
+      id: 'molded-1', name: 'Bonbon Shells', type: 'molded_praline',
+      hardware: { cavitiesPerMold: 24, moldCount: 2, gramPerCavity: 10 },
+      components: [ganacheComponent(0)],
+    } as Recipe;
+    const pm = phys(molded, [DARK_70, HEAVY_CREAM], [molded]);
+    // 24 cavities x 2 molds x 10 g = 480 g batch — the old physics ignored hardware (159 g).
+    expect(pm.totalMass).toBeCloseTo(480, 4);
+    const byId = Object.fromEntries(pm.resolvedIngredients.map(r => [r.ingredientId, r.mass]));
+    expect(byId['dark-70']).toBeCloseTo((100 / 159) * 480, 3);
+    expect(byId['heavy-cream']).toBeCloseTo((59 / 159) * 480, 3);
+    // Uniform scaling => identical composition => identical Aw, band and shelf-life.
+    const pc = phys(CLASSIC_GANACHE, [DARK_70, HEAVY_CREAM], [CLASSIC_GANACHE]);
+    expect(pm.aw.aw!).toBeCloseTo(pc.aw.aw!, 6);
+    expect(pm.awBand.key).toBe(pc.awBand.key);
+    expect(pm.shelfLife.weeks).toBe(pc.shelfLife.weeks);
+  });
+
+  test('volume units convert to grams by density (50 ml glucose @1.4 = 70 g) and feed Aw on a true gram basis', () => {
+    const comp = (rows: any[]) => ({ id: 'm', name: 'M', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 0, ingredients: rows });
+    const rMl: Recipe = { id: 'vol-ml', name: 'ml', components: [comp([
+      { ingredientId: 'glucose', quantity: 50, unit: 'ml' },
+      { ingredientId: 'dark-70', quantity: 100, unit: 'g' },
+    ])] } as Recipe;
+    const rGramEquiv: Recipe = { id: 'vol-g', name: 'g-equiv', components: [comp([
+      { ingredientId: 'glucose', quantity: 70, unit: 'g' },
+      { ingredientId: 'dark-70', quantity: 100, unit: 'g' },
+    ])] } as Recipe;
+    const rGramNaive: Recipe = { id: 'vol-naive', name: 'g-naive', components: [comp([
+      { ingredientId: 'glucose', quantity: 50, unit: 'g' }, // what the old physics did: ml treated as g
+      { ingredientId: 'dark-70', quantity: 100, unit: 'g' },
+    ])] } as Recipe;
+    const cat = [GLUCOSE_SYRUP, DARK_70];
+
+    const pMl = phys(rMl, cat, [rMl]);
+    const byId = Object.fromEntries(pMl.resolvedIngredients.map(r => [r.ingredientId, r.mass]));
+    expect(byId['glucose']).toBeCloseTo(70, 4); // 50 ml x 1.4 g/ml
+
+    // Modeled at its true gram mass: equals the 70 g recipe, not the naive (ml-as-g) 50 g one.
+    expect(pMl.aw.aw!).toBeCloseTo(phys(rGramEquiv, cat, [rGramEquiv]).aw.aw!, 6);
+    expect(pMl.aw.aw!).not.toBeCloseTo(phys(rGramNaive, cat, [rGramNaive]).aw.aw!, 5);
+  });
+
+  test('sub-recipe expansion yields the same physics as the equivalent flattened recipe', () => {
+    const sub: Recipe = {
+      id: 'sub-syrup', name: 'Ganache Base',
+      yield: { totalYieldAmount: 159, totalYieldUnit: 'g' }, // = raw sum => clean 1:1 expansion
+      components: [ganacheComponent(0)],
+    } as Recipe;
+    const parent: Recipe = {
+      id: 'parent-x', name: 'Parent',
+      components: [{
+        id: 'm', name: 'M', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 0,
+        ingredients: [{ type: 'recipe', recipeId: 'sub-syrup', quantity: 159, unit: 'g' }],
+      }],
+    } as Recipe;
+    const pSub = phys(parent, [DARK_70, HEAVY_CREAM], [sub, parent]);
+    const pFlat = phys(CLASSIC_GANACHE, [DARK_70, HEAVY_CREAM], [CLASSIC_GANACHE]);
+    expect(pSub.totalMass).toBeCloseTo(pFlat.totalMass, 4); // both 159 g
+    expect(pSub.aw.aw!).toBeCloseTo(pFlat.aw.aw!, 6);
+  });
+});
