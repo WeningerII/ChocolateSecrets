@@ -3,30 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DataProvider } from './contexts/DataContext';
 import { ToastProvider } from './contexts/ToastContext';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import Ingredients from './pages/Ingredients';
-import IngredientDetail from './pages/IngredientDetail';
-import Recipes from './pages/Recipes';
-import PrepList from './pages/PrepList';
-import ShoppingList from './pages/ShoppingList';
-import Suppliers from './pages/Suppliers';
-import Inventory from './pages/Inventory';
-import InventoryTransactions from './pages/InventoryTransactions';
-import PurchaseOrders from './pages/PurchaseOrders';
-import Reports from './pages/Reports';
-import RecipeDetail from './pages/RecipeDetail';
-import RecipeEditPage from './pages/RecipeEditPage';
-import RecipeCookingMode from './pages/RecipeCookingMode';
-import RecipeAudit from './pages/RecipeAudit';
-import Formulate from './pages/lab/Formulate';
-import RestaurantSettings from './pages/RestaurantSettings';
-import Expenses from './pages/Expenses';
 import RequireAdmin from './components/RequireAdmin';
+import PageSpinner from './components/PageSpinner';
+
+// Pages are code-split: each route loads its own chunk on demand, shrinking the
+// initial bundle. Suspense boundaries (here and around Layout's Outlet) show a
+// spinner while a chunk loads.
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Ingredients = lazy(() => import('./pages/Ingredients'));
+const IngredientDetail = lazy(() => import('./pages/IngredientDetail'));
+const Recipes = lazy(() => import('./pages/Recipes'));
+const PrepList = lazy(() => import('./pages/PrepList'));
+const ShoppingList = lazy(() => import('./pages/ShoppingList'));
+const Suppliers = lazy(() => import('./pages/Suppliers'));
+const Inventory = lazy(() => import('./pages/Inventory'));
+const InventoryTransactions = lazy(() => import('./pages/InventoryTransactions'));
+const PurchaseOrders = lazy(() => import('./pages/PurchaseOrders'));
+const Reports = lazy(() => import('./pages/Reports'));
+const RecipeDetail = lazy(() => import('./pages/RecipeDetail'));
+const RecipeEditPage = lazy(() => import('./pages/RecipeEditPage'));
+const RecipeCookingMode = lazy(() => import('./pages/RecipeCookingMode'));
+const RecipeAudit = lazy(() => import('./pages/RecipeAudit'));
+const Formulate = lazy(() => import('./pages/lab/Formulate'));
+const RestaurantSettings = lazy(() => import('./pages/RestaurantSettings'));
+const Expenses = lazy(() => import('./pages/Expenses'));
 
 export default function App() {
   return (
@@ -34,7 +40,8 @@ export default function App() {
       <ToastProvider>
         <DataProvider>
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<PageSpinner />}>
+              <Routes>
               <Route path="/recipes/:id/cook" element={<RecipeCookingMode />} />
               <Route path="/" element={<Layout />}>
                 <Route index element={<Dashboard />} />
@@ -57,7 +64,8 @@ export default function App() {
                 <Route path="admin/restaurant" element={<RequireAdmin><RestaurantSettings /></RequireAdmin>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
-            </Routes>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </DataProvider>
       </ToastProvider>
