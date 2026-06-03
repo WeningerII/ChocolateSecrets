@@ -50,21 +50,6 @@ export interface RecipePhysics {
   bread: BreadEvaluation | null;
 }
 
-function computeAmounts(recipe: Recipe, scale: number): { amounts: Map<string, number>; totalMass: number } {
-  const amounts = new Map<string, number>();
-  let totalMass = 0;
-  for (const component of recipe.components ?? []) {
-    for (const ri of component.ingredients ?? []) {
-      const key = ri.ingredientId || ri.recipeId;
-      if (!key) continue;       // malformed ingredient row, skip
-      const massAtScale = (ri.quantity ?? 0) * scale;
-      amounts.set(key, massAtScale);
-      totalMass += massAtScale;
-    }
-  }
-  return { amounts, totalMass };
-}
-
 function deriveWarnings(
   aw: AwResult,
   pH: PHResult | null,
@@ -152,11 +137,19 @@ export function useRecipePhysics(
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, recipe.haccp?.shelfLifeDays);
 
-    const { amounts, totalMass } = computeAmounts(recipe, scale);
+    // Production-accurate per-ingredient amounts and total mass derive directly
+    // from the resolved leaf vector (buffers, hardware yield, sub-recipe expansion
+    // and unit->grams conversion already applied), grouped by ingredient id.
+    const computedAmounts = new Map<string, number>();
+    let totalMass = 0;
+    for (const r of resolvedIngredients) {
+      computedAmounts.set(r.ingredientId, (computedAmounts.get(r.ingredientId) ?? 0) + r.mass);
+      totalMass += r.mass;
+    }
 
     return {
       aw, pH, shelfLife, awBand, fatRegime, warnings,
-      computedAmounts: amounts,
+      computedAmounts,
       totalMass,
       scale,
       resolvedIngredients,

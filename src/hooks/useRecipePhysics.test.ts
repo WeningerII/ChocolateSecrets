@@ -137,6 +137,53 @@ describe('useRecipePhysics', () => {
     const { result } = renderHook(() => useRecipePhysics(recipe, mystery, [recipe], 1));
     expect(result.current!.warnings.find(w => w.kind === 'composition_incomplete')).toBeDefined();
   });
+
+  test('production-aware resolution: component buffer scales resolved masses (regression lock)', () => {
+    const buffered: Recipe = {
+      ...CLASSIC_GANACHE,
+      components: [{
+        id: 'main', name: 'Ganache', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 10,
+        ingredients: [
+          { ingredientId: 'dark-70', quantity: 100 },
+          { ingredientId: 'heavy-cream', quantity: 59 },
+        ],
+      }],
+    } as Recipe;
+    const { result } = renderHook(() =>
+      useRecipePhysics(buffered, [DARK_70, HEAVY_CREAM], [buffered], 1)
+    );
+    const byId = Object.fromEntries(result.current!.resolvedIngredients.map(r => [r.ingredientId, r.mass]));
+    // The old resolver ignored bufferPercentage and would have reported 100 / 59.
+    expect(byId['dark-70']).toBeCloseTo(110, 3);
+    expect(byId['heavy-cream']).toBeCloseTo(64.9, 3);
+  });
+
+  test('production-aware resolution: sub-recipe expands into physics by declared yield (regression lock)', () => {
+    const sub: Recipe = {
+      id: 'sub-syrup', name: 'Syrup', description: '',
+      yield: { totalYieldAmount: 100, totalYieldUnit: 'g' },
+      components: [{
+        id: 's', name: 'S', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 0,
+        ingredients: [{ ingredientId: 'heavy-cream', quantity: 100 }],
+      }],
+    } as Recipe;
+    const parent: Recipe = {
+      id: 'parent', name: 'Parent', description: '',
+      components: [{
+        id: 'm', name: 'M', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 0,
+        ingredients: [
+          { ingredientId: 'dark-70', quantity: 100 },
+          { type: 'recipe', recipeId: 'sub-syrup', quantity: 50, unit: 'g' },
+        ],
+      }],
+    } as Recipe;
+    const { result } = renderHook(() =>
+      useRecipePhysics(parent, [DARK_70, HEAVY_CREAM], [sub, parent], 1)
+    );
+    const byId = Object.fromEntries(result.current!.resolvedIngredients.map(r => [r.ingredientId, r.mass]));
+    expect(byId['dark-70']).toBeCloseTo(100, 3);
+    expect(byId['heavy-cream']).toBeCloseTo(50, 3); // 50 g of a 100 g-yield syrup = 50 g cream
+  });
 });
 
 describe('useRecipePhysics — confectionery module', () => {
