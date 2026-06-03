@@ -95,6 +95,9 @@
     "shelfLife": "Vida útil",
     "scale": "Escala"
   },
+  "contribution": {
+    "costDrivers": "Factores de costo"
+  },
   "editor": {
     "ribbon": {
       "empty": "Agrega ingredientes para ver la simulación en vivo."
