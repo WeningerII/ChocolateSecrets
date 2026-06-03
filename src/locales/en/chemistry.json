@@ -34,7 +34,8 @@
     "composition_incomplete": "{{count}} ingredients are using category-default composition. Numbers below are approximate — fill in explicit composition for accurate predictions.",
     "no_water": "No water present. Water activity calculation does not apply.",
     "extreme_saturation": "Aqueous sugar saturation at {{aqueousSugarPct}}% is at the edge of the Norrish model's reliable range. Treat predicted Aw as a lower bound.",
-    "declared_diverges": "Declared shelf life ({{declaredDays}} days) and predicted shelf life ({{predictedWeeks}} weeks) disagree by more than one band. Verify the declared value or refine the recipe."
+    "declared_diverges": "Declared shelf life ({{declaredDays}} days) and predicted shelf life ({{predictedWeeks}} weeks) disagree by more than one band. Verify the declared value or refine the recipe.",
+    "missing_density": "{{count}} volume-measured ingredient(s) ({{names}}) have no density set, so they're excluded from water-activity and shelf-life. Add a density to include them."
   },
   "shelfLife": {
     "label": "Predicted shelf life",

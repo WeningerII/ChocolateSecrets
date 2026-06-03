@@ -66,6 +66,20 @@ describe('resolveRecipeLeaves', () => {
     const noDensity = resolveRecipeLeaves(recipe, [ing({ id: 'water', name: 'Water', unit: 'ml' })], [recipe]);
     expect(noDensity.resolved).toHaveLength(0);
     expect(noDensity.unmassableLeaves).toHaveLength(1);
+    expect(noDensity.unmassableLeaves[0].reason).toBe('missing_density');
+  });
+
+  it('classifies a discrete-count leaf as discrete_unit, not a density error', () => {
+    const recipe = {
+      id: 'r', name: 'R', type: 'standard', description: '',
+      components: [stdComponent([{ ingredientId: 'leaf', quantity: 2, unit: 'each' }])],
+    } as Recipe;
+    const { resolved, unmassableLeaves } = resolveRecipeLeaves(
+      recipe, [ing({ id: 'leaf', name: 'Gold Leaf', unit: 'each' })], [recipe],
+    );
+    expect(resolved).toHaveLength(0);
+    expect(unmassableLeaves).toHaveLength(1);
+    expect(unmassableLeaves[0].reason).toBe('discrete_unit');
   });
 
   it('counts composition fallbacks', () => {
