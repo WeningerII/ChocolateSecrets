@@ -13,21 +13,16 @@ export function RecipeOutputStrip({ recipe, ingredients, physics }: RecipeOutput
   const { t } = useTranslation('chemistry');
   const ingredientMap = new Map(ingredients.map(i => [i.id, i]));
 
-  // Aggregate amounts by ingredient (combine duplicates across components)
+  // Production-accurate amounts come straight from the resolved leaf vector
+  // (component buffers, hardware yield, sub-recipe expansion and unit->grams
+  // conversion already applied), grouped by ingredient.
   const aggregated = new Map<string, { name: string; mass: number; localized?: Ingredient['nameI18n'] }>();
-  for (const component of recipe.components ?? []) {
-    for (const ri of component.ingredients ?? []) {
-      const key = ri.ingredientId || ri.recipeId;
-      if (!key) continue;
-      const mass = physics.computedAmounts.get(key) ?? 0;
-      if (mass <= 0) continue;
-      const ing = ri.ingredientId ? ingredientMap.get(ri.ingredientId) : undefined;
-      const name = ing?.name ?? 'Unknown';
-      const localized = ing?.nameI18n;
-      const existing = aggregated.get(name);
-      if (existing) existing.mass += mass;
-      else aggregated.set(name, { name, mass, localized });
-    }
+  for (const r of physics.resolvedIngredients) {
+    if (!(r.mass > 0)) continue;
+    const ing = ingredientMap.get(r.ingredientId);
+    const existing = aggregated.get(r.ingredientId);
+    if (existing) existing.mass += r.mass;
+    else aggregated.set(r.ingredientId, { name: ing?.name ?? r.name, mass: r.mass, localized: ing?.nameI18n });
   }
 
   const items = Array.from(aggregated.values()).sort((a, b) => b.mass - a.mass);

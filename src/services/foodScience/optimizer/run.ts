@@ -4,8 +4,7 @@ import type {
 } from '../../../types';
 import {
   calculateNorrishAw, calculateMixedPH, predictShelfLife,
-  classifyAwBand, classifyFatRegime, resolveComposition,
-  type ResolvedIngredient,
+  classifyAwBand, classifyFatRegime,
 } from '../universal';
 import { evaluateConfectionery } from '../confectionery';
 import { deriveSearchSpace, totalGeneCount } from './searchSpace';
@@ -18,6 +17,7 @@ import {
   type IndividualScored, NSGA2_DEFAULTS,
 } from './nsga2';
 import { topsisRank } from './topsis';
+import { resolveRecipeLeaves } from '../../../utils/resolveRecipeLeaves';
 
 export interface OptimizerProgressMessage {
   generation: number;
@@ -50,7 +50,7 @@ export function runFormulationOptimizer(
   // If the search space is empty, return the base recipe as a single candidate
   if (numGenes === 0 || active.length === 0) {
     const baseScored = scoreCandidate(
-      input.baseRecipe, [], dimensions, input.ingredientCatalog, input
+      input.baseRecipe, [], dimensions, input.ingredientCatalog, input.recipesCatalog, input
     );
     return {
       candidates: [{ ...baseScored.candidate, paretoRank: 0, topsisCloseness: 1.0 }],
@@ -64,7 +64,7 @@ export function runFormulationOptimizer(
   let population: IndividualScored[] = Array.from({ length: popSize }, () => {
     const vector = Array.from({ length: numGenes }, () => rng());
     const scored = scoreCandidate(
-      input.baseRecipe, vector, dimensions, input.ingredientCatalog, input
+      input.baseRecipe, vector, dimensions, input.ingredientCatalog, input.recipesCatalog, input
     );
     return {
       vector,
@@ -103,7 +103,7 @@ export function runFormulationOptimizer(
       for (const v of [child1, child2]) {
         if (children.length >= popSize) break;
         const scored = scoreCandidate(
-          input.baseRecipe, v, dimensions, input.ingredientCatalog, input
+          input.baseRecipe, v, dimensions, input.ingredientCatalog, input.recipesCatalog, input
         );
         children.push({
           vector: v,
@@ -157,7 +157,7 @@ export function runFormulationOptimizer(
   const front = population.filter(p => p.paretoRank === 0);
   const candidates: OptimizerCandidate[] = front.map(ind => {
     const { candidate } = scoreCandidate(
-      input.baseRecipe, ind.vector, dimensions, input.ingredientCatalog, input
+      input.baseRecipe, ind.vector, dimensions, input.ingredientCatalog, input.recipesCatalog, input
     );
     return { ...candidate, paretoRank: 0, topsisCloseness: 0 };
   });
@@ -196,31 +196,17 @@ function scoreCandidate(
   vector: DecisionVector,
   dimensions: OptimizerInput['baseRecipe'] extends never ? never : ReturnType<typeof deriveSearchSpace>,
   catalog: Ingredient[],
+  recipesCatalog: Recipe[],
   scoreInput: ScoreInput,
 ): { candidate: OptimizerCandidate } {
   const { recipe: candidateRecipe, diff } = applyDecisionVector(baseRecipe, vector, dimensions, catalog);
   const catalogById = new Map(catalog.map(i => [i.id, i]));
 
-  // Resolve to ingredients (one level of recursion for sub-recipes is enough for tuning)
-  const resolved: ResolvedIngredient[] = [];
-  for (const component of candidateRecipe.components ?? []) {
-    for (const ri of component.ingredients ?? []) {
-      const mass = ri.quantity ?? 0;
-      if (mass <= 0 || !ri.ingredientId) continue;
-      const ing = catalogById.get(ri.ingredientId);
-      if (!ing) continue;
-      const { composition, source } = resolveComposition(ing);
-      resolved.push({
-        ingredientId: ing.id, name: ing.name, mass,
-        composition, compositionSource: source,
-        bufferRef: ing.bufferRef,
-        role: ri.role?.universal,
-        chocolateCocoaPercentage: ing.chocolateSpec?.cocoaPercentage,
-        chocolateClass: ing.chocolateSpec?.type as any,
-        alcoholAbv: ing.alcoholSpec?.abv,
-      });
-    }
-  }
+  // Resolve through the shared production-aware operator: real grams (unit
+  // conversion via density), sub-recipe expansion, and component buffers/yield —
+  // the same view the recipe pages display, so the optimizer scores the product
+  // as it will actually be made.
+  const { resolved } = resolveRecipeLeaves(candidateRecipe, catalog, recipesCatalog, 1);
 
   const aw = calculateNorrishAw(resolved);
   const pH = calculateMixedPH(resolved);

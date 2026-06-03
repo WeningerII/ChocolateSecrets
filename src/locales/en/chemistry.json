@@ -95,6 +95,9 @@
     "shelfLife": "Shelf life",
     "scale": "Scale"
   },
+  "contribution": {
+    "costDrivers": "Cost drivers"
+  },
   "editor": {
     "ribbon": {
       "empty": "Add ingredients to see live physics."
