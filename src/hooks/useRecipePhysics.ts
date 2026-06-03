@@ -6,7 +6,6 @@ import {
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
-  resolveComposition,
   type ResolvedIngredient,
   type AwResult,
   type PHResult,
@@ -18,6 +17,7 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
+import { resolveRecipeLeaves } from '../utils/resolveRecipeLeaves';
 
 export interface PhysicsWarning {
   kind:
@@ -48,89 +48,6 @@ export interface RecipePhysics {
   confectionery: ConfectioneryEvaluation | null;
   frozen: FrozenEvaluation | null;
   bread: BreadEvaluation | null;
-}
-
-const MAX_RECURSION_DEPTH = 6;
-
-interface ResolveContext {
-  ingredients: Map<string, Ingredient>;
-  recipes: Map<string, Recipe>;
-  memo: Map<string, ResolvedIngredient[] | 'computing'>;
-  scale: number;
-  fallbackCount: { value: number };
-}
-
-/**
- * Recursively resolve a recipe into a flat list of ResolvedIngredients.
- * Sub-recipes are expanded by their components × scale; cycles return empty arrays.
- */
-function resolveRecipe(
-  recipe: Recipe,
-  ctx: ResolveContext,
-  depth: number
-): ResolvedIngredient[] {
-  if (depth > MAX_RECURSION_DEPTH) return [];
-
-  const cached = ctx.memo.get(recipe.id);
-  if (cached === 'computing') return [];          // cycle
-  if (cached) return cached;
-
-  ctx.memo.set(recipe.id, 'computing');
-
-  const out: ResolvedIngredient[] = [];
-
-  for (const component of recipe.components ?? []) {
-    for (const ri of component.ingredients ?? []) {
-      const mass = (ri.quantity ?? 0) * ctx.scale;
-      if (mass <= 0) continue;
-
-      // Sub-recipe reference?
-      if (ri.recipeId) {
-        const subRecipe = ctx.recipes.get(ri.recipeId);
-        if (!subRecipe) continue;
-
-        // Determine yield-scaling factor for the sub-recipe so total mass equals `mass`.
-        const subTotal = (subRecipe.components ?? []).reduce(
-          (acc, c) => acc + (c.ingredients ?? []).reduce(
-            (sum, sub) => sum + (sub.quantity ?? 0), 0),
-          0
-        );
-        if (subTotal === 0) continue;
-        const subScale = mass / subTotal;
-
-        const subCtx: ResolveContext = { ...ctx, scale: subScale };
-        const subResolved = resolveRecipe(subRecipe, subCtx, depth + 1);
-        out.push(...subResolved);
-        continue;
-      }
-
-      // Leaf ingredient
-      if (!ri.ingredientId) continue;
-      const ing = ctx.ingredients.get(ri.ingredientId);
-      if (!ing) continue;
-
-      const { composition, source } = resolveComposition(ing);
-      if (source === 'category_default' || source === 'unknown') {
-        ctx.fallbackCount.value += 1;
-      }
-
-      out.push({
-        ingredientId: ing.id,
-        name: ing.name,
-        mass,
-        composition,
-        compositionSource: source,
-        bufferRef: ing.bufferRef,
-        role: ri.role?.universal,
-        chocolateCocoaPercentage: ing.chocolateSpec?.cocoaPercentage,
-        chocolateClass: ing.chocolateSpec?.type as any,
-        alcoholAbv: ing.alcoholSpec?.abv,
-      });
-    }
-  }
-
-  ctx.memo.set(recipe.id, out);
-  return out;
 }
 
 function computeAmounts(recipe: Recipe, scale: number): { amounts: Map<string, number>; totalMass: number } {
@@ -182,21 +99,16 @@ export function useRecipePhysics(
     if (!recipe) return null;
 
     const ingredientMap = new Map(ingredients.map(i => [i.id, i]));
-    const recipeMap = new Map(allRecipes.map(r => [r.id, r]));
 
-    const fallbackCount = { value: 0 };
-    const ctx: ResolveContext = {
-      ingredients: ingredientMap,
-      recipes: recipeMap,
-      memo: new Map(),
+    const { resolved: resolvedIngredients, fallbackCount } = resolveRecipeLeaves(
+      recipe,
+      ingredients,
+      allRecipes,
       scale,
-      fallbackCount,
-    };
-
-    const resolvedIngredients = resolveRecipe(recipe, ctx, 0);
+    );
     if (resolvedIngredients.length === 0) {
-      // Empty recipe — return a deterministic zero-physics result rather than null
-      // so consumers can still render an "incomplete recipe" state without conditionals.
+      // Empty or fully-unresolvable recipe — return null so consumers render an
+      // "incomplete recipe" state rather than a misleading zero-physics result.
       return null;
     }
 
@@ -238,7 +150,7 @@ export function useRecipePhysics(
       });
     }
 
-    const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount.value, recipe.categories ?? [], resolvedIngredients.length, bread, recipe.haccp?.shelfLifeDays);
+    const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, recipe.haccp?.shelfLifeDays);
 
     const { amounts, totalMass } = computeAmounts(recipe, scale);
 
