@@ -34,7 +34,8 @@
     "composition_incomplete": "{{count}}개의 재료가 기본값을 사용 중입니다. 정확한 결과를 위해 직접 수치를 입력하세요.",
     "no_water": "수분 없음. 수분 활성도 (Aw) 모델 미포함.",
     "extreme_saturation": "수성 당 농도 ({{aqueousSugarPct}}%) 가 모델 정상 임계점을 넘었습니다. 최소한의 모델 예측으로 생각하십시오.",
-    "declared_diverges": "선언된 보관 기간 ({{declaredDays}} 일)과 예상 ({{predictedWeeks}} 주)이 모델 밴드에서 크게 벗어남."
+    "declared_diverges": "선언된 보관 기간 ({{declaredDays}} 일)과 예상 ({{predictedWeeks}} 주)이 모델 밴드에서 크게 벗어남.",
+    "missing_density": "부피로 측정된 재료 {{count}}개 ({{names}})에 밀도가 설정되지 않아 수분 활성도 및 보관 기간 계산에서 제외되었습니다. 포함하려면 밀도를 입력하세요."
   },
   "shelfLife": {
     "label": "예상 보관 기간",

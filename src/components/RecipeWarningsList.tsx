@@ -38,6 +38,9 @@ export function RecipeWarningsList({ universal, confectionery = [], frozen = [],
       case 'declared_diverges':
         items.push({ severity: 'warn', text: t('warnings.declared_diverges' as any, { declaredDays: w.declaredDays, predictedWeeks: w.predictedWeeks }) });
         break;
+      case 'missing_density':
+        items.push({ severity: 'warn', text: t('warnings.missing_density' as any, { count: w.ingredientCount, names: (w.ingredientNames ?? []).join(', ') }) });
+        break;
       case 'bread_no_flour':
         items.push({ severity: 'critical', text: t('bread.warnings.no_flour_present' as any) });
         break;

@@ -21,7 +21,7 @@
 import type { Recipe, Ingredient } from '../types';
 import type { ResolvedIngredient } from '../services/foodScience/universal/types';
 import { resolveComposition } from '../services/foodScience/universal/composition';
-import { convertUnit } from './units';
+import { convertUnit, unitKind } from './units';
 import {
   normalizeRecipe,
   calculateTotalTargetYield,
@@ -32,10 +32,20 @@ import {
 
 const MAX_RECURSION_DEPTH = 6;
 
+/**
+ * Why a leaf could not be put on the gram basis:
+ *  - `missing_density`: a volume-measured ingredient with no density — a recoverable
+ *    data gap that mismodels Aw/shelf-life if ignored, so callers should flag it.
+ *  - `discrete_unit`: a count/unknown unit ("2 each", "1 piece") that has no gram
+ *    value by nature — usually an intentional garnish, so callers shouldn't nag.
+ */
+export type UnmassableReason = 'missing_density' | 'discrete_unit';
+
 export interface UnmassableLeaf {
   ingredientId: string;
   name: string;
   unit: string;
+  reason: UnmassableReason;
 }
 
 export interface ResolveLeavesResult {
@@ -120,7 +130,11 @@ function walk(recipe: Recipe, scale: number, depth: number, ctx: Ctx): void {
 
       const grams = toGrams(scaledQty, ri.unit, ing, ri.density);
       if (grams === null || !(grams > 0)) {
-        ctx.unmassable.push({ ingredientId: ing.id, name: ing.name, unit: ri.unit || ing.unit || '' });
+        const unit = ri.unit || ing.unit || '';
+        // A volume unit reaching here means density is missing (a recoverable gap);
+        // anything else is a discrete/unknown unit with no gram basis by nature.
+        const reason: UnmassableReason = unitKind(unit) === 'volume' ? 'missing_density' : 'discrete_unit';
+        ctx.unmassable.push({ ingredientId: ing.id, name: ing.name, unit, reason });
         continue;
       }
 
