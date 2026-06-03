@@ -8,6 +8,7 @@
  * thing a chef can actually act on.
  */
 import type { Recipe, Ingredient } from '../types';
+import type { ResolvedIngredient } from '../services/foodScience/universal/types';
 import { resolveRecipeLeaves } from './resolveRecipeLeaves';
 import { convertUnit } from './units';
 
@@ -28,13 +29,15 @@ export interface ContributionReport {
   totalMassG: number;
 }
 
-export function recipeContributions(
-  recipe: Recipe,
+/**
+ * Roll up contributions from an already-resolved leaf vector. Kept separate so
+ * callers that already hold the resolved leaves (e.g. the recipe view, which
+ * resolves once via useRecipePhysics) don't pay for a second operator pass.
+ */
+export function contributionsFromLeaves(
+  resolved: ResolvedIngredient[],
   ingredients: Ingredient[],
-  recipes: Recipe[],
-  scale = 1,
 ): ContributionReport {
-  const { resolved } = resolveRecipeLeaves(recipe, ingredients, recipes, scale);
   const byId = new Map(ingredients.map((i) => [i.id, i]));
 
   const agg = new Map<string, { name: string; massG: number; costUsd: number | null; waterG: number }>();
@@ -43,9 +46,12 @@ export function recipeContributions(
     const waterG = leaf.mass * ((leaf.composition.water ?? 0) / 100);
 
     // Cost: convert grams into the ingredient's cost unit, then × its unit cost.
+    // Use the same `weightedAverageCost || costPerUnit` precedence as
+    // calculateRecipeCost so the cost-driver total can't diverge from the recipe's
+    // headline COGS (a defined weightedAverageCost of 0 must fall back to costPerUnit).
     let cost: number | null = null;
     if (ing) {
-      const unitCost = ing.weightedAverageCost ?? ing.costPerUnit;
+      const unitCost = ing.weightedAverageCost || ing.costPerUnit;
       if (typeof unitCost === 'number' && unitCost > 0) {
         const inUnit = convertUnit(leaf.mass, 'g', ing.unit ?? 'g', ing.density);
         if (inUnit !== null) cost = inUnit * unitCost;
@@ -85,4 +91,14 @@ export function recipeContributions(
   list.sort((a, b) => (b.costUsd ?? -1) - (a.costUsd ?? -1));
 
   return { ingredients: list, totalCostUsd, totalWaterG, totalMassG };
+}
+
+export function recipeContributions(
+  recipe: Recipe,
+  ingredients: Ingredient[],
+  recipes: Recipe[],
+  scale = 1,
+): ContributionReport {
+  const { resolved } = resolveRecipeLeaves(recipe, ingredients, recipes, scale);
+  return contributionsFromLeaves(resolved, ingredients);
 }

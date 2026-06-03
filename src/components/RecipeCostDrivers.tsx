@@ -1,30 +1,32 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Recipe, Ingredient, Language } from '../types';
-import { recipeContributions } from '../utils/recipeContributions';
+import type { Ingredient, Language } from '../types';
+import type { RecipePhysics } from '../hooks/useRecipePhysics';
+import { contributionsFromLeaves } from '../utils/recipeContributions';
 import { formatCurrency } from '../utils/formatters';
 import { LocalizedField } from './LocalizedField';
 
 interface RecipeCostDriversProps {
-  recipe: Recipe;
+  physics: RecipePhysics;
   ingredients: Ingredient[];
-  recipes: Recipe[];
   language: Language;
 }
 
 /**
  * "What drives this cost?" — top ingredients by share of total recipe cost,
- * computed as a rollup over the same resolved leaf vector the rest of the recipe
- * view uses. Sub-recipe costs are attributed to the underlying raw ingredient.
+ * rolled up from the resolved leaf vector physics already computed (no second
+ * resolution pass). Sub-recipe costs are attributed to the underlying raw
+ * ingredient.
  */
-export function RecipeCostDrivers({ recipe, ingredients, recipes, language }: RecipeCostDriversProps) {
+export function RecipeCostDrivers({ physics, ingredients, language }: RecipeCostDriversProps) {
   const { t } = useTranslation('chemistry');
   const report = useMemo(
-    () => recipeContributions(recipe, ingredients, recipes, 1),
-    [recipe, ingredients, recipes],
+    () => contributionsFromLeaves(physics.resolvedIngredients, ingredients),
+    [physics.resolvedIngredients, ingredients],
   );
 
-  if (report.totalCostUsd <= 0) return null;
+  // totalCostUsd > 0 iff at least one ingredient has a positive cost, so the
+  // drivers check is the only guard needed.
   const drivers = report.ingredients.filter((i) => (i.costUsd ?? 0) > 0).slice(0, 6);
   if (drivers.length === 0) return null;
 

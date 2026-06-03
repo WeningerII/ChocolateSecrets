@@ -16,13 +16,13 @@ export function RecipeOutputStrip({ recipe, ingredients, physics }: RecipeOutput
   // Production-accurate amounts come straight from the resolved leaf vector
   // (component buffers, hardware yield, sub-recipe expansion and unit->grams
   // conversion already applied), grouped by ingredient.
-  const aggregated = new Map<string, { name: string; mass: number; localized?: Ingredient['nameI18n'] }>();
+  const aggregated = new Map<string, { id: string; name: string; mass: number; localized?: Ingredient['nameI18n'] }>();
   for (const r of physics.resolvedIngredients) {
     if (!(r.mass > 0)) continue;
     const ing = ingredientMap.get(r.ingredientId);
     const existing = aggregated.get(r.ingredientId);
     if (existing) existing.mass += r.mass;
-    else aggregated.set(r.ingredientId, { name: ing?.name ?? r.name, mass: r.mass, localized: ing?.nameI18n });
+    else aggregated.set(r.ingredientId, { id: r.ingredientId, name: ing?.name ?? r.name, mass: r.mass, localized: ing?.nameI18n });
   }
 
   const items = Array.from(aggregated.values()).sort((a, b) => b.mass - a.mass);
@@ -35,8 +35,8 @@ export function RecipeOutputStrip({ recipe, ingredients, physics }: RecipeOutput
 
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md bg-cream-50 px-5 py-4 border border-cream-200">
-      {items.map((it, idx) => (
-        <div key={it.name + idx} className="flex flex-col">
+      {items.map((it) => (
+        <div key={it.id} className="flex flex-col">
           <p className="text-[11px] uppercase tracking-wide text-cocoa-500 font-medium">
             {it.localized
               ? <LocalizedField field={it.localized} />

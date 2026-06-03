@@ -638,7 +638,7 @@ export default function RecipeEditor({ initialRecipe, ingredients, recipes, onSa
             <div className={activeTab === 'overview' ? 'block' : 'hidden'}>
               <div className="mb-6 space-y-4">
                 <EditorPhysicsRibbon physics={physics} />
-                {state.categories?.includes('frozen') && <EditorFrozenStrip physics={physics} />}
+                {state.categories?.includes('frozen') && physics && <EditorFrozenStrip physics={physics} />}
                 {state.categories?.includes('bread') && physics?.bread && <EditorBreadStrip bread={physics.bread} />}
                 {physics?.warnings.length || physics?.confectionery?.warnings.length || physics?.frozen?.warnings.length || physics?.bread?.warnings.length ? (
                   <RecipeWarningsList 

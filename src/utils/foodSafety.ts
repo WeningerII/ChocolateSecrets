@@ -19,6 +19,11 @@ export function computeCrossContactRisks(
   const station = targetRecipe.stationTag?.primary;
   if (!station) return [];
 
+  // Build the id→ingredient lookup once; computeCrossContactRisks enumerates
+  // names for the target AND every sibling recipe on the station, so a linear
+  // scan per leaf/row would be O(recipes × leaves × catalog).
+  const byId = new Map(ingredients.map(i => [i.id, i]));
+
   // Enumerate ingredient names through the canonical BOM expansion so sub-recipe
   // ingredients are included (their allergens matter for cross-contact too),
   // while preserving the inline-name fallback for rows whose ingredient isn't in
@@ -27,13 +32,12 @@ export function computeCrossContactRisks(
     const names = new Set<string>();
     const expanded = getRecipeRawIngredients(recipe, 1, allRecipes, ingredients);
     expanded.forEach((_, id) => {
-      const name = ingredients.find(i => i.id === id)?.name;
+      const name = byId.get(id)?.name;
       if (name) names.add(name);
     });
     for (const comp of recipe.components || []) {
       for (const ing of comp.ingredients || []) {
-        const known = ing.ingredientId && ingredients.some(i => i.id === ing.ingredientId);
-        if (known) continue;
+        if (ing.ingredientId && byId.has(ing.ingredientId)) continue;
         const inline = (ing as any).name;
         if (inline) names.add(inline);
       }

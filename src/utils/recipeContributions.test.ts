@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { recipeContributions } from './recipeContributions';
+import { recipeContributions, contributionsFromLeaves } from './recipeContributions';
 import type { Recipe, Ingredient } from '../types';
 
 const ing = (over: Partial<Ingredient> & { id: string; name: string }): Ingredient => ({
@@ -76,5 +76,30 @@ describe('recipeContributions', () => {
     expect(r.ingredients).toHaveLength(1);
     expect(r.ingredients[0].ingredientId).toBe('dark');
     expect(r.ingredients[0].costUsd).toBeCloseTo(2.5, 6);
+  });
+
+  it('falls back to costPerUnit when weightedAverageCost is 0 (matches calculateRecipeCost precedence)', () => {
+    const recipe = {
+      id: 'r', name: 'R', type: 'standard', description: '',
+      components: [stdComponent([{ ingredientId: 'dark', quantity: 100, unit: 'g' }])],
+    } as Recipe;
+    const ingredients = [ing({ id: 'dark', name: 'Dark', weightedAverageCost: 0, costPerUnit: 0.05 })];
+    const r = recipeContributions(recipe, ingredients, [recipe]);
+    // A defined weightedAverageCost of 0 must NOT suppress the costPerUnit fallback (|| not ??).
+    expect(r.totalCostUsd).toBeCloseTo(5, 6); // 100 g × $0.05
+    expect(r.ingredients[0].costUsd).toBeCloseTo(5, 6);
+  });
+
+  it('contributionsFromLeaves rolls up a pre-resolved leaf vector without re-resolving', () => {
+    const resolved = [
+      { ingredientId: 'a', name: 'A', mass: 100, composition: { water: 50 }, compositionSource: 'explicit' },
+      { ingredientId: 'b', name: 'B', mass: 100, composition: { water: 0 }, compositionSource: 'explicit' },
+    ] as any;
+    const ingredients = [ing({ id: 'a', name: 'A', costPerUnit: 0.1 }), ing({ id: 'b', name: 'B', costPerUnit: 0.1 })];
+    const r = contributionsFromLeaves(resolved, ingredients);
+    expect(r.totalMassG).toBeCloseTo(200, 6);
+    expect(r.totalWaterG).toBeCloseTo(50, 6);
+    expect(r.totalCostUsd).toBeCloseTo(20, 6); // 100×0.1 + 100×0.1
+    expect(r.ingredients[0].costShare).toBeCloseTo(0.5, 6);
   });
 });
