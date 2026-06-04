@@ -21,13 +21,26 @@ The hardcoded admin email in `firestore.rules` (`isAdmin()`) is the **owner's** 
 
 ### 1. Confirm your Firestore rules are actually deployed
 `firestore.rules` in the repo is the source of truth, but the project enforces
-whatever was **last deployed**. They can drift. Deploy the repo's copy:
+whatever was **last deployed**, and they can drift.
+
+⚠️ **This project uses a _named_ Firestore database**
+(`ai-studio-b87bb121-f3a6-4594-bf8b-d104e1bc3903`), not `(default)` — see
+`firestoreDatabaseId` in `firebase-applet-config.json`. A bare
+`firebase deploy --only firestore:rules` deploys to `(default)`, which would leave
+the database your app actually uses on its old rules. `firebase.json` now declares
+that database explicitly (multi-database array form), so the deploy targets it:
 
 ```bash
 firebase deploy --only firestore:rules
+# → deploys firestore.rules to the ai-studio-… database declared in firebase.json
 ```
 
-Then check **Firebase console → Firestore → Rules** shows the same content.
+Verify in **Firebase console → Firestore →** (switch to the `ai-studio-…`
+database) **→ Rules** — it should match `firestore.rules`.
+
+If a `(default)` database also exists in the project, make sure it isn't sitting in
+open "test mode": add a `{ "database": "(default)", … }` entry to `firebase.json`
+and deploy, or lock it down in the console.
 
 ### 2. Restrict the public Firebase web API key
 The key (`AIza…` in `firebase-applet-config.json`) is safe to ship — it identifies
