@@ -91,6 +91,11 @@
       "button": "Tag recipe ingredient roles",
       "running": "Tagging in progress...",
       "success": "Role tagging complete: {{recipesUpdated}} recipes updated, {{ingredientsTagged}} ingredients tagged, {{ambiguous}} ambiguous (skipped)."
+    },
+    "crossContactRecompute": {
+      "button": "Recalcular todos los riesgos de contacto cruzado",
+      "running": "Recalculando riesgos de contacto cruzado...",
+      "success": "Recálculo de contacto cruzado completo: {{recipesUpdated}} de {{recipesScanned}} recetas actualizadas."
     }
   }
 }

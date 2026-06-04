@@ -91,6 +91,11 @@
       "button": "Tag recipe ingredient roles",
       "running": "Tagging in progress...",
       "success": "Role tagging complete: {{recipesUpdated}} recipes updated, {{ingredientsTagged}} ingredients tagged, {{ambiguous}} ambiguous (skipped)."
+    },
+    "crossContactRecompute": {
+      "button": "모든 교차 오염 위험 재계산",
+      "running": "교차 오염 위험 재계산 중...",
+      "success": "교차 오염 재계산 완료: {{recipesScanned}}개 중 {{recipesUpdated}}개 레시피 업데이트됨."
     }
   }
 }

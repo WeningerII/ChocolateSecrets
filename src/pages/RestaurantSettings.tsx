@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { migrateRecipesToV2 } from '../utils/recipeMigration';
 import { migrateRecipeRoles } from '../utils/recipeRoleMigration';
+import { recomputeAllCrossContacts } from '../utils/recomputeAllCrossContacts';
 import { RESTAURANT_ID } from '../constants/tenant';
 
 const ALL_ALLERGEN_KEYS: AllergenKey[] = [
@@ -28,6 +29,9 @@ export default function RestaurantSettings() {
 
   const [isRoleMigrating, setIsRoleMigrating] = useState(false);
   const [roleMigrationResult, setRoleMigrationResult] = useState<{ recipesUpdated: number; ingredientsTagged: number; ambiguousOrLowConfidence: number } | null>(null);
+
+  const [isRecomputing, setIsRecomputing] = useState(false);
+  const [recomputeResult, setRecomputeResult] = useState<{ recipesScanned: number; recipesUpdated: number } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -86,6 +90,23 @@ export default function RestaurantSettings() {
       console.error('[migrateRecipeRoles] Failed:', e);
     }
     setIsRoleMigrating(false);
+  };
+
+  const handleRecomputeCrossContacts = async () => {
+    setIsRecomputing(true);
+    setRecomputeResult(null);
+    try {
+      const result = await recomputeAllCrossContacts();
+      setRecomputeResult(result);
+      toast.success(t('common:admin.crossContactRecompute.success', {
+        recipesScanned: result.recipesScanned,
+        recipesUpdated: result.recipesUpdated,
+      }));
+    } catch (e) {
+      toast.error(t('common:dataMigration.failedToast'));
+      console.error('[recomputeAllCrossContacts] Failed:', e);
+    }
+    setIsRecomputing(false);
   };
 
   const handleSave = async () => {
@@ -173,17 +194,24 @@ export default function RestaurantSettings() {
         <div className="flex gap-4">
           <button
             onClick={handleRunMigration}
-            disabled={isMigrating || isRoleMigrating}
+            disabled={isMigrating || isRoleMigrating || isRecomputing}
             className="bg-copper hover:bg-copper-dark text-white px-6 py-2 rounded-xl font-medium disabled:opacity-60"
           >
             {isMigrating ? t('common:dataMigration.running') : t('common:dataMigration.run')}
           </button>
           <button
             onClick={handleRunRoleMigration}
-            disabled={isMigrating || isRoleMigrating}
+            disabled={isMigrating || isRoleMigrating || isRecomputing}
             className="bg-copper hover:bg-copper-dark text-white px-6 py-2 rounded-xl font-medium disabled:opacity-60"
           >
             {isRoleMigrating ? t('common:admin.roleMigration.running') : t('common:admin.roleMigration.button')}
+          </button>
+          <button
+            onClick={handleRecomputeCrossContacts}
+            disabled={isMigrating || isRoleMigrating || isRecomputing}
+            className="bg-copper hover:bg-copper-dark text-white px-6 py-2 rounded-xl font-medium disabled:opacity-60"
+          >
+            {isRecomputing ? t('common:admin.crossContactRecompute.running') : t('common:admin.crossContactRecompute.button')}
           </button>
         </div>
         {migrationResult && (
@@ -197,6 +225,14 @@ export default function RestaurantSettings() {
               recipesUpdated: roleMigrationResult.recipesUpdated,
               ingredientsTagged: roleMigrationResult.ingredientsTagged,
               ambiguous: roleMigrationResult.ambiguousOrLowConfidence
+            })}
+          </p>
+        )}
+        {recomputeResult && (
+          <p className="mt-4 text-sm text-cocoa-700">
+            {t('common:admin.crossContactRecompute.success', {
+              recipesScanned: recomputeResult.recipesScanned,
+              recipesUpdated: recomputeResult.recipesUpdated,
             })}
           </p>
         )}
