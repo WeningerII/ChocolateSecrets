@@ -1,6 +1,6 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions/v2';
-import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue, Timestamp, Firestore } from 'firebase-admin/firestore';
 
 const RECHECK_SKIP_HOURS = 20;
 const DUE_SOON_DAYS_AHEAD = 3;
@@ -16,7 +16,11 @@ export const dailyExpenseCheck = onSchedule(
     const expectationsSnap = await db.collection('recurringExpectations')
       .where('isActive', '==', true)
       .get();
-    
+
+    // Missing-bill alerts have no owning user on the expectation or vendor, so
+    // resolve the back-office recipients (all admins) once for the whole sweep.
+    const adminUserIds = await resolveAdminUserIds(db);
+
     for (const expDoc of expectationsSnap.docs) {
       const exp = expDoc.data();
       const lastChecked = (exp.lastCheckedAt as Timestamp | undefined)?.toDate();
@@ -40,29 +44,37 @@ export const dailyExpenseCheck = onSchedule(
           .get();
         
         if (billsSnap.empty) {
-          // Missing! Write alert (idempotent via id)
-          const alertId = `${expDoc.id}_missing_${nextExpected.toISOString().slice(0, 10)}`;
-          // Determine userId from the expectation's owner. For now, expectations
-          // don't carry a userId field, so we read from the first vendor record
-          // that has this expectation's vendor — see TODO below.
-          const userId = 'system'; // TODO: resolve from vendor or restaurant context
-          
-          await db.collection('alerts').doc(alertId).set({
-            userId,
-            type: 'missing_bill',
-            severity: 'warning',
-            vendorId: exp.vendorId,
-            expectationId: expDoc.id,
-            titleKey: 'alerts:missingBill.title',
-            bodyKey: 'alerts:missingBill.body',
-            bodyParams: {
-              expectedDate: nextExpected.toISOString().slice(0, 10),
-              graceDays,
-            },
-            actionUrl: `/expenses?recurringExpectation=${expDoc.id}`,
-            dismissedAt: null,
-            createdAt: FieldValue.serverTimestamp(),
-          }, { merge: true });
+          // Missing! Recurring expectations (and vendors) carry no owning user,
+          // so this alert has no single addressee. Fan it out to the back-office:
+          // one copy per admin (mirrors firestore.rules isAdmin()). The
+          // per-recipient doc id keeps each admin's copy idempotent across daily
+          // runs and independently dismissible.
+          const dateSlug = nextExpected.toISOString().slice(0, 10);
+          if (adminUserIds.length === 0) {
+            logger.warn('Missing-bill alert has no admin recipients; skipping', {
+              expectationId: expDoc.id,
+              vendorId: exp.vendorId,
+            });
+          } else {
+            await Promise.all(adminUserIds.map((uid) =>
+              db.collection('alerts').doc(`${expDoc.id}_missing_${dateSlug}_${uid}`).set({
+                userId: uid,
+                type: 'missing_bill',
+                severity: 'warning',
+                vendorId: exp.vendorId,
+                expectationId: expDoc.id,
+                titleKey: 'alerts:missingBill.title',
+                bodyKey: 'alerts:missingBill.body',
+                bodyParams: {
+                  expectedDate: dateSlug,
+                  graceDays,
+                },
+                actionUrl: `/expenses?recurringExpectation=${expDoc.id}`,
+                dismissedAt: null,
+                createdAt: FieldValue.serverTimestamp(),
+              }, { merge: true })
+            ));
+          }
         }
       }
       
@@ -108,7 +120,30 @@ export const dailyExpenseCheck = onSchedule(
     
     logger.info('Daily expense check complete', {
       expectationsChecked: expectationsSnap.size,
+      missingBillRecipients: adminUserIds.length,
       billsDueSoon: dueSnap.size,
     });
   }
 );
+
+/**
+ * Resolves the user IDs that should receive back-office alerts (e.g. missing
+ * bills), which have no owning user on the source record.
+ *
+ * Mirrors the two admin paths in firestore.rules `isAdmin()`:
+ *   1. users/{uid}.role == 'admin'
+ *   2. the bootstrap super-admin email, so the owner stays reachable even
+ *      before any role doc is promoted. Override via the SUPER_ADMIN_EMAIL env.
+ */
+async function resolveAdminUserIds(db: Firestore): Promise<string[]> {
+  const ids = new Set<string>();
+
+  const byRole = await db.collection('users').where('role', '==', 'admin').get();
+  byRole.forEach((d) => ids.add(d.id));
+
+  const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'weningerii@gmail.com').toLowerCase();
+  const byEmail = await db.collection('users').where('email', '==', superAdminEmail).get();
+  byEmail.forEach((d) => ids.add(d.id));
+
+  return Array.from(ids);
+}

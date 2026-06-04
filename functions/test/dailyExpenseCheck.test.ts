@@ -8,7 +8,7 @@ const { getFirestoreMock, docMock, setMock, getMock, whereMock } = vi.hoisted(()
   const whereMock = vi.fn(() => ({ get: getMock, where: whereMock, limit: limitMock }));
   const docMock = vi.fn(() => ({ set: setMock, update: updateMock }));
   const collectionMock = vi.fn(() => ({ doc: docMock, where: whereMock }));
-  
+
   const getFirestoreMock = vi.fn(() => ({
     collection: collectionMock,
   }));
@@ -28,6 +28,21 @@ vi.mock('firebase-functions/v2/scheduler', () => ({
 }));
 
 import { dailyExpenseCheck } from '../src/dailyExpenseCheck';
+
+// A QuerySnapshot stand-in whose forEach yields docs with the given ids,
+// matching how resolveAdminUserIds consumes the users queries.
+function usersSnap(ids: string[]) {
+  return { forEach: (cb: (d: { id: string }) => void) => ids.forEach((id) => cb({ id })) };
+}
+
+// dailyExpenseCheck resolves admin recipients immediately after the
+// expectations query (and before any per-expectation work) via two users
+// queries: role == 'admin', then the super-admin email. Queue their results so
+// the shared getMock sequence stays aligned with the code's call order.
+function queueAdmins(roleIds: string[], emailIds: string[] = []) {
+  getMock.mockResolvedValueOnce(usersSnap(roleIds));
+  getMock.mockResolvedValueOnce(usersSnap(emailIds));
+}
 
 describe('dailyExpenseCheck', () => {
   beforeEach(() => {
@@ -49,6 +64,7 @@ describe('dailyExpenseCheck', () => {
         })
       }]
     });
+    queueAdmins(['admin1']);
     getMock.mockResolvedValueOnce({ docs: [] }); // due snap
 
     await (dailyExpenseCheck as any)();
@@ -71,6 +87,7 @@ describe('dailyExpenseCheck', () => {
         })
       }]
     });
+    queueAdmins(['admin1']);
     // The query for looking up the satisfying bill
     getMock.mockResolvedValueOnce({
       empty: true, // No bill found in window
@@ -80,17 +97,78 @@ describe('dailyExpenseCheck', () => {
 
     await (dailyExpenseCheck as any)();
 
-    expect(docMock).toHaveBeenCalledWith('exp_2_missing_2026-05-05');
+    // Alert is addressed to a real admin (not 'system') and keyed per recipient.
+    expect(docMock).toHaveBeenCalledWith('exp_2_missing_2026-05-05_admin1');
     expect(setMock).toHaveBeenCalledWith(expect.objectContaining({
       type: 'missing_bill',
-      severity: 'warning'
+      severity: 'warning',
+      userId: 'admin1',
+      expectationId: 'exp_2',
+      vendorId: 'v1',
     }), { merge: true });
-    
+
     expect(expDocRef.update).toHaveBeenCalled();
+  });
+
+  it('fans out a missing_bill alert to every admin recipient', async () => {
+    const expDocRef = { update: vi.fn() };
+    getMock.mockResolvedValueOnce({
+      docs: [{
+        id: 'exp_3',
+        ref: expDocRef,
+        data: () => ({
+          vendorId: 'v1',
+          isActive: true,
+          nextExpectedDate: { toDate: () => new Date('2026-05-05T00:00:00Z') },
+          tolerance: { graceDays: 5 }
+        })
+      }]
+    });
+    queueAdmins(['admin1', 'admin2'], ['owner']); // role admins + super-admin email
+    getMock.mockResolvedValueOnce({ empty: true, docs: [] }); // bill lookup
+    getMock.mockResolvedValueOnce({ docs: [] }); // due snap
+
+    await (dailyExpenseCheck as any)();
+
+    expect(docMock).toHaveBeenCalledWith('exp_3_missing_2026-05-05_admin1');
+    expect(docMock).toHaveBeenCalledWith('exp_3_missing_2026-05-05_admin2');
+    expect(docMock).toHaveBeenCalledWith('exp_3_missing_2026-05-05_owner');
+
+    const missingAlertUserIds = setMock.mock.calls
+      .map(([data]) => data)
+      .filter((data) => data?.type === 'missing_bill')
+      .map((data) => data.userId)
+      .sort();
+    expect(missingAlertUserIds).toEqual(['admin1', 'admin2', 'owner']);
+  });
+
+  it('skips the missing_bill alert when there are no admin recipients', async () => {
+    const expDocRef = { update: vi.fn() };
+    getMock.mockResolvedValueOnce({
+      docs: [{
+        id: 'exp_4',
+        ref: expDocRef,
+        data: () => ({
+          vendorId: 'v1',
+          isActive: true,
+          nextExpectedDate: { toDate: () => new Date('2026-05-05T00:00:00Z') },
+          tolerance: { graceDays: 5 }
+        })
+      }]
+    });
+    queueAdmins([], []); // no admins resolvable
+    getMock.mockResolvedValueOnce({ empty: true, docs: [] }); // bill lookup
+    getMock.mockResolvedValueOnce({ docs: [] }); // due snap
+
+    await (dailyExpenseCheck as any)();
+
+    expect(setMock).not.toHaveBeenCalled(); // nothing to address it to
+    expect(expDocRef.update).toHaveBeenCalled(); // still marked as checked
   });
 
   it('creates due_soon alert for urgent bills', async () => {
     getMock.mockResolvedValueOnce({ docs: [] }); // expectations
+    queueAdmins(['admin1']);
     getMock.mockResolvedValueOnce({
       docs: [{
         id: 'bill_1',
@@ -112,9 +190,10 @@ describe('dailyExpenseCheck', () => {
       userId: 'userX'
     }), { merge: true });
   });
-  
+
   it('creates due_soon alert for warning bills', async () => {
     getMock.mockResolvedValueOnce({ docs: [] }); // expectations
+    queueAdmins(['admin1']);
     getMock.mockResolvedValueOnce({
       docs: [{
         id: 'bill_2',
