@@ -13,5 +13,11 @@
     "body_expectation_band_low": "{{amount}} is below the expected band of {{low}} – {{high}}",
     "body_rolling_avg_high": "{{amount}} is above the historical range of {{low}} – {{high}}",
     "body_rolling_avg_low": "{{amount}} is below the historical range of {{low}} – {{high}}"
+  },
+  "ui": {
+    "title": "Notificaciones",
+    "empty": "Estás al día.",
+    "dismiss": "Descartar",
+    "open": "Notificaciones"
   }
 }
