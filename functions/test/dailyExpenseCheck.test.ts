@@ -183,7 +183,7 @@ describe('dailyExpenseCheck', () => {
 
     await (dailyExpenseCheck as any)();
 
-    expect(docMock).toHaveBeenCalledWith('bill_1_due_2026-05-16');
+    expect(docMock).toHaveBeenCalledWith('bill_1_due_2026-05-16_userX');
     expect(setMock).toHaveBeenCalledWith(expect.objectContaining({
       type: 'due_soon',
       severity: 'urgent', // <= 1 day
@@ -201,15 +201,46 @@ describe('dailyExpenseCheck', () => {
           vendorId: 'v2',
           dueDate: { toDate: () => new Date('2026-05-18T10:00:00Z') }, // in 3 days
           totalAmount: 100,
+          createdBy: 'userY'
         })
       }]
     });
 
     await (dailyExpenseCheck as any)();
 
+    expect(docMock).toHaveBeenCalledWith('bill_2_due_2026-05-18_userY');
     expect(setMock).toHaveBeenCalledWith(expect.objectContaining({
       type: 'due_soon',
-      severity: 'warning' // > 1 day
+      severity: 'warning', // > 1 day
+      userId: 'userY'
     }), { merge: true });
+  });
+
+  it('fans out a due_soon alert to admins when the bill has no creator', async () => {
+    getMock.mockResolvedValueOnce({ docs: [] }); // expectations
+    queueAdmins(['admin1', 'admin2'], ['owner']);
+    getMock.mockResolvedValueOnce({
+      docs: [{
+        id: 'bill_3',
+        data: () => ({
+          vendorId: 'v2',
+          dueDate: { toDate: () => new Date('2026-05-17T10:00:00Z') }, // in 2 days
+          totalAmount: 100,
+          // no createdBy -> falls back to the back-office admins
+        })
+      }]
+    });
+
+    await (dailyExpenseCheck as any)();
+
+    expect(docMock).toHaveBeenCalledWith('bill_3_due_2026-05-17_admin1');
+    expect(docMock).toHaveBeenCalledWith('bill_3_due_2026-05-17_admin2');
+    expect(docMock).toHaveBeenCalledWith('bill_3_due_2026-05-17_owner');
+    const dueUserIds = setMock.mock.calls
+      .map(([data]) => data)
+      .filter((data) => data?.type === 'due_soon')
+      .map((data) => data.userId)
+      .sort();
+    expect(dueUserIds).toEqual(['admin1', 'admin2', 'owner']);
   });
 });

@@ -97,26 +97,34 @@ export const dailyExpenseCheck = onSchedule(
       const bill = billDoc.data();
       const dueDate = (bill.dueDate as Timestamp).toDate();
       const dateSlug = dueDate.toISOString().slice(0, 10);
-      const alertId = `${billDoc.id}_due_${dateSlug}`;
-      const userId = bill.createdBy || 'system';
       const daysUntil = Math.ceil((dueDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+      // Address the reminder to the bill's creator; if it has none, reuse the
+      // back-office admins resolved above so it stays visible (alerts are
+      // read-gated by userId in firestore.rules).
+      const recipientUserIds = bill.createdBy ? [bill.createdBy] : adminUserIds;
+      if (recipientUserIds.length === 0) {
+        logger.warn('Due-soon alert has no recipients; skipping', { billId: billDoc.id });
+        continue;
+      }
       
-      await db.collection('alerts').doc(alertId).set({
-        userId,
-        type: 'due_soon',
-        severity: daysUntil <= 1 ? 'urgent' : 'warning',
-        billId: billDoc.id,
-        vendorId: bill.vendorId,
-        titleKey: 'alerts:dueSoon.title',
-        bodyKey: 'alerts:dueSoon.body',
-        bodyParams: {
-          amount: `$${(bill.amountDue ?? bill.totalAmount).toFixed(2)}`,
-          daysUntil,
-        },
-        actionUrl: `/expenses?reviewBill=${billDoc.id}`,
-        dismissedAt: null,
-        createdAt: FieldValue.serverTimestamp(),
-      }, { merge: true });
+      await Promise.all(recipientUserIds.map((uid) =>
+        db.collection('alerts').doc(`${billDoc.id}_due_${dateSlug}_${uid}`).set({
+          userId: uid,
+          type: 'due_soon',
+          severity: daysUntil <= 1 ? 'urgent' : 'warning',
+          billId: billDoc.id,
+          vendorId: bill.vendorId,
+          titleKey: 'alerts:dueSoon.title',
+          bodyKey: 'alerts:dueSoon.body',
+          bodyParams: {
+            amount: `$${(bill.amountDue ?? bill.totalAmount).toFixed(2)}`,
+            daysUntil,
+          },
+          actionUrl: `/expenses?reviewBill=${billDoc.id}`,
+          dismissedAt: null,
+          createdAt: FieldValue.serverTimestamp(),
+        }, { merge: true })
+      ));
     }
     
     logger.info('Daily expense check complete', {
