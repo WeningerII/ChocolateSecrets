@@ -1,6 +1,7 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions/v2';
-import { getFirestore, FieldValue, Timestamp, Firestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { resolveAdminUserIds } from './utils/adminRecipients';
 
 const RECHECK_SKIP_HOURS = 20;
 const DUE_SOON_DAYS_AHEAD = 3;
@@ -125,25 +126,3 @@ export const dailyExpenseCheck = onSchedule(
     });
   }
 );
-
-/**
- * Resolves the user IDs that should receive back-office alerts (e.g. missing
- * bills), which have no owning user on the source record.
- *
- * Mirrors the two admin paths in firestore.rules `isAdmin()`:
- *   1. users/{uid}.role == 'admin'
- *   2. the bootstrap super-admin email, so the owner stays reachable even
- *      before any role doc is promoted. Override via the SUPER_ADMIN_EMAIL env.
- */
-async function resolveAdminUserIds(db: Firestore): Promise<string[]> {
-  const ids = new Set<string>();
-
-  const byRole = await db.collection('users').where('role', '==', 'admin').get();
-  byRole.forEach((d) => ids.add(d.id));
-
-  const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'weningerii@gmail.com').toLowerCase();
-  const byEmail = await db.collection('users').where('email', '==', superAdminEmail).get();
-  byEmail.forEach((d) => ids.add(d.id));
-
-  return Array.from(ids);
-}

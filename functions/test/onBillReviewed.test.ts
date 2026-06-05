@@ -30,6 +30,12 @@ vi.mock('firebase-functions/v2/firestore', () => ({
 
 import { onBillReviewed } from '../src/onBillReviewed';
 
+// A QuerySnapshot stand-in whose forEach yields docs with the given ids,
+// matching how resolveAdminUserIds consumes the users queries.
+function usersSnap(ids: string[]) {
+  return { forEach: (cb: (d: { id: string }) => void) => ids.forEach((id) => cb({ id })) };
+}
+
 describe('onBillReviewed', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,7 +45,7 @@ describe('onBillReviewed', () => {
     params: { billId: 'bill_123' },
     data: {
       before: { data: () => (beforeStatus ? { status: beforeStatus } : undefined) },
-      after: { data: () => ({ status: afterStatus, vendorId: 'v_1', billDate: { toDate: () => new Date('2026-05-15T10:00:00Z') }, totalAmount: 400.0, ...afterData }) }
+      after: { data: () => ({ status: afterStatus, vendorId: 'v_1', billDate: { toDate: () => new Date('2026-05-15T10:00:00Z') }, totalAmount: 400.0, createdBy: 'creatorX', ...afterData }) }
     }
   });
 
@@ -91,7 +97,7 @@ describe('onBillReviewed', () => {
     // Anomaly logic
     // Expected 400, high 50 -> max 450. Bill is 500 -> Anomaly High
     expect(setMock).toHaveBeenCalledWith({
-      userId: 'system',
+      userId: 'creatorX',
       type: 'anomaly_amount',
       severity: 'warning',
       vendorId: 'v_1',
@@ -108,7 +114,7 @@ describe('onBillReviewed', () => {
       createdAt: expect.anything()
     }, { merge: true });
     
-    expect(docMock).toHaveBeenCalledWith('bill_123_anomaly');
+    expect(docMock).toHaveBeenCalledWith('bill_123_anomaly_creatorX');
   });
 
   it('does not re-advance an expectation already satisfied by this bill (idempotent retry)', async () => {
@@ -157,6 +163,32 @@ describe('onBillReviewed', () => {
       severity: 'warning',
       bodyKey: 'alerts:anomaly.body_rolling_avg_high'
     }), { merge: true });
+  });
+
+  it('fans out the anomaly alert to admins when the bill has no creator', async () => {
+    getMock.mockResolvedValueOnce({ docs: [] }); // expectations (none -> rolling path)
+    getMock.mockResolvedValueOnce({ // rolling-average history (mean 100, stddev 0)
+      docs: [
+        { id: 'b1', data: () => ({ totalAmount: 100 }) },
+        { id: 'b2', data: () => ({ totalAmount: 100 }) },
+        { id: 'b3', data: () => ({ totalAmount: 100 }) },
+      ]
+    });
+    getMock.mockResolvedValueOnce(usersSnap(['admin1', 'admin2'])); // role admins
+    getMock.mockResolvedValueOnce(usersSnap([])); // super-admin email (none)
+
+    // Bill carries no createdBy -> recipients fall back to the back-office admins.
+    const event = createEvent('extracted', 'reviewed', { totalAmount: 500, createdBy: undefined });
+    await (onBillReviewed as any)(event);
+
+    expect(docMock).toHaveBeenCalledWith('bill_123_anomaly_admin1');
+    expect(docMock).toHaveBeenCalledWith('bill_123_anomaly_admin2');
+    const anomalyUserIds = setMock.mock.calls
+      .map(([data]) => data)
+      .filter((data) => data?.type === 'anomaly_amount')
+      .map((data) => data.userId)
+      .sort();
+    expect(anomalyUserIds).toEqual(['admin1', 'admin2']);
   });
 
   it('ignores anomaly if <3 prior bills', async () => {
