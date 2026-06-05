@@ -118,7 +118,7 @@ export const dailyExpenseCheck = onSchedule(
           bodyKey: 'alerts:dueSoon.body',
           bodyParams: {
             amount: `$${(bill.amountDue ?? bill.totalAmount).toFixed(2)}`,
-            daysUntil,
+            count: daysUntil,
           },
           actionUrl: `/expenses?reviewBill=${billDoc.id}`,
           dismissedAt: null,

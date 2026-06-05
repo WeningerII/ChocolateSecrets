@@ -5,7 +5,8 @@
   },
   "dueSoon": {
     "title": "Bill due soon",
-    "body": "{{amount}} due in {{daysUntil}} days"
+    "body_one": "{{amount}} due in {{count}} day",
+    "body_other": "{{amount}} due in {{count}} days"
   },
   "anomaly": {
     "title": "Bill amount anomaly",
