@@ -17,7 +17,7 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
-import { resolveRecipeLeaves } from '../utils/resolveRecipeLeaves';
+import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 export interface PhysicsWarning {
   kind:
@@ -26,8 +26,10 @@ export interface PhysicsWarning {
     | 'no_water'
     | 'extreme_saturation'
     | 'declared_diverges'
-    | 'bread_no_flour';
+    | 'bread_no_flour'
+    | 'missing_density';
   ingredientCount?: number;
+  ingredientNames?: string[];
   pH?: number;
   aqueousSugarPct?: number;
   declaredDays?: number;
@@ -58,10 +60,19 @@ function deriveWarnings(
   recipeCategories: string[],
   resolvedIngredientsLength: number,
   breadEval: BreadEvaluation | null,
+  unmassableLeaves: UnmassableLeaf[],
   declaredShelfLifeDays?: number
 ): PhysicsWarning[] {
   const warnings: PhysicsWarning[] = [];
   if (fallbackCount >= 3) warnings.push({ kind: 'composition_incomplete', ingredientCount: fallbackCount });
+  // Volume-measured ingredients with no density were dropped from the gram basis,
+  // so Aw/shelf-life silently omit them. Flag them (deduped by ingredient); discrete
+  // "each"/"piece" leaves are excluded by design and intentionally not warned about.
+  const missingDensity = unmassableLeaves.filter(l => l.reason === 'missing_density');
+  if (missingDensity.length > 0) {
+    const ingredientNames = [...new Set(missingDensity.map(l => l.name))];
+    warnings.push({ kind: 'missing_density', ingredientCount: ingredientNames.length, ingredientNames });
+  }
   if (aw.flags.find(f => f.kind === 'no_water')) warnings.push({ kind: 'no_water' });
   const sat = aw.flags.find(f => f.kind === 'extreme_saturation');
   if (sat && sat.kind === 'extreme_saturation') warnings.push({ kind: 'extreme_saturation', aqueousSugarPct: sat.aqueousSugarPct });
@@ -85,7 +96,7 @@ export function useRecipePhysics(
 
     const ingredientMap = new Map(ingredients.map(i => [i.id, i]));
 
-    const { resolved: resolvedIngredients, fallbackCount } = resolveRecipeLeaves(
+    const { resolved: resolvedIngredients, fallbackCount, unmassableLeaves } = resolveRecipeLeaves(
       recipe,
       ingredients,
       allRecipes,
@@ -135,7 +146,7 @@ export function useRecipePhysics(
       });
     }
 
-    const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, recipe.haccp?.shelfLifeDays);
+    const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
     // from the resolved leaf vector (buffers, hardware yield, sub-recipe expansion

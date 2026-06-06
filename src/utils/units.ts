@@ -80,3 +80,19 @@ export function convertUnit(amount: number, fromUnit: string, toUnit: string, de
 
   return null; // Incompatible or unknown units
 }
+
+export type UnitKind = 'mass' | 'volume' | 'count';
+
+/**
+ * Classify a unit by physical dimension. 'mass' (g, kg, …) and 'volume' (ml, cup,
+ * …) map to the conversion tables above; everything else — discrete counts like
+ * "each"/"piece", or unrecognized units — is 'count', which has no intrinsic gram
+ * value without a per-item weight. Single source of truth for "what kind of unit
+ * is this", so callers don't re-encode the taxonomy.
+ */
+export function unitKind(unit: string): UnitKind {
+  const u = normalizeUnit(unit);
+  if (weightToG[u]) return 'mass';
+  if (volumeToMl[u]) return 'volume';
+  return 'count';
+}

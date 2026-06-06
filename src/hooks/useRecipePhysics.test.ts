@@ -333,4 +333,30 @@ describe('useRecipePhysics — production-aware physics (buffers / molds / volum
     expect(pSub.totalMass).toBeCloseTo(pFlat.totalMass, 4); // both 159 g
     expect(pSub.aw.aw!).toBeCloseTo(pFlat.aw.aw!, 6);
   });
+
+  test('density-less volume ingredient is flagged (missing_density), not silently dropped', () => {
+    const GLUCOSE_NO_DENSITY = { ...GLUCOSE_SYRUP, density: undefined } as Ingredient;
+    const comp = (rows: any[]) => ({ id: 'm', name: 'M', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 0, ingredients: rows });
+    const recipe: Recipe = { id: 'no-dens', name: 'No density', components: [comp([
+      { ingredientId: 'glucose', quantity: 50, unit: 'ml' }, // volume row, ingredient has no density
+      { ingredientId: 'dark-70', quantity: 100, unit: 'g' },
+    ])] } as Recipe;
+    const p = phys(recipe, [GLUCOSE_NO_DENSITY, DARK_70], [recipe]);
+    const w = p.warnings.find(w => w.kind === 'missing_density');
+    expect(w).toBeDefined();
+    expect(w!.ingredientNames).toContain('Glucose Syrup DE60');
+    // The dropped volume leaf must not appear in the resolved gram basis.
+    expect(p.resolvedIngredients.find(r => r.ingredientId === 'glucose')).toBeUndefined();
+  });
+
+  test('discrete-count garnish does not raise a missing_density warning', () => {
+    const GOLD_LEAF = { id: 'gold', name: 'Gold Leaf', stock: 0, lowStockThreshold: 0, unit: 'each', category: 'Decorations' } as Ingredient;
+    const comp = (rows: any[]) => ({ id: 'm', name: 'M', type: 'base', percentageOfTotalWeight: 100, bufferPercentage: 0, ingredients: rows });
+    const recipe: Recipe = { id: 'garnish', name: 'Garnish', components: [comp([
+      { ingredientId: 'dark-70', quantity: 100, unit: 'g' },
+      { ingredientId: 'gold', quantity: 2, unit: 'each' },
+    ])] } as Recipe;
+    const p = phys(recipe, [DARK_70, GOLD_LEAF], [recipe]);
+    expect(p.warnings.find(w => w.kind === 'missing_density')).toBeUndefined();
+  });
 });

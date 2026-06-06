@@ -34,7 +34,8 @@
     "composition_incomplete": "{{count}} ingredientes usan la composición predeterminada de categoría. Los números a continuación son aproximados — ingrese composiciones explícitas para predicciones precisas.",
     "no_water": "Sin presencia de agua. El cálculo de actividad de agua no aplica.",
     "extreme_saturation": "La saturación de azúcar acuosa del {{aqueousSugarPct}}% está en el límite del rango confiable del modelo Norrish. Considere el Aw como límite inferior.",
-    "declared_diverges": "Vida útil declarada ({{declaredDays}} días) y estimada ({{predictedWeeks}} semanas) difieren en más de una banda. Verifique el valor o refine la receta."
+    "declared_diverges": "Vida útil declarada ({{declaredDays}} días) y estimada ({{predictedWeeks}} semanas) difieren en más de una banda. Verifique el valor o refine la receta.",
+    "missing_density": "{{count}} ingrediente(s) medido(s) por volumen ({{names}}) no tienen densidad definida, por lo que se excluyen de la actividad de agua y la vida útil. Agregue una densidad para incluirlos."
   },
   "shelfLife": {
     "label": "Vida útil predeterminada",
