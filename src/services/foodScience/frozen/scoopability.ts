@@ -1,5 +1,4 @@
 import type { ScoopabilityLevel } from './types';
-
 /**
  * Hardening-factor heuristic. Operational rule from artisan gelato literature
  * (Frisinghelli et al. 2010; Liébana 2018). Combines total solids, fat, and
@@ -37,5 +36,25 @@ export function classifyScoopability(pac: number, hardeningFactor: number): Scoo
   if (idx < -2)  return 'firm';
   if (idx < 5)   return 'standard';
   if (idx < 12)  return 'soft';
+  return 'too_soft';
+}
+
+/**
+ * Physics-based scoopability from ice-phase volume. Eating hardness tracks the
+ * fraction of water frozen at serving temperature (computeFreezing); this maps
+ * that fraction onto the same brick/firm/standard/soft/too_soft scale against a
+ * per-subtype target band (TARGET_FROZEN_WATER_PCT_BY_SUBTYPE). Runs in parallel
+ * to the hardening-factor heuristic; the target bands are provisional and should
+ * be calibrated against known-good recipes before the heuristic is retired.
+ */
+export function classifyFrozenWaterScoopability(
+  frozenWaterPct: number,
+  target: [number, number]
+): ScoopabilityLevel {
+  const [lo, hi] = target;
+  if (frozenWaterPct > hi + 10) return 'brick';
+  if (frozenWaterPct > hi)      return 'firm';
+  if (frozenWaterPct >= lo)     return 'standard';
+  if (frozenWaterPct >= lo - 10) return 'soft';
   return 'too_soft';
 }

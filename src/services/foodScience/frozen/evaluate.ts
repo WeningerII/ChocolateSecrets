@@ -1,12 +1,13 @@
 import type { Recipe, Ingredient, FrozenRecipeSubtype, FrozenSubtype } from '../../../types';
 import type { ResolvedIngredient, AwResult } from '../universal';
+import { computeFreezing } from '../universal';
 import type { FrozenEvaluation, FrozenComposition } from './types';
 import { calculatePAC, calculatePOD, calculateTotalSugarsPct } from './pac';
 import { calculateMSNF, calculateLactosePct, calculateTotalSolidsPct } from './msnf';
-import { calculateHardeningFactor, classifyScoopability } from './scoopability';
+import { calculateHardeningFactor, classifyScoopability, classifyFrozenWaterScoopability } from './scoopability';
 import { inferFrozenIngredientSubtype } from './subtypes';
 import { deriveFrozenWarnings } from './warnings';
-import { FROZEN_BANDS_BY_SUBTYPE } from './constants';
+import { FROZEN_BANDS_BY_SUBTYPE, TARGET_FROZEN_WATER_PCT_BY_SUBTYPE } from './constants';
 
 interface EvalInput {
   recipe: Recipe;
@@ -82,6 +83,23 @@ export function evaluateFrozen(input: EvalInput): FrozenEvaluation {
     ts: totalSolidsPct,
   });
 
+  const band = FROZEN_BANDS_BY_SUBTYPE[subtype];
+
+  // Freezing curve / ice fraction — the texture-causal coordinate. Reuses the
+  // aqueous masses the Norrish kernel already produced (aw.massBy); null-safe so
+  // callers that don't supply massBy simply get null freezing fields.
+  const freezing = input.aw.massBy ? computeFreezing(input.aw.massBy) : null;
+  const servingTempC = (band.servingTempCRange[0] + band.servingTempCRange[1]) / 2;
+  const initialFreezingPointC = freezing?.initialFreezingPointC ?? null;
+  const frozenWaterPctAtServing =
+    freezing && freezing.initialFreezingPointC !== null
+      ? freezing.frozenFractionAt(servingTempC) * 100
+      : null;
+  const frozenWaterScoopability =
+    frozenWaterPctAtServing !== null
+      ? classifyFrozenWaterScoopability(frozenWaterPctAtServing, TARGET_FROZEN_WATER_PCT_BY_SUBTYPE[subtype])
+      : null;
+
   const hardeningFactor = calculateHardeningFactor(totalSolidsPct, fatPct, msnfPct, pac);
   const scoopability = classifyScoopability(pac, hardeningFactor);
 
@@ -114,7 +132,10 @@ export function evaluateFrozen(input: EvalInput): FrozenEvaluation {
       recipeSubtype: subtype,
       recipeSubtypeProvenance: provenance,
       ingredientSubtypes,
-      band: FROZEN_BANDS_BY_SUBTYPE[subtype],
+      band,
+      initialFreezingPointC,
+      frozenWaterPctAtServing,
+      frozenWaterScoopability,
     },
     warnings,
   };

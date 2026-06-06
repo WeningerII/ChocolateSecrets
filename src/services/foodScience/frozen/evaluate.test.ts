@@ -143,4 +143,37 @@ describe('frozen evaluate end-to-end', () => {
     expect(res.derived.recipeSubtype).toBe('gelato');
     expect(res.derived.recipeSubtypeProvenance).toBe('declared');
   });
+
+  test('freezing curve surfaced when massBy is present', () => {
+    const rec: any = { name: 'Vanilla Gelato', categories: ['frozen'], frozenSubtype: 'gelato' };
+    const res = evaluateFrozen({
+      recipe: rec as Recipe,
+      aw: {
+        waterPct: 62, fatPct: 8,
+        massBy: { water: 620, sucrose: 180, glucose: 27, lactose: 30 },
+      } as unknown as AwResult,
+      resolved: [],
+      ingredientCatalog: catalog,
+    });
+    const d = res.derived;
+    expect(d.initialFreezingPointC).not.toBeNull();
+    expect(d.initialFreezingPointC!).toBeLessThan(0);          // serum depresses below 0 °C
+    expect(d.frozenWaterPctAtServing).not.toBeNull();
+    expect(d.frozenWaterPctAtServing!).toBeGreaterThan(0);
+    expect(d.frozenWaterPctAtServing!).toBeLessThanOrEqual(100);
+    expect(['brick', 'firm', 'standard', 'soft', 'too_soft']).toContain(d.frozenWaterScoopability);
+  });
+
+  test('freezing fields are null when massBy is absent (back-compat)', () => {
+    const rec: any = { name: 'x', categories: ['frozen'], frozenSubtype: 'gelato' };
+    const res = evaluateFrozen({
+      recipe: rec as Recipe,
+      aw: { waterPct: 50, fatPct: 10 } as AwResult,
+      resolved: [],
+      ingredientCatalog: catalog,
+    });
+    expect(res.derived.initialFreezingPointC).toBeNull();
+    expect(res.derived.frozenWaterPctAtServing).toBeNull();
+    expect(res.derived.frozenWaterScoopability).toBeNull();
+  });
 });
