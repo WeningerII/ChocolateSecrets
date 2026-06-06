@@ -49,6 +49,10 @@ export interface FrozenDerived {
   frozenWaterPctAtServing: number | null;
   /** Scoopability derived from ice-phase volume (physics), parallel to `scoopability`. */
   frozenWaterScoopability: ScoopabilityLevel | null;
+  /** Glass-transition temp of the freeze-concentrated serum, °C (estimate). null when no aqueous data. */
+  tgPrimeC: number | null;
+  /** Serving temp − Tg′ (°C). Larger = more mobility = faster recrystallization in storage. */
+  recrystallizationMarginC: number | null;
 }
 
 export type FrozenWarning =

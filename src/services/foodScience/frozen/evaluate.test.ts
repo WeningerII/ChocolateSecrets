@@ -162,6 +162,9 @@ describe('frozen evaluate end-to-end', () => {
     expect(d.frozenWaterPctAtServing!).toBeGreaterThan(0);
     expect(d.frozenWaterPctAtServing!).toBeLessThanOrEqual(100);
     expect(['brick', 'firm', 'standard', 'soft', 'too_soft']).toContain(d.frozenWaterScoopability);
+    expect(d.tgPrimeC).not.toBeNull();
+    expect(d.tgPrimeC!).toBeLessThan(0);
+    expect(d.recrystallizationMarginC).not.toBeNull();
   });
 
   test('freezing fields are null when massBy is absent (back-compat)', () => {
@@ -175,5 +178,7 @@ describe('frozen evaluate end-to-end', () => {
     expect(res.derived.initialFreezingPointC).toBeNull();
     expect(res.derived.frozenWaterPctAtServing).toBeNull();
     expect(res.derived.frozenWaterScoopability).toBeNull();
+    expect(res.derived.tgPrimeC).toBeNull();
+    expect(res.derived.recrystallizationMarginC).toBeNull();
   });
 });

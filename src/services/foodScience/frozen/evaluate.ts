@@ -1,6 +1,6 @@
 import type { Recipe, Ingredient, FrozenRecipeSubtype, FrozenSubtype } from '../../../types';
 import type { ResolvedIngredient, AwResult } from '../universal';
-import { computeFreezing } from '../universal';
+import { computeFreezing, estimateTgPrime } from '../universal';
 import type { FrozenEvaluation, FrozenComposition } from './types';
 import { calculatePAC, calculatePOD, calculateTotalSugarsPct } from './pac';
 import { calculateMSNF, calculateLactosePct, calculateTotalSolidsPct } from './msnf';
@@ -100,6 +100,12 @@ export function evaluateFrozen(input: EvalInput): FrozenEvaluation {
       ? classifyFrozenWaterScoopability(frozenWaterPctAtServing, TARGET_FROZEN_WATER_PCT_BY_SUBTYPE[subtype])
       : null;
 
+  // Glass transition of the freeze-concentrated serum — the storage-stability
+  // coordinate. recrystallization margin = how far above Tg′ the product is served.
+  const tgPrime = input.aw.massBy ? estimateTgPrime(input.aw.massBy) : null;
+  const tgPrimeC = tgPrime?.tgPrimeC ?? null;
+  const recrystallizationMarginC = tgPrimeC !== null ? servingTempC - tgPrimeC : null;
+
   const hardeningFactor = calculateHardeningFactor(totalSolidsPct, fatPct, msnfPct, pac);
   const scoopability = classifyScoopability(pac, hardeningFactor);
 
@@ -136,6 +142,8 @@ export function evaluateFrozen(input: EvalInput): FrozenEvaluation {
       initialFreezingPointC,
       frozenWaterPctAtServing,
       frozenWaterScoopability,
+      tgPrimeC,
+      recrystallizationMarginC,
     },
     warnings,
   };
