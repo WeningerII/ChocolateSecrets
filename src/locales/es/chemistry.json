@@ -264,7 +264,9 @@
       "header": "Objetivos",
       "awTarget": "Aw objetivo",
       "shelfLifeWeeksMin": "Vida útil (semanas, mínimo)",
-      "costPerGramMaxUsd": "Costo por gramo (USD, máx)"
+      "costPerGramMaxUsd": "Costo por gramo (USD, máx)",
+      "servingTempC": "Temp. de servicio (°C)",
+      "frozenWaterTarget": "Fracción congelada objetivo"
     },
     "weights": {
       "header": "Pesos de los objetivos"
@@ -277,7 +279,9 @@
       "curdle_safety_margin": "Margen anti-cortado",
       "fat_regime_distance": "Régimen graso",
       "warning_count": "Advertencias",
-      "composition_completeness": "Datos de composición"
+      "composition_completeness": "Datos de composición",
+      "ice_fraction_at_serving_distance": "Fracción de hielo al servir",
+      "recrystallization_margin": "Estabilidad en almacenamiento"
     },
     "searchSpace": {
       "title": "Espacio de búsqueda",
