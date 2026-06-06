@@ -26,6 +26,7 @@ const ctx: DslContext = {
       curdle: { level: 'high', reasons: [{ kind: 'ph_low', pH: 3.75 }], recommendedFoldTempCeilingC: 30 },
       polymorph: { chocolateClass: 'dark', cocoaPercentage: 70, tempWindowC: [31.0, 32.5], workingPointC: 31.75 },
       ethanol: { abv: null, retentionApplied: 0.9, postRetentionMassPct: 0, inLongShelfBand: false },
+      snap: null,
     },
     warnings: [],
   },
