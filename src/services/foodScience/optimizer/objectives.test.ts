@@ -56,6 +56,32 @@ describe('objectives', () => {
     expect(resOil.fat_regime_distance).toBe(0.0);
   });
 
+  test('ice_fraction_at_serving_distance: high when φ(servingT) hits target, neutral when unset', () => {
+    // massBy → Tf0 ≈ -2.29 °C, φ(-11) ≈ 0.79
+    const ctx: any = {
+      ...dummyCtx,
+      aw: { aw: 0.85, massBy: { water: 620, sucrose: 180, glucose: 27, lactose: 30 } },
+    };
+    const onTarget = evaluateObjectives(ctx, { servingTempC: -11, frozenWaterTarget: 0.79 });
+    expect(onTarget.ice_fraction_at_serving_distance).toBeGreaterThan(0.9);
+
+    // No massBy / no targets → neutral 1.0 (objective inactive)
+    expect(evaluateObjectives(dummyCtx, {}).ice_fraction_at_serving_distance).toBe(1.0);
+  });
+
+  test('recrystallization_margin: smaller serving-to-Tg′ gap scores higher', () => {
+    const ctx: any = { ...dummyCtx, aw: { aw: 0.85, massBy: { water: 620, sucrose: 200 } } }; // Tg′ = -32
+    const cold = evaluateObjectives(ctx, { servingTempC: -30 }); // margin 2 °C → near the glass
+    const warm = evaluateObjectives(ctx, { servingTempC: -8 });  // margin 24 °C → far above
+    expect(cold.recrystallization_margin).toBeGreaterThan(warm.recrystallization_margin);
+  });
+
+  test('new texture objectives collapse to 0.05 on hard-constraint violation', () => {
+    const res = evaluateObjectives({ ...dummyCtx, hardConstraintViolated: true }, {});
+    expect(res.ice_fraction_at_serving_distance).toBe(0.05);
+    expect(res.recrystallization_margin).toBe(0.05);
+  });
+
   test('detectHardConstraintViolation trips on various conditions', () => {
     expect(detectHardConstraintViolation({ aw: 0.90 } as any, { key: 'firm-set' } as any, null, { awMaxThreshold: 0.85 })).toBe(true); // 0.90 > 0.85 + 0.02
     expect(detectHardConstraintViolation({ aw: 0.86 } as any, { key: 'firm-set' } as any, null, { awMaxThreshold: 0.85 })).toBe(false); // allowed 0.02 tolerance
