@@ -1,6 +1,7 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions/v2';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { resolveAdminUserIds } from './utils/adminRecipients';
 
 const RECHECK_SKIP_HOURS = 20;
 const DUE_SOON_DAYS_AHEAD = 3;
@@ -16,7 +17,11 @@ export const dailyExpenseCheck = onSchedule(
     const expectationsSnap = await db.collection('recurringExpectations')
       .where('isActive', '==', true)
       .get();
-    
+
+    // Missing-bill alerts have no owning user on the expectation or vendor, so
+    // resolve the back-office recipients (all admins) once for the whole sweep.
+    const adminUserIds = await resolveAdminUserIds(db);
+
     for (const expDoc of expectationsSnap.docs) {
       const exp = expDoc.data();
       const lastChecked = (exp.lastCheckedAt as Timestamp | undefined)?.toDate();
@@ -40,29 +45,37 @@ export const dailyExpenseCheck = onSchedule(
           .get();
         
         if (billsSnap.empty) {
-          // Missing! Write alert (idempotent via id)
-          const alertId = `${expDoc.id}_missing_${nextExpected.toISOString().slice(0, 10)}`;
-          // Determine userId from the expectation's owner. For now, expectations
-          // don't carry a userId field, so we read from the first vendor record
-          // that has this expectation's vendor — see TODO below.
-          const userId = 'system'; // TODO: resolve from vendor or restaurant context
-          
-          await db.collection('alerts').doc(alertId).set({
-            userId,
-            type: 'missing_bill',
-            severity: 'warning',
-            vendorId: exp.vendorId,
-            expectationId: expDoc.id,
-            titleKey: 'alerts:missingBill.title',
-            bodyKey: 'alerts:missingBill.body',
-            bodyParams: {
-              expectedDate: nextExpected.toISOString().slice(0, 10),
-              graceDays,
-            },
-            actionUrl: `/expenses?recurringExpectation=${expDoc.id}`,
-            dismissedAt: null,
-            createdAt: FieldValue.serverTimestamp(),
-          }, { merge: true });
+          // Missing! Recurring expectations (and vendors) carry no owning user,
+          // so this alert has no single addressee. Fan it out to the back-office:
+          // one copy per admin (mirrors firestore.rules isAdmin()). The
+          // per-recipient doc id keeps each admin's copy idempotent across daily
+          // runs and independently dismissible.
+          const dateSlug = nextExpected.toISOString().slice(0, 10);
+          if (adminUserIds.length === 0) {
+            logger.warn('Missing-bill alert has no admin recipients; skipping', {
+              expectationId: expDoc.id,
+              vendorId: exp.vendorId,
+            });
+          } else {
+            await Promise.all(adminUserIds.map((uid) =>
+              db.collection('alerts').doc(`${expDoc.id}_missing_${dateSlug}_${uid}`).set({
+                userId: uid,
+                type: 'missing_bill',
+                severity: 'warning',
+                vendorId: exp.vendorId,
+                expectationId: expDoc.id,
+                titleKey: 'alerts:missingBill.title',
+                bodyKey: 'alerts:missingBill.body',
+                bodyParams: {
+                  expectedDate: dateSlug,
+                  graceDays,
+                },
+                actionUrl: `/expenses?recurringExpectation=${expDoc.id}`,
+                dismissedAt: null,
+                createdAt: FieldValue.serverTimestamp(),
+              }, { merge: true })
+            ));
+          }
         }
       }
       
@@ -84,30 +97,39 @@ export const dailyExpenseCheck = onSchedule(
       const bill = billDoc.data();
       const dueDate = (bill.dueDate as Timestamp).toDate();
       const dateSlug = dueDate.toISOString().slice(0, 10);
-      const alertId = `${billDoc.id}_due_${dateSlug}`;
-      const userId = bill.createdBy || 'system';
       const daysUntil = Math.ceil((dueDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+      // Address the reminder to the bill's creator; if it has none, reuse the
+      // back-office admins resolved above so it stays visible (alerts are
+      // read-gated by userId in firestore.rules).
+      const recipientUserIds = bill.createdBy ? [bill.createdBy] : adminUserIds;
+      if (recipientUserIds.length === 0) {
+        logger.warn('Due-soon alert has no recipients; skipping', { billId: billDoc.id });
+        continue;
+      }
       
-      await db.collection('alerts').doc(alertId).set({
-        userId,
-        type: 'due_soon',
-        severity: daysUntil <= 1 ? 'urgent' : 'warning',
-        billId: billDoc.id,
-        vendorId: bill.vendorId,
-        titleKey: 'alerts:dueSoon.title',
-        bodyKey: 'alerts:dueSoon.body',
-        bodyParams: {
-          amount: `$${(bill.amountDue ?? bill.totalAmount).toFixed(2)}`,
-          daysUntil,
-        },
-        actionUrl: `/expenses?reviewBill=${billDoc.id}`,
-        dismissedAt: null,
-        createdAt: FieldValue.serverTimestamp(),
-      }, { merge: true });
+      await Promise.all(recipientUserIds.map((uid) =>
+        db.collection('alerts').doc(`${billDoc.id}_due_${dateSlug}_${uid}`).set({
+          userId: uid,
+          type: 'due_soon',
+          severity: daysUntil <= 1 ? 'urgent' : 'warning',
+          billId: billDoc.id,
+          vendorId: bill.vendorId,
+          titleKey: 'alerts:dueSoon.title',
+          bodyKey: 'alerts:dueSoon.body',
+          bodyParams: {
+            amount: `$${(bill.amountDue ?? bill.totalAmount).toFixed(2)}`,
+            count: daysUntil,
+          },
+          actionUrl: `/expenses?reviewBill=${billDoc.id}`,
+          dismissedAt: null,
+          createdAt: FieldValue.serverTimestamp(),
+        }, { merge: true })
+      ));
     }
     
     logger.info('Daily expense check complete', {
       expectationsChecked: expectationsSnap.size,
+      missingBillRecipients: adminUserIds.length,
       billsDueSoon: dueSnap.size,
     });
   }

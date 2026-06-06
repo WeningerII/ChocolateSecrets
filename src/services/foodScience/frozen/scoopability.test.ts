@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { calculateHardeningFactor, classifyScoopability } from './scoopability';
+import { calculateHardeningFactor, classifyScoopability, classifyFrozenWaterScoopability } from './scoopability';
 
 describe('frozen scoopability', () => {
   test('standard gelato anchor', () => {
@@ -39,5 +39,25 @@ describe('frozen scoopability', () => {
 
     // > 12 -> too_soft
     expect(classifyScoopability(20, 10)).toBe('too_soft'); // 20 - 6.0 = 14
+  });
+});
+
+describe('frozen-water scoopability (physics-based)', () => {
+  const ICE_CREAM: [number, number] = [70, 80]; // target % water frozen at serving
+
+  test('within the target band → standard', () => {
+    expect(classifyFrozenWaterScoopability(75, ICE_CREAM)).toBe('standard');
+    expect(classifyFrozenWaterScoopability(70, ICE_CREAM)).toBe('standard');
+    expect(classifyFrozenWaterScoopability(80, ICE_CREAM)).toBe('standard');
+  });
+
+  test('above band → firm, well above → brick', () => {
+    expect(classifyFrozenWaterScoopability(84, ICE_CREAM)).toBe('firm');
+    expect(classifyFrozenWaterScoopability(92, ICE_CREAM)).toBe('brick');
+  });
+
+  test('below band → soft, well below → too_soft', () => {
+    expect(classifyFrozenWaterScoopability(65, ICE_CREAM)).toBe('soft');
+    expect(classifyFrozenWaterScoopability(55, ICE_CREAM)).toBe('too_soft');
   });
 });

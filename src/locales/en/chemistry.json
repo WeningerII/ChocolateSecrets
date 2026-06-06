@@ -264,7 +264,9 @@
       "header": "Targets",
       "awTarget": "Aw target",
       "shelfLifeWeeksMin": "Shelf life (weeks, min)",
-      "costPerGramMaxUsd": "Cost per gram (USD, max)"
+      "costPerGramMaxUsd": "Cost per gram (USD, max)",
+      "servingTempC": "Serving temp (°C)",
+      "frozenWaterTarget": "Target frozen fraction"
     },
     "weights": {
       "header": "Objective weights"
@@ -277,7 +279,9 @@
       "curdle_safety_margin": "Curdle safety",
       "fat_regime_distance": "Fat regime",
       "warning_count": "Warnings",
-      "composition_completeness": "Composition data"
+      "composition_completeness": "Composition data",
+      "ice_fraction_at_serving_distance": "Ice fraction at serving",
+      "recrystallization_margin": "Storage stability"
     },
     "searchSpace": {
       "title": "Search Space",

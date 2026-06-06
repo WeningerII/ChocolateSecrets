@@ -43,6 +43,16 @@ export interface FrozenDerived {
   ingredientSubtypes: Record<string, FrozenSubtype | null>;
   /** The band table row that applies to this recipe. */
   band: FrozenBand;
+  /** Initial freezing point of the serum, °C (≤ 0). null when no aqueous data. */
+  initialFreezingPointC: number | null;
+  /** Equilibrium % of water frozen at the subtype's serving temperature (ideal colligative). */
+  frozenWaterPctAtServing: number | null;
+  /** Scoopability derived from ice-phase volume (physics), parallel to `scoopability`. */
+  frozenWaterScoopability: ScoopabilityLevel | null;
+  /** Glass-transition temp of the freeze-concentrated serum, °C (estimate). null when no aqueous data. */
+  tgPrimeC: number | null;
+  /** Serving temp − Tg′ (°C). Larger = more mobility = faster recrystallization in storage. */
+  recrystallizationMarginC: number | null;
 }
 
 export type FrozenWarning =

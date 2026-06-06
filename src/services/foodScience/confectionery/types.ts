@@ -25,6 +25,16 @@ export interface PolymorphWindow {
   workingPointC: number;
 }
 
+export type ChocolateSnapClass = 'hard_snap' | 'firm' | 'soft';
+
+export interface ChocolateSnap {
+  chocolateClass: ChocolateClass;
+  /** % solid fat at the reference eating temperature. */
+  sfcAtEatingTempPct: number;
+  eatingTempC: number;
+  snapClass: ChocolateSnapClass;
+}
+
 export interface EthanolAssessment {
   abv: number | null;
   retentionApplied: number;        // 0.90 hardcoded constant for now
@@ -39,6 +49,8 @@ export interface ConfectioneryDerived {
   curdle: CurdleAssessment;
   polymorph: PolymorphWindow | null;
   ethanol: EthanolAssessment;
+  /** Estimated chocolate snap from solid fat content at eating temperature. */
+  snap: ChocolateSnap | null;
 }
 
 export type ConfectioneryWarning =

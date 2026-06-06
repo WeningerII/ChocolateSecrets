@@ -8,7 +8,7 @@ import type { Ingredient } from '../../../types';
 import type { ConfectioneryEvaluation } from './types';
 import { inferConfectionerySubtype } from './subtypes';
 import { assessCurdleRisk } from './curdle';
-import { computePolymorphWindow, detectMixedChocolateClasses } from './polymorph';
+import { computePolymorphWindow, detectMixedChocolateClasses, computeChocolateSnap } from './polymorph';
 import { assessEthanol } from './ethanol';
 import { deriveConfectioneryWarnings } from './warnings';
 
@@ -36,6 +36,7 @@ export function evaluateConfectionery(input: EvalInput): ConfectioneryEvaluation
   const polymorph = computePolymorphWindow(input.resolved);
   const mixedChocolateClasses = detectMixedChocolateClasses(input.resolved);
   const ethanol = assessEthanol(input.resolved);
+  const snap = computeChocolateSnap(input.resolved);
 
   const warnings = deriveConfectioneryWarnings({
     aw: input.aw,
@@ -48,7 +49,7 @@ export function evaluateConfectionery(input: EvalInput): ConfectioneryEvaluation
   });
 
   return {
-    derived: { subtypes, curdle, polymorph, ethanol },
+    derived: { subtypes, curdle, polymorph, ethanol, snap },
     warnings,
   };
 }

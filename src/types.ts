@@ -820,7 +820,9 @@ export type OptimizerObjective =
   | 'curdle_safety_margin'
   | 'fat_regime_distance'
   | 'warning_count'
-  | 'composition_completeness';
+  | 'composition_completeness'
+  | 'ice_fraction_at_serving_distance'
+  | 'recrystallization_margin';
 
 export interface OptimizerTargets {
   awTarget?: number;             // e.g., 0.85 for stabilized
@@ -829,6 +831,10 @@ export interface OptimizerTargets {
   costPerGramMaxUsd?: number;
   forbiddenFatRegimes?: Array<'firm-set' | 'standard' | 'inversion-approaching' | 'oil-in-water'>;
   maxCurdleRisk?: 'none' | 'low' | 'medium' | 'high';
+  /** Frozen-dessert serving temperature (°C) for the ice-fraction / recrystallization objectives. */
+  servingTempC?: number;
+  /** Target fraction (0..1) of water frozen at servingTempC. */
+  frozenWaterTarget?: number;
 }
 
 /** Weights in [0..1]. Normalized at runtime. Keys present here are active objectives. */

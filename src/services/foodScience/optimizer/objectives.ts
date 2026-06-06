@@ -1,5 +1,6 @@
 import type { OptimizerObjective, OptimizerTargets, ObjectiveWeights, Recipe, Ingredient } from '../../../types';
 import type { AwResult, FatRegime, ShelfLifePrediction } from '../universal';
+import { computeFreezing, estimateTgPrime } from '../universal';
 import type { ConfectioneryEvaluation } from '../confectionery';
 
 const RISK_RANK: Record<string, number> = { none: 0, low: 1, medium: 2, high: 3 };
@@ -34,6 +35,8 @@ export function evaluateObjectives(
       fat_regime_distance: 0.05,
       warning_count: 0.05,
       composition_completeness: 0.05,
+      ice_fraction_at_serving_distance: 0.05,
+      recrystallization_margin: 0.05,
     };
   }
 
@@ -80,6 +83,26 @@ export function evaluateObjectives(
   // Warning count — fewer is better
   const warningCount = 1 / (1 + ctx.warningCount);
 
+  // Ice fraction at serving temperature (texture). Neutral (1.0) unless the
+  // operator specifies a serving temperature and a target frozen fraction.
+  let iceFractionDistance = 1.0;
+  if (targets.servingTempC !== undefined && targets.frozenWaterTarget !== undefined && ctx.aw.massBy) {
+    const phi = computeFreezing(ctx.aw.massBy).frozenFractionAt(targets.servingTempC);
+    iceFractionDistance = 1 - Math.min(1, Math.abs(phi - targets.frozenWaterTarget) / 0.20);
+  }
+
+  // Recrystallization margin (storage stability): the closer the serving/storage
+  // temperature sits to the serum's Tg', the slower it coarsens. Neutral (1.0)
+  // unless a serving temperature is given.
+  let recrystallizationMargin = 1.0;
+  if (targets.servingTempC !== undefined && ctx.aw.massBy) {
+    const tgPrimeC = estimateTgPrime(ctx.aw.massBy).tgPrimeC;
+    if (tgPrimeC !== null) {
+      const marginC = targets.servingTempC - tgPrimeC;
+      recrystallizationMargin = 1 - Math.min(1, Math.max(0, marginC) / 30);
+    }
+  }
+
   return {
     aw_distance_to_target: awDistanceToTarget,
     aw_below_threshold: awBelowThreshold,
@@ -89,6 +112,8 @@ export function evaluateObjectives(
     fat_regime_distance: fatRegimeDistance,
     warning_count: warningCount,
     composition_completeness: ctx.compositionCompleteness,
+    ice_fraction_at_serving_distance: iceFractionDistance,
+    recrystallization_margin: recrystallizationMargin,
   };
 }
 

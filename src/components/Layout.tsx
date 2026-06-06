@@ -6,6 +6,8 @@ import { auth, signInWithGoogle, logOut } from '../firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUserRole } from '../hooks/useUserRole';
+import { useAlerts } from '../hooks/useAlerts';
+import AlertsBell from './AlertsBell';
 import PageSpinner from './PageSpinner';
 
 export default function Layout() {
@@ -16,6 +18,7 @@ export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { role } = useUserRole();
   const isAdmin = role === 'admin';
+  const { alerts } = useAlerts();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -48,13 +51,14 @@ export default function Layout() {
     { path: '/admin/restaurant', label: t('nav:restaurantSettings'), icon: Settings },
   ];
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ showAlerts = false }: { showAlerts?: boolean }) => (
     <>
-      <div className="p-6">
+      <div className="p-6 flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold tracking-tight text-stone-800">
           {t('common:app.title.chocolate')}<br />
           <span className="text-amber-700">{t('common:app.title.secrets')}</span>
         </h1>
+        {showAlerts && user && <AlertsBell alerts={alerts} align="left" />}
       </div>
       
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
@@ -162,7 +166,7 @@ export default function Layout() {
     <div className="flex h-screen bg-stone-50 text-stone-900 font-sans overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 bg-white border-r border-stone-200 flex-col shrink-0">
-        <SidebarContent />
+        <SidebarContent showAlerts />
       </aside>
 
       {/* Mobile Header */}
@@ -170,12 +174,15 @@ export default function Layout() {
         <h1 className="text-lg font-bold tracking-tight text-stone-800">
           {t('common:app.title.chocolate')} <span className="text-amber-700">{t('common:app.title.secrets')}</span>
         </h1>
-        <button 
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 text-stone-600 hover:bg-stone-100 rounded-lg"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-1">
+          {user && <AlertsBell alerts={alerts} align="right" />}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 text-stone-600 hover:bg-stone-100 rounded-lg"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}

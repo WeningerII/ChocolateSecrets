@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Beaker, Play, Square } from 'lucide-react';
@@ -22,6 +22,13 @@ const DEFAULT_OBJECTIVES: OptimizerObjective[] = [
   'warning_count',
 ];
 
+// Frozen-dessert texture objectives — only shown/active for frozen recipes,
+// since they depend on a serving temperature and a target frozen fraction.
+const TEXTURE_OBJECTIVES: OptimizerObjective[] = [
+  'ice_fraction_at_serving_distance',
+  'recrystallization_margin',
+];
+
 export function Formulate() {
   const { t } = useTranslation('chemistry' as any);
   const navigate = useNavigate();
@@ -30,6 +37,10 @@ export function Formulate() {
 
   const baseRecipeId = searchParams.get('baseRecipeId');
   const baseRecipe = baseRecipeId ? recipes.find(r => r.id === baseRecipeId) : null;
+
+  const isFrozen = !!baseRecipe
+    && ((baseRecipe.categories ?? []).includes('frozen') || baseRecipe.frozenSubtype != null);
+  const objectives = isFrozen ? [...DEFAULT_OBJECTIVES, ...TEXTURE_OBJECTIVES] : DEFAULT_OBJECTIVES;
 
   const [targets, setTargets] = useState<OptimizerTargets>({
     awTarget: 0.85,
@@ -42,6 +53,16 @@ export function Formulate() {
   const [weights, setWeights] = useState<ObjectiveWeights>(
     DEFAULT_OBJECTIVES.reduce((acc, o) => { acc[o] = 1; return acc; }, {} as ObjectiveWeights)
   );
+
+  // Once the base recipe resolves as frozen, seed the texture targets + weights
+  // (guarded so re-runs don't clobber chef edits). Handles async recipe load.
+  useEffect(() => {
+    if (!isFrozen) return;
+    setTargets(s => s.servingTempC == null ? { ...s, servingTempC: -13, frozenWaterTarget: 0.73 } : s);
+    setWeights(w => w.ice_fraction_at_serving_distance == null
+      ? { ...w, ice_fraction_at_serving_distance: 1, recrystallization_margin: 1 }
+      : w);
+  }, [isFrozen]);
 
   const [lockedIds, setLockedIds] = useState<string[]>([]);
   const { toast: appToast } = useToast();
@@ -139,6 +160,22 @@ export function Formulate() {
             min={0.001} max={1.00} step={0.001}
             onChange={v => setTargets(s => ({ ...s, costPerGramMaxUsd: v }))}
           />
+          {isFrozen && (
+            <>
+              <NumericField
+                label={t('optimizer.targets.servingTempC' as any)}
+                value={targets.servingTempC ?? -13}
+                min={-30} max={-4} step={0.5}
+                onChange={v => setTargets(s => ({ ...s, servingTempC: v }))}
+              />
+              <NumericField
+                label={t('optimizer.targets.frozenWaterTarget' as any)}
+                value={targets.frozenWaterTarget ?? 0.73}
+                min={0.30} max={0.95} step={0.01}
+                onChange={v => setTargets(s => ({ ...s, frozenWaterTarget: v }))}
+              />
+            </>
+          )}
         </div>
       </section>
 
@@ -146,7 +183,7 @@ export function Formulate() {
       <section className="mb-5">
         <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('optimizer.weights.header' as any)}</h2>
         <div className="grid grid-cols-2 gap-2 text-xs">
-          {DEFAULT_OBJECTIVES.map(obj => (
+          {objectives.map(obj => (
             <div key={obj} className="flex items-center gap-2">
               <label className="flex-1 text-cocoa-700">{t(`optimizer.objectives.${obj}` as any)}</label>
               <input

@@ -264,7 +264,9 @@
       "header": "목표",
       "awTarget": "Aw 목표",
       "shelfLifeWeeksMin": "유통 기한 (주, 최소)",
-      "costPerGramMaxUsd": "그램당 비용 (USD, 최대)"
+      "costPerGramMaxUsd": "그램당 비용 (USD, 최대)",
+      "servingTempC": "제공 온도 (°C)",
+      "frozenWaterTarget": "목표 빙결 비율"
     },
     "weights": {
       "header": "목표 가중치"
@@ -277,7 +279,9 @@
       "curdle_safety_margin": "응고 안전 여유",
       "fat_regime_distance": "지방 영역",
       "warning_count": "경고",
-      "composition_completeness": "조성 데이터"
+      "composition_completeness": "조성 데이터",
+      "ice_fraction_at_serving_distance": "제공 시 빙결 비율",
+      "recrystallization_margin": "보관 안정성"
     },
     "searchSpace": {
       "title": "탐색 공간",

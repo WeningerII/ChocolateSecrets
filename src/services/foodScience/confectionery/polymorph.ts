@@ -1,5 +1,6 @@
-import type { ResolvedIngredient } from '../universal';
-import type { PolymorphWindow, ChocolateClass } from './types';
+import type { ResolvedIngredient, FatProfileKey } from '../universal';
+import { blendSfcAtTemp } from '../universal';
+import type { PolymorphWindow, ChocolateClass, ChocolateSnap, ChocolateSnapClass } from './types';
 
 /**
  * Form-V (stable β polymorph) temper windows for chocolate by cocoa percentage.
@@ -72,6 +73,36 @@ export function computePolymorphWindow(resolved: ResolvedIngredient[]): Polymorp
     tempWindowC: window,
     workingPointC: (window[0] + window[1]) / 2,
   };
+}
+
+const SNAP_EATING_TEMP_C = 20;
+
+// Class-based cocoa-butter / milk-fat blend. Composition lumps "fat", so the
+// milk-fat fraction can't be read directly — these are nominal per-class splits,
+// directional only (dark snaps harder than milk). Calibrate if/when a fat-source
+// breakdown becomes available.
+const SNAP_FAT_BLEND_BY_CLASS: Record<ChocolateClass, Partial<Record<FatProfileKey, number>>> = {
+  dark: { cocoa_butter: 1.0 },
+  milk: { cocoa_butter: 0.7, milk_fat: 0.3 },
+  white: { cocoa_butter: 0.8, milk_fat: 0.2 },
+};
+
+/**
+ * Estimate chocolate snap from solid fat content at eating temperature. Snap
+ * tracks how solid the fat is in the mouth/room: cocoa butter's sharp melt gives
+ * dark chocolate its crack, while milk fat softens milk/white. Returns null when
+ * no chocolate is present.
+ */
+export function computeChocolateSnap(resolved: ResolvedIngredient[]): ChocolateSnap | null {
+  const chocolates = resolved.filter(r => typeof r.chocolateCocoaPercentage === 'number');
+  if (chocolates.length === 0) return null;
+
+  const dominant = chocolates.reduce((max, c) => (c.mass > max.mass ? c : max), chocolates[0]);
+  const cls = classify(dominant.chocolateCocoaPercentage!, dominant.chocolateClass);
+  const sfc = blendSfcAtTemp(SNAP_FAT_BLEND_BY_CLASS[cls], SNAP_EATING_TEMP_C);
+  const snapClass: ChocolateSnapClass = sfc >= 72 ? 'hard_snap' : sfc >= 55 ? 'firm' : 'soft';
+
+  return { chocolateClass: cls, sfcAtEatingTempPct: sfc, eatingTempC: SNAP_EATING_TEMP_C, snapClass };
 }
 
 /** Returns true if multiple distinct chocolate classes are present. */

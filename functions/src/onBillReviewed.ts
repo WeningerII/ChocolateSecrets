@@ -1,7 +1,8 @@
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { logger } from 'firebase-functions/v2';
-import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue, Timestamp, type Firestore } from 'firebase-admin/firestore';
 import { nextOccurrence } from './utils/rrule';
+import { resolveAdminUserIds } from './utils/adminRecipients';
 
 const SATISFACTION_WINDOW_DAYS_FALLBACK = 5;  // when expectation has no graceDays
 const ANOMALY_MIN_HISTORY = 3;                // need 3 prior bills before flagging
@@ -27,13 +28,6 @@ export const onBillReviewed = onDocumentWritten('bills/{billId}', async (event) 
     logger.warn('Bill became reviewed without vendorId', { billId });
     return;
   }
-  
-  // Determine the user the alerts will belong to. Bill itself doesn't carry
-  // userId. For now, use the vendor's recording user via a query; if that's
-  // unreliable, use a single restaurant-default user from a config doc. For
-  // this milestone, fall back to the bill's createdBy if present, else the
-  // expectation's owner. Document this trade-off in the function.
-  const userId = after.createdBy || 'system';
   
   // === Satisfaction matching ===
   // Find active recurring expectations for this vendor
@@ -94,7 +88,7 @@ export const onBillReviewed = onDocumentWritten('bills/{billId}', async (event) 
     if (billAmount < lowBound || billAmount > highBound) {
       await writeAnomalyAlert(db, {
         billId,
-        userId,
+        createdBy: after.createdBy,
         vendorId,
         amount: billAmount,
         lowBound,
@@ -126,7 +120,7 @@ export const onBillReviewed = onDocumentWritten('bills/{billId}', async (event) 
       if (billAmount < lowBound || billAmount > highBound) {
         await writeAnomalyAlert(db, {
           billId,
-          userId,
+          createdBy: after.createdBy,
           vendorId,
           amount: billAmount,
           lowBound,
@@ -138,32 +132,49 @@ export const onBillReviewed = onDocumentWritten('bills/{billId}', async (event) 
   }
 });
 
-async function writeAnomalyAlert(db: FirebaseFirestore.Firestore, params: {
+async function writeAnomalyAlert(db: Firestore, params: {
   billId: string;
-  userId: string;
+  createdBy?: string;
   vendorId: string;
   amount: number;
   lowBound: number;
   highBound: number;
   source: 'expectation_band' | 'rolling_avg';
 }) {
-  const alertId = `${params.billId}_anomaly`;
+  // Address the anomaly to the bill's creator. Bills don't always carry
+  // createdBy, and a missing recipient would make the alert invisible (alerts
+  // are read-gated by userId in firestore.rules), so fall back to the
+  // back-office admins. One copy per recipient keeps each idempotent across
+  // retries and independently dismissible.
+  const recipientUserIds = params.createdBy
+    ? [params.createdBy]
+    : await resolveAdminUserIds(db);
+  if (recipientUserIds.length === 0) {
+    logger.warn('Anomaly alert has no recipients; skipping', {
+      billId: params.billId,
+      vendorId: params.vendorId,
+    });
+    return;
+  }
+
   const direction = params.amount > params.highBound ? 'high' : 'low';
-  await db.collection('alerts').doc(alertId).set({
-    userId: params.userId,
-    type: 'anomaly_amount',
-    severity: direction === 'high' ? 'warning' : 'info',
-    vendorId: params.vendorId,
-    billId: params.billId,
-    titleKey: 'alerts:anomaly.title',
-    bodyKey: `alerts:anomaly.body_${params.source}_${direction}`,
-    bodyParams: {
-      amount: `$${params.amount.toFixed(2)}`,
-      low: `$${params.lowBound.toFixed(2)}`,
-      high: `$${params.highBound.toFixed(2)}`,
-    },
-    actionUrl: `/expenses?reviewBill=${params.billId}`,
-    dismissedAt: null,
-    createdAt: FieldValue.serverTimestamp(),
-  }, { merge: true });
+  await Promise.all(recipientUserIds.map((uid) =>
+    db.collection('alerts').doc(`${params.billId}_anomaly_${uid}`).set({
+      userId: uid,
+      type: 'anomaly_amount',
+      severity: direction === 'high' ? 'warning' : 'info',
+      vendorId: params.vendorId,
+      billId: params.billId,
+      titleKey: 'alerts:anomaly.title',
+      bodyKey: `alerts:anomaly.body_${params.source}_${direction}`,
+      bodyParams: {
+        amount: `$${params.amount.toFixed(2)}`,
+        low: `$${params.lowBound.toFixed(2)}`,
+        high: `$${params.highBound.toFixed(2)}`,
+      },
+      actionUrl: `/expenses?reviewBill=${params.billId}`,
+      dismissedAt: null,
+      createdAt: FieldValue.serverTimestamp(),
+    }, { merge: true })
+  ));
 }

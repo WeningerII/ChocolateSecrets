@@ -5,7 +5,8 @@
   },
   "dueSoon": {
     "title": "Bill due soon",
-    "body": "{{amount}} due in {{daysUntil}} days"
+    "body_one": "{{amount}} due in {{count}} day",
+    "body_other": "{{amount}} due in {{count}} days"
   },
   "anomaly": {
     "title": "Bill amount anomaly",
@@ -13,5 +14,11 @@
     "body_expectation_band_low": "{{amount}} is below the expected band of {{low}} – {{high}}",
     "body_rolling_avg_high": "{{amount}} is above the historical range of {{low}} – {{high}}",
     "body_rolling_avg_low": "{{amount}} is below the historical range of {{low}} – {{high}}"
+  },
+  "ui": {
+    "title": "Notifications",
+    "empty": "You're all caught up.",
+    "dismiss": "Dismiss",
+    "open": "Notifications"
   }
 }

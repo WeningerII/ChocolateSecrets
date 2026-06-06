@@ -118,3 +118,24 @@ export const FROZEN_BANDS_BY_SUBTYPE: Record<FrozenRecipeSubtype, FrozenBand> = 
     servingTempCRange: [-8, -4],
   },
 };
+
+/**
+ * Target fraction of water frozen (%) at the subtype's serving temperature, the
+ * texture-causal coordinate behind scoopability. Eating hardness tracks ice-phase
+ * volume; within band = a clean scoop. Anchored to ice-cream science (≈70–80%
+ * frozen at service) and adjusted per subtype for serving temperature and typical
+ * overrun.
+ *
+ * PROVISIONAL — calibrate against known-good recipes (and ideally cross-check the
+ * freezing curve against measured draw/serving hardness) before retiring the
+ * hardening-factor heuristic in scoopability.ts.
+ */
+export const TARGET_FROZEN_WATER_PCT_BY_SUBTYPE: Record<FrozenRecipeSubtype, [number, number]> = {
+  ice_cream: [70, 80],
+  gelato: [62, 74],
+  sorbet: [62, 74],
+  sherbet: [62, 74],
+  frozen_yogurt: [62, 74],
+  semifreddo: [45, 62],
+  granita: [35, 58],
+};
