@@ -20,17 +20,16 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          // Split large, stable vendor libs into their own cacheable chunks so the
-          // main bundle shrinks and these rarely-changing deps cache across deploys.
+          // Split only React-FREE vendor libs into their own cacheable chunks.
+          // Anything that touches React is left to Vite's default chunking:
+          // manually pulling React-dependent modules into separate chunks breaks
+          // module init order in the static production build (blank screen,
+          // "Cannot set properties of undefined (setting 'Activity')").
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
             if (id.includes('firebase')) return 'firebase';
             if (id.includes('@google/genai')) return 'genai';
             if (id.includes('@zxing')) return 'zxing';
-            if (id.includes('react-big-calendar')) return 'calendar';
-            if (id.includes('motion')) return 'motion';
-            if (id.includes('react')) return 'react';
-            return 'vendor';
           },
         },
       },
