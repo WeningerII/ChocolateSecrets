@@ -1,0 +1,40 @@
+name: firebase-hosting
+
+# Deploys the built app to Firebase Hosting, where the auth handler
+# (/__/auth/handler) is served same-origin as authDomain — so Google sign-in
+# works. (On GitHub Pages it's cross-origin/third-party and browsers block it.)
+#
+# Prerequisite: a repo secret FIREBASE_SERVICE_ACCOUNT
+#   Firebase console -> Project settings -> Service accounts -> Generate new
+#   private key, then add the JSON as the secret (repo Settings -> Secrets and
+#   variables -> Actions). Until then, deploy manually:
+#     npm run build && firebase deploy --only hosting
+#
+# Manual trigger only for now; add `push: { branches: [main] }` once the secret
+# exists if you want auto-deploy on every merge to main.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install
+        run: npm ci
+      - name: Build (root base path — Hosting serves at /)
+        run: npm run build
+      - name: Deploy to Firebase Hosting (live channel)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: absolute-pulsar-301421
