@@ -39,7 +39,7 @@ export default function App() {
     <ErrorBoundary>
       <ToastProvider>
         <DataProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || '/'}>
             <Suspense fallback={<PageSpinner />}>
               <Routes>
               <Route path="/recipes/:id/cook" element={<RecipeCookingMode />} />

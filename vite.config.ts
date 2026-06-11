@@ -8,6 +8,9 @@ import { defineConfig } from 'vite';
 // key in Secret Manager server-side.
 export default defineConfig(() => {
   return {
+    // GitHub Pages serves a project site under /<repo>/. The deploy workflow sets
+    // BASE_PATH=/ChocolateSecrets/; local dev and Firebase Hosting stay at root.
+    base: process.env.BASE_PATH || '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
