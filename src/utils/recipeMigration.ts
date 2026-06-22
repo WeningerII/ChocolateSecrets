@@ -1,6 +1,6 @@
 import { collection, getDocs, doc, writeBatch, serverTimestamp, deleteField } from 'firebase/firestore';
 import { db } from '../firebase';
-import { Recipe, RecipeComponent } from '../types';
+import { Recipe, RecipeComponent, RecipeIngredient } from '../types';
 
 const CURRENT_EXTRACTION_VERSION = 2;
 
@@ -22,7 +22,10 @@ export async function migrateRecipesToV2(): Promise<{
   let batchCount = 0;
 
   for (const docSnap of snapshot.docs) {
-    const data = docSnap.data() as Recipe;
+    // Recipe no longer declares the legacy top-level `ingredients` field, but old
+    // Firestore docs may still carry it until this migration lifts them. Read it
+    // through a local legacy-aware type so the one-time migration stays runnable.
+    const data = docSnap.data() as Recipe & { ingredients?: RecipeIngredient[] };
     const needsVersionBump = (data.extractionVersion || 0) < CURRENT_EXTRACTION_VERSION;
     const hasLegacyIngredients = data.ingredients && data.ingredients.length > 0;
     const hasNoComponents = !data.components || data.components.length === 0;
