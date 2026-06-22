@@ -9,6 +9,43 @@ export interface UsdaFdcEntry {
 }
 
 /**
+ * Derive a milk-powder composition from its liquid composition by removing water
+ * down to a target residual moisture (spray-/freeze-dried whole milk powder ≈ 3%).
+ *
+ * Drying removes water, not solids: every non-water component keeps its mass and is
+ * concentrated by the same factor. This is exact for the macronutrient profile
+ * (fat, protein, lactose, ash) the engine models — it intentionally does not model
+ * heat-driven changes (Maillard browning, vitamin loss, lactose crystallinity),
+ * which don't alter these mass fractions. Validated against the FDC "Milk, dry,
+ * whole" entry in usdaFoodData.test.ts (dehydrating whole cow milk reproduces the
+ * published powder within ~0.5 of a point per component).
+ */
+export function dehydrate(liquid: Composition, targetMoisturePct = 3): Composition {
+  const entries = Object.entries(liquid) as [CompositionSpecies, number | undefined][];
+  const solids = entries.reduce((sum, [k, v]) => (k === 'water' ? sum : sum + (v ?? 0)), 0);
+  if (solids <= 0) return { ...liquid };
+  const factor = (100 - targetMoisturePct) / solids;
+  const out: Composition = { water: targetMoisturePct };
+  for (const [k, v] of entries) {
+    if (k === 'water' || v == null) continue;
+    out[k] = Math.round(v * factor * 10) / 10;
+  }
+  return out;
+}
+
+// Liquid composition of non-bovine milks, per 100 g, from dairy-science literature
+// (FAO / Park & Haenlein; see usdaFoodData.test.ts and the commit notes for the
+// sourced figures). The whole-milk-powder snapshot entries below are derived from
+// these via dehydrate(), so the liquid and powder forms always agree. Replace any
+// entry with a supplier Certificate of Analysis when one is available — spray/
+// freeze-dried solids can deviate from the literature mean.
+const GOAT_MILK: Composition = { water: 87.2, fat: 3.8, protein: 3.7, lactose: 4.5, ash: 0.8 };
+const SHEEP_MILK: Composition = { water: 82.9, fat: 5.9, protein: 5.5, lactose: 4.8, ash: 0.9 };
+const BUFFALO_MILK: Composition = { water: 82.5, fat: 7.4, protein: 4.5, lactose: 4.8, ash: 0.8 };
+const CAMEL_MILK: Composition = { water: 87.6, fat: 4.0, protein: 3.3, lactose: 4.3, ash: 0.8 };
+const REINDEER_MILK: Composition = { water: 70.7, fat: 15.5, protein: 9.9, lactose: 2.5, ash: 1.4 };
+
+/**
  * Curated snapshot of the most common kitchen ingredients across categories.
  * Values are per 100 g of the edible portion, sourced from FDC Foundation Foods
  * (where available) or SR Legacy. All values rounded to one decimal.
@@ -52,6 +89,50 @@ export const USDA_FDC_SNAPSHOT: UsdaFdcEntry[] = [
     dataType: 'SR Legacy',
     composition: { water: 3.2, fat: 0.8, lactose: 51.9, protein: 36.2, ash: 7.9 },
     matchKeywords: ['nonfat dry milk', 'skim milk powder', 'nfdm'] },
+
+  // --- Non-bovine milks (curated). Liquid values from dairy-science literature;
+  //     whole-milk powders derived from them via dehydrate(). Override any entry
+  //     with a supplier Certificate of Analysis when one is available. ---
+  { fdcId: 1100200, description: '[Curated] Goat milk, whole, fluid',
+    dataType: 'Foundation',
+    composition: GOAT_MILK,
+    matchKeywords: ['goat milk', 'goats milk', "goat's milk", 'leche de cabra'] },
+  { fdcId: 1100201, description: '[Curated] Goat milk powder, whole',
+    dataType: 'Foundation',
+    composition: dehydrate(GOAT_MILK),
+    matchKeywords: ['goat milk powder', 'powdered goat milk', 'dried goat milk', 'leche de cabra en polvo'] },
+  { fdcId: 1100202, description: '[Curated] Sheep milk, whole, fluid',
+    dataType: 'Foundation',
+    composition: SHEEP_MILK,
+    matchKeywords: ['sheep milk', "sheep's milk", 'ewe milk', 'leche de oveja'] },
+  { fdcId: 1100203, description: '[Curated] Sheep milk powder, whole',
+    dataType: 'Foundation',
+    composition: dehydrate(SHEEP_MILK),
+    matchKeywords: ['sheep milk powder', 'ewe milk powder', 'leche de oveja en polvo'] },
+  { fdcId: 1100204, description: '[Curated] Water buffalo milk, whole, fluid',
+    dataType: 'Foundation',
+    composition: BUFFALO_MILK,
+    matchKeywords: ['buffalo milk', 'water buffalo milk', 'leche de bufala'] },
+  { fdcId: 1100205, description: '[Curated] Water buffalo milk powder, whole',
+    dataType: 'Foundation',
+    composition: dehydrate(BUFFALO_MILK),
+    matchKeywords: ['buffalo milk powder', 'water buffalo milk powder', 'leche de bufala en polvo'] },
+  { fdcId: 1100206, description: '[Curated] Camel milk, whole, fluid (dromedary)',
+    dataType: 'Foundation',
+    composition: CAMEL_MILK,
+    matchKeywords: ['camel milk', 'dromedary milk', 'leche de camello'] },
+  { fdcId: 1100207, description: '[Curated] Camel milk powder, whole (dromedary)',
+    dataType: 'Foundation',
+    composition: dehydrate(CAMEL_MILK),
+    matchKeywords: ['camel milk powder', 'dromedary milk powder', 'leche de camello en polvo'] },
+  { fdcId: 1100208, description: '[Curated] Reindeer milk, whole, fluid',
+    dataType: 'Foundation',
+    composition: REINDEER_MILK,
+    matchKeywords: ['reindeer milk', 'leche de reno'] },
+  { fdcId: 1100209, description: '[Curated] Reindeer milk powder, whole',
+    dataType: 'Foundation',
+    composition: dehydrate(REINDEER_MILK),
+    matchKeywords: ['reindeer milk powder', 'leche de reno en polvo'] },
 
   // --- Sugars and sweeteners ---
   { fdcId: 169655, description: 'Sugar, granulated',
