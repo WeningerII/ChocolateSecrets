@@ -91,6 +91,15 @@
       "button": "Tag recipe ingredient roles",
       "running": "Tagging in progress...",
       "success": "Role tagging complete: {{recipesUpdated}} recipes updated, {{ingredientsTagged}} ingredients tagged, {{ambiguous}} ambiguous (skipped)."
+    },
+    "crossContactRecompute": {
+      "title": "Cross-contact recompute",
+      "description": "Recompute cross-contact allergen risks across every recipe. Run after bulk imports or station changes so a risk introduced on one recipe propagates to others sharing its station. Safe to run multiple times.",
+      "button": "Recompute cross-contact risks",
+      "running": "Recomputing...",
+      "result": "Recomputed {{scanned}} recipes. Updated: {{updated}}. Unchanged: {{unchanged}}.",
+      "completeToast": "Cross-contact recompute complete: {{updated}} updated.",
+      "failedToast": "Cross-contact recompute failed. See console for details."
     }
   }
 }

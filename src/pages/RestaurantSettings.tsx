@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { migrateRecipesToV2 } from '../utils/recipeMigration';
 import { migrateRecipeRoles } from '../utils/recipeRoleMigration';
+import { recomputeAllCrossContactRisks } from '../utils/crossContactRecompute';
 import { RESTAURANT_ID } from '../constants/tenant';
 
 const ALL_ALLERGEN_KEYS: AllergenKey[] = [
@@ -28,6 +29,9 @@ export default function RestaurantSettings() {
 
   const [isRoleMigrating, setIsRoleMigrating] = useState(false);
   const [roleMigrationResult, setRoleMigrationResult] = useState<{ recipesUpdated: number; ingredientsTagged: number; ambiguousOrLowConfidence: number } | null>(null);
+
+  const [isRecomputing, setIsRecomputing] = useState(false);
+  const [recomputeResult, setRecomputeResult] = useState<{ scanned: number; updated: number; unchanged: number } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -86,6 +90,20 @@ export default function RestaurantSettings() {
       console.error('[migrateRecipeRoles] Failed:', e);
     }
     setIsRoleMigrating(false);
+  };
+
+  const handleRecomputeCrossContact = async () => {
+    setIsRecomputing(true);
+    setRecomputeResult(null);
+    try {
+      const result = await recomputeAllCrossContactRisks();
+      setRecomputeResult(result);
+      toast.success(t('common:admin.crossContactRecompute.completeToast', { updated: result.updated }));
+    } catch (e) {
+      toast.error(t('common:admin.crossContactRecompute.failedToast'));
+      console.error('[recomputeAllCrossContactRisks] Failed:', e);
+    }
+    setIsRecomputing(false);
   };
 
   const handleSave = async () => {
@@ -198,6 +216,25 @@ export default function RestaurantSettings() {
               ingredientsTagged: roleMigrationResult.ingredientsTagged,
               ambiguous: roleMigrationResult.ambiguousOrLowConfidence
             })}
+          </p>
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-cocoa-100 p-6 mb-6">
+        <h2 className="font-display text-xl font-semibold text-cocoa-900 mb-2">{t('common:admin.crossContactRecompute.title')}</h2>
+        <p className="text-cocoa-500 text-sm mb-4">
+          {t('common:admin.crossContactRecompute.description')}
+        </p>
+        <button
+          onClick={handleRecomputeCrossContact}
+          disabled={isRecomputing}
+          className="bg-copper hover:bg-copper-dark text-white px-6 py-2 rounded-xl font-medium disabled:opacity-60"
+        >
+          {isRecomputing ? t('common:admin.crossContactRecompute.running') : t('common:admin.crossContactRecompute.button')}
+        </button>
+        {recomputeResult && (
+          <p className="mt-4 text-sm text-cocoa-700">
+            {t('common:admin.crossContactRecompute.result', { scanned: recomputeResult.scanned, updated: recomputeResult.updated, unchanged: recomputeResult.unchanged })}
           </p>
         )}
       </div>
