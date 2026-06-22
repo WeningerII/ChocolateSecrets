@@ -1,5 +1,8 @@
 import { describe, test, expect } from 'vitest';
 import { QUALITY_DIMENSIONS } from './verifiability';
+import * as universal from './universal';
+import * as frozen from './frozen';
+import * as confectionery from './confectionery';
 
 describe('verifiability registry', () => {
   test('dimension ids are unique', () => {
@@ -43,5 +46,29 @@ describe('verifiability registry', () => {
     const ice = QUALITY_DIMENSIONS.find((x) => x.id === 'ice_fraction_at_serving');
     expect(ice?.predictability).toBe('first_principles');
     expect(ice?.computedBy).toBe('computeFreezing');
+  });
+});
+
+describe('verifiability registry ↔ kernel exports (anti-rot link check)', () => {
+  // Collect every callable exported from the kernel barrels the registry points at,
+  // so a renamed or removed kernel function can't silently leave the ledger dangling.
+  const callableExports = new Set<string>();
+  for (const ns of [universal, frozen, confectionery]) {
+    for (const [name, value] of Object.entries(ns)) {
+      if (typeof value === 'function') callableExports.add(name);
+    }
+  }
+
+  test('barrels actually loaded (guards against a false pass)', () => {
+    expect(callableExports.size).toBeGreaterThan(10);
+  });
+
+  test('every computedBy symbol resolves to a real exported kernel function', () => {
+    const linked = QUALITY_DIMENSIONS.filter((d) => d.computedBy !== null);
+    expect(linked.length).toBeGreaterThan(5);
+    const dangling = linked
+      .filter((d) => !callableExports.has(d.computedBy as string))
+      .map((d) => `${d.id} → ${d.computedBy}`);
+    expect(dangling).toEqual([]);
   });
 });
