@@ -104,11 +104,46 @@ export function resolveComposition(ingredient: Ingredient): ResolveCompositionRe
   return { composition: {}, source: 'unknown' };
 }
 
+/**
+ * Every composition species the model tracks, in canonical order. Single source
+ * of truth for code that must iterate all species (sum, aggregation, editors).
+ */
+export const COMPOSITION_SPECIES: readonly (keyof Composition)[] = [
+  'water', 'sucrose', 'glucose', 'fructose', 'lactose', 'maltose',
+  'sorbitol', 'glycerol', 'ethanol', 'fat', 'protein', 'ash',
+] as const;
+
 export function compositionSum(c: Composition): number {
-  return (c.water ?? 0) + (c.sucrose ?? 0) + (c.glucose ?? 0)
-    + (c.fructose ?? 0) + (c.lactose ?? 0) + (c.maltose ?? 0)
-    + (c.sorbitol ?? 0) + (c.glycerol ?? 0) + (c.ethanol ?? 0)
-    + (c.fat ?? 0) + (c.protein ?? 0) + (c.ash ?? 0);
+  return COMPOSITION_SPECIES.reduce((sum, sp) => sum + (c[sp] ?? 0), 0);
+}
+
+/**
+ * Aggregate resolved leaf ingredients into one mix-level composition in mass %
+ * (each species summed by mass, over total mass). Unlike the Norrish `massBy`
+ * map — aqueous solutes only, in grams — this spans ALL species, including the
+ * fat and protein the aqueous kernel ignores, which the process-layer models
+ * (Maillard, …) need. Returns {} for an empty / zero-mass mix.
+ */
+export function aggregateComposition(
+  resolved: ReadonlyArray<{ mass: number; composition: Composition }>,
+): Composition {
+  const grams: Partial<Record<keyof Composition, number>> = {};
+  let total = 0;
+  for (const r of resolved) {
+    if (r.mass <= 0) continue;
+    total += r.mass;
+    for (const sp of COMPOSITION_SPECIES) {
+      const pct = r.composition[sp];
+      if (pct) grams[sp] = (grams[sp] ?? 0) + (r.mass * pct) / 100;
+    }
+  }
+  if (total <= 0) return {};
+  const out: Composition = {};
+  for (const sp of COMPOSITION_SPECIES) {
+    const g = grams[sp];
+    if (g) out[sp] = (g / total) * 100;
+  }
+  return out;
 }
 
 export function isCompositionComplete(c: Composition, tolerance = 2): boolean {

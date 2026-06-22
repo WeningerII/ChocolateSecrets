@@ -138,6 +138,35 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Maillard browning (time·temperature process layer) */}
+      {physics.browning && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.browning.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.browning.bandLabel')}</span>
+              <span className="font-medium text-cocoa-900">
+                {t(`chemistry:detail.browning.band.${physics.browning.band}` as any)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.browning.indexLabel')}</span>
+              <span className="font-mono">{physics.browning.index.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.browning.cookValueLabel')}</span>
+              <span className="font-mono">
+                {t('chemistry:detail.browning.cookValueUnit' as any, { minutes: (physics.browning.cookValueS / 60).toFixed(1) })}
+              </span>
+            </div>
+          </div>
+          {physics.browning.flags.some(f => f.kind === 'no_reducing_sugar' || f.kind === 'no_protein') && (
+            <p className="text-[11px] italic text-cocoa-500 mt-1">{t('chemistry:detail.browning.noReactants')}</p>
+          )}
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.browning.explanation')}</p>
+        </>
+      )}
+
       {/* Aw band interpretation */}
       <SectionHeader className="mt-5">{t('chemistry:detail.bands.title')}</SectionHeader>
       <div className="mt-2 space-y-1">

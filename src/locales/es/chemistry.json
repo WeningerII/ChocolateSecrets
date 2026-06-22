@@ -59,6 +59,23 @@
       "footnoteEthanol": "Etanol K=1.60 es estimado; pérmida de volatilidad de {{lossPct}}% aplicada.",
       "constants": "Constantes Norrish (escala log. natural): sacarosa 6.47, maltosa 4.54, glucosa y fructosa 2.25, lactosa 10.2, sorbitol 1.66, glicerol 1.15, etanol 1.60. Fuente: Chirife et al. 1980 vía Ergun, Lietha y Hartel. Exactitud de ±1.5%."
     },
+    "browning": {
+      "title": "Reacción de Maillard",
+      "bandLabel": "Nivel previsto",
+      "indexLabel": "Índice de dorado",
+      "cookValueLabel": "Horneado equivalente",
+      "cookValueUnit": "{{minutes}} min a 180°C",
+      "band": {
+        "none": "Ninguno",
+        "pale": "Pálido",
+        "light": "Ligero",
+        "golden": "Dorado",
+        "deep": "Intenso",
+        "dark": "Oscuro / riesgo de quemado"
+      },
+      "explanation": "Potencial de dorado relativo: azúcares reductores + proteína integrados sobre el tiempo·temperatura de horneado, modulado por la actividad de agua — no es un color absoluto.",
+      "noReactants": "Poco dorado previsto: la reacción de Maillard requiere azúcares reductores y proteína."
+    },
     "ph": {
       "title": "Equilibrio de pH (Cálculo de balance de cargas)",
       "table": {

@@ -6,6 +6,7 @@ import {
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
+  aggregateComposition,
   type ResolvedIngredient,
   type AwResult,
   type PHResult,
@@ -17,6 +18,7 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
+import { buildProcessProfile, computeMaillardBrowning, type MaillardResult } from '../services/foodScience/process';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 export interface PhysicsWarning {
@@ -50,6 +52,8 @@ export interface RecipePhysics {
   confectionery: ConfectioneryEvaluation | null;
   frozen: FrozenEvaluation | null;
   bread: BreadEvaluation | null;
+  /** Maillard browning over the bake T·time profile; null when no thermal step. */
+  browning: MaillardResult | null;
 }
 
 function deriveWarnings(
@@ -146,6 +150,18 @@ export function useRecipePhysics(
       });
     }
 
+    // Maillard browning: integrate reducing-sugar + protein reactivity over the
+    // recipe's bake T·time profile (assembled from every component's steps).
+    // Browning extent is order-independent, so flattening components is exact.
+    // Null when there is no thermal step to integrate (unbaked / frozen items).
+    const processProfile = buildProcessProfile(
+      (recipe.components ?? []).flatMap(c => c.steps ?? []),
+    );
+    const browning: MaillardResult | null =
+      processProfile.segments.length > 0 && aw.aw !== null
+        ? computeMaillardBrowning(aggregateComposition(resolvedIngredients), aw.aw, processProfile)
+        : null;
+
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
@@ -167,6 +183,7 @@ export function useRecipePhysics(
       confectionery,
       frozen,
       bread,
+      browning,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

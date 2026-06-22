@@ -59,6 +59,23 @@
       "footnoteEthanol": "Ethanol K=1.60 예측치, 알콜 증발 {{lossPct}}% 적용됨.",
       "constants": "Norrish 상수 (자연 로그): sucrose 6.47, maltose 4.54, glucose & fructose 2.25, lactose 10.2, sorbitol 1.66, glycerol 1.15, ethanol 1.60. 출처: Chirife 등 1980."
     },
+    "browning": {
+      "title": "마이야르 갈변",
+      "bandLabel": "예측 단계",
+      "indexLabel": "갈변 지수",
+      "cookValueLabel": "등가 굽기",
+      "cookValueUnit": "180°C에서 {{minutes}}분",
+      "band": {
+        "none": "없음",
+        "pale": "연함",
+        "light": "약간",
+        "golden": "황금색",
+        "deep": "진함",
+        "dark": "어두움 / 탈 위험"
+      },
+      "explanation": "굽는 시간·온도에 걸쳐 환원당 + 단백질을 적분하고 수분활성도로 보정한 상대적 갈변 잠재력입니다 — 절대 색상이 아닙니다.",
+      "noReactants": "갈변이 거의 예상되지 않음: 마이야르 반응에는 환원당과 단백질이 모두 필요합니다."
+    },
     "ph": {
       "title": "pH 균형 (charge-balance)",
       "table": {
