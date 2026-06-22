@@ -53,3 +53,50 @@ export function computeCrossContactRisks(
 
   return identifyCrossContactRisks(currentAllergens, otherRecipeAllergens, station);
 }
+
+/**
+ * Normalize a recipe's stored cross-contact risks to a stable, order-independent
+ * string so two values can be compared. Legacy `string[]` entries normalize to a
+ * distinct `legacy:` form, so a recompute always supersedes them with the
+ * structured shape rather than being treated as already up to date.
+ */
+function normalizeRisks(risks: (CrossContactRisk | string)[] | undefined): string {
+  if (!risks || risks.length === 0) return '';
+  return risks
+    .map(r => (typeof r === 'string' ? `legacy:${r}` : `${r.allergen}|${r.station ?? ''}`))
+    .sort()
+    .join('\n');
+}
+
+/** True when two cross-contact risk lists are equivalent, ignoring order. */
+export function crossContactRisksEqual(
+  a: (CrossContactRisk | string)[] | undefined,
+  b: (CrossContactRisk | string)[] | undefined
+): boolean {
+  return normalizeRisks(a) === normalizeRisks(b);
+}
+
+/**
+ * Plan a global cross-contact recompute. Saving a single recipe only refreshes
+ * that recipe's own `crossContactRisks`; sibling recipes sharing its station keep
+ * stale values until they too are saved. This recomputes every recipe against the
+ * full catalog and returns only those whose stored value changed, so the caller
+ * can persist a minimal set of writes.
+ *
+ * Pure and Firestore-free so it stays unit-testable; persistence lives in
+ * `recomputeAllCrossContactRisks` (crossContactRecompute.ts).
+ */
+export function planCrossContactRecompute(
+  allRecipes: Recipe[],
+  ingredients: Ingredient[]
+): { recipeId: string; crossContactRisks: CrossContactRisk[] }[] {
+  const changes: { recipeId: string; crossContactRisks: CrossContactRisk[] }[] = [];
+  for (const recipe of allRecipes) {
+    if (!recipe.id) continue;
+    const next = computeCrossContactRisks(recipe, allRecipes, ingredients);
+    if (!crossContactRisksEqual(recipe.crossContactRisks, next)) {
+      changes.push({ recipeId: recipe.id, crossContactRisks: next });
+    }
+  }
+  return changes;
+}

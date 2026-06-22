@@ -5,7 +5,7 @@ Whoever does the deploy is responsible for verifying.
 
 ## 1. Sandbox-runnable tests (should already be green)
 - [ ] `npm run lint` passes
-- [ ] `npm test` passes (expect ~130 tests)
+- [ ] `npm test` passes (expect ~530 tests)
 - [ ] `npm run check:schema` exits 0
 
 ## 2. Non-sandbox tests (require Java + Chrome)
