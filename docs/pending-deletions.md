@@ -1,15 +1,29 @@
 # Pending deletions (post-migration)
 
-These items are kept for backward compatibility during the transition from the
-legacy Recipe.ingredients field to the components model. Once migrateRecipesToV2
-has been run in production and the UI has been verified against migrated data,
-delete the following:
+**Status: completed 2026-06-22.** The legacy `Recipe.ingredients` field and its
+read-time fallback have been removed now that recipes use the components model.
 
-- `src/utils/recipeMath.ts` — `normalizeRecipe()` function (entire function)
-- `src/utils/recipeMath.ts` — calls to `normalizeRecipe()` in `calculateRecipeCost` and `getRecipeRawIngredients` (replace `normRecipe` with the input `recipe` directly)
-- `src/types.ts` — `ingredients?: RecipeIngredient[]` field on Recipe (line ~407)
-- `firestore.rules` — any allowedField entry for `ingredients` on recipes
+⚠️ **Production gate:** this removal assumes production has no recipe that still
+relies on the legacy `ingredients`-only shape. Before this lands in production,
+confirm the migration has run there:
 
-Before deletion:
-1. Confirm migration ran: `await migrateRecipesToV2()` returned `liftedLegacyIngredients === 0` on a re-run (no legacy records remain)
-2. Manually spot-check 3-5 recipes in Firestore — they should have `components` array and NO top-level `ingredients` field
+1. `await migrateRecipesToV2()` returns `liftedLegacyIngredients === 0` on a re-run
+   (no legacy records remain) — run it from **Restaurant Settings → Run recipe migration**.
+2. Spot-check 3-5 recipes in Firestore — each should have a `components` array and
+   no top-level `ingredients` field.
+
+## What was removed
+
+- `src/utils/recipeMath.ts` — the `normalizeRecipe()` function and its calls in
+  `calculateRecipeCost` and `getRecipeRawIngredients` (now use `recipe` directly).
+- `src/utils/resolveRecipeLeaves.ts` — the third `normalizeRecipe()` caller (this
+  one was **not** listed in the original note; found via a full-codebase sweep).
+- `src/types.ts` — the `ingredients?: RecipeIngredient[]` field on `Recipe`.
+- `firestore.rules` — `'ingredients'` removed from the recipe allowed-fields list
+  **and** the `(!('ingredients' in data) || data.ingredients is list)` validation line.
+
+## Intentionally kept
+
+- `migrateRecipesToV2()` (`src/utils/recipeMigration.ts`) still lifts any straggler
+  legacy docs and is reachable from the admin UI. Because the `Recipe` type no longer
+  declares `ingredients`, it reads the field through a local legacy-aware cast.

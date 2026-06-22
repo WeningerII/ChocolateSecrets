@@ -23,7 +23,6 @@ import type { ResolvedIngredient } from '../services/foodScience/universal/types
 import { resolveComposition } from '../services/foodScience/universal/composition';
 import { convertUnit, unitKind } from './units';
 import {
-  normalizeRecipe,
   calculateTotalTargetYield,
   calculateTotalTargetWeight,
   calculateComponentTargetWeight,
@@ -87,12 +86,11 @@ function walk(recipe: Recipe, scale: number, depth: number, ctx: Ctx): void {
   if (recipe.id && ctx.ancestry.has(recipe.id)) return; // true cycle
   if (recipe.id) ctx.ancestry.add(recipe.id);
 
-  const norm = normalizeRecipe(recipe);
-  const totalYield = calculateTotalTargetYield(norm, 1);
-  const totalWeight = calculateTotalTargetWeight(norm, 1);
+  const totalYield = calculateTotalTargetYield(recipe, 1);
+  const totalWeight = calculateTotalTargetWeight(recipe, 1);
 
-  for (const comp of norm.components ?? []) {
-    const compWeight = calculateComponentTargetWeight(comp, totalWeight, norm.type, 1);
+  for (const comp of recipe.components ?? []) {
+    const compWeight = calculateComponentTargetWeight(comp, totalWeight, recipe.type, 1);
 
     for (const ri of comp.ingredients ?? []) {
       // Production-aware scaled quantity in the row's own unit, then × outer scale.

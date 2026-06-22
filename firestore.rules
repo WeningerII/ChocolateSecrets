@@ -129,7 +129,7 @@ service cloud.firestore {
     function isValidRecipe() {
       let data = request.resource.data;
       let allowedFields = [
-        'id', 'name', 'nameSpanish', 'nameI18n', 'nameTranslations', 'description', 'descriptionI18n', 'type', 'hardware', 'equipment', 'design', 'components', 'ingredients', 'yield', 'tags', 'categories', 'frozenSubtype', 'breadSubtype', 'customFields',
+        'id', 'name', 'nameSpanish', 'nameI18n', 'nameTranslations', 'description', 'descriptionI18n', 'type', 'hardware', 'equipment', 'design', 'components', 'yield', 'tags', 'categories', 'frozenSubtype', 'breadSubtype', 'customFields',
         'laborTimeMinutes', 'hourlyRate', 'overheadPercentage', 'updatedAt', 'createdAt',
         'storageInstructions', 'storageInstructionsI18n', 'storageEnvironment', 'shelfLife', 'shelfLifeI18n', 'globalDisclaimers', 'allergens', 'dietary',
         'packagingOptions', 'sensoryProfile', 'reconstitutionInstructions', 'needsReview', 'aiExtractionNotes', 'aiExtractionNotesI18n', 'rawExtractionData',
@@ -161,7 +161,6 @@ service cloud.firestore {
              isValidOptionalString('aiExtractionNotes', 5000) &&
              isValidOptionalString('rawExtractionData', 10000) &&
              (!('components' in data) || data.components is list) &&
-             (!('ingredients' in data) || data.ingredients is list) &&
              (!('design' in data) || data.design is list) &&
              (!('equipment' in data) || data.equipment is list) &&
              (!('tags' in data) || data.tags is list) &&

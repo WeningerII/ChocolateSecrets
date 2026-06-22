@@ -91,14 +91,13 @@ export function calculateRecipeCost(
     _memo.set(recipe.id, 'computing');
   }
 
-  const normRecipe = normalizeRecipe(recipe);
-  const totalTargetYield = calculateTotalTargetYield(normRecipe);
-  const totalTargetWeight = calculateTotalTargetWeight(normRecipe);
+  const totalTargetYield = calculateTotalTargetYield(recipe);
+  const totalTargetWeight = calculateTotalTargetWeight(recipe);
 
   let totalCost = 0;
 
-  for (const comp of normRecipe.components || []) {
-    const componentTargetWeight = calculateComponentTargetWeight(comp, totalTargetWeight, normRecipe.type);
+  for (const comp of recipe.components || []) {
+    const componentTargetWeight = calculateComponentTargetWeight(comp, totalTargetWeight, recipe.type);
     
     for (const ing of comp.ingredients) {
       const scaledQty = scaleIngredient(ing, comp, totalTargetYield, componentTargetWeight);
@@ -204,12 +203,11 @@ export function getRecipeRawIngredients(
 
   const rawBaseMap = new Map<string, number>();
   
-  const normRecipe = normalizeRecipe(recipe);
-  const totalYield = calculateTotalTargetYield(normRecipe, 1);
-  const totalWeight = calculateTotalTargetWeight(normRecipe, 1);
+  const totalYield = calculateTotalTargetYield(recipe, 1);
+  const totalWeight = calculateTotalTargetWeight(recipe, 1);
 
-  for (const component of normRecipe.components || []) {
-    const componentWeight = calculateComponentTargetWeight(component, totalWeight, normRecipe.type, 1);
+  for (const component of recipe.components || []) {
+    const componentWeight = calculateComponentTargetWeight(component, totalWeight, recipe.type, 1);
 
     for (const ing of component.ingredients) {
       const scaledQty = scaleIngredient(ing, component, totalYield, componentWeight);
@@ -293,35 +291,4 @@ export function getRecipeAllergens(
   });
   
   return Array.from(allergens).sort();
-}
-
-/**
- * @deprecated Will be removed once the one-time migration (migrateRecipesToV2) has run
- * against production data. This defensive normalizer exists to handle legacy recipes
- * that haven't been lifted to the components model yet. After migration:
- * 1. Remove this function
- * 2. Remove the `ingredients?: RecipeIngredient[]` field from the Recipe type
- * 3. Remove the calls to normalizeRecipe() in calculateRecipeCost and getRecipeRawIngredients
- */
-export function normalizeRecipe(recipe: Recipe): Recipe {
-  if (recipe.components && recipe.components.length > 0) {
-    return recipe;
-  }
-
-  // Convert legacy ingredients array to a single base component
-  const baseComponent: RecipeComponent = {
-    id: 'base-component',
-    name: 'Base Recipe',
-    type: 'base',
-    percentageOfTotalWeight: 100,
-    bufferPercentage: 0,
-    ingredients: recipe.ingredients || [],
-    instructions: []
-  };
-
-  return {
-    ...recipe,
-    type: recipe.type || 'standard',
-    components: [baseComponent]
-  };
 }

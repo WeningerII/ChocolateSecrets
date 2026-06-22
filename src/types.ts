@@ -525,7 +525,6 @@ export interface Recipe {
   reconstitutionInstructions?: string; // e.g., "35g per 8oz cup"
   design?: DesignLayer[];
   components?: RecipeComponent[];
-  ingredients?: RecipeIngredient[]; // Legacy support
   customFields?: CustomField[];
   tags?: string[];
   /**

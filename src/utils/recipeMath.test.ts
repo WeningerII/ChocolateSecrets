@@ -6,7 +6,6 @@ import {
   scaleIngredient,
   calculateRecipeCost,
   getRecipeRawIngredients,
-  normalizeRecipe,
   calculateFullyLoadedCost
 } from './recipeMath';
 import { Recipe, RecipeComponent, Ingredient } from '../types';
@@ -111,21 +110,6 @@ describe('recipeMath', () => {
     expect((result.unitWarnings[0] as any).toUnit).toBe('g');
   });
 
-  it('normalizes legacy recipe', () => {
-    const legacyRecipe: Recipe = {
-      id: 'legacy1',
-      name: 'Legacy',
-      description: 'Legacy recipe',
-      type: 'standard',
-      ingredients: [
-        { ingredientId: 'ing1', quantity: 50, unit: 'g', isDiscrete: false }
-      ]
-    };
-    const normalized = normalizeRecipe(legacyRecipe);
-    expect(normalized.components).toBeDefined();
-    expect(normalized.components![0].ingredients.length).toBe(1);
-    expect(normalized.components![0].ingredients[0].quantity).toBe(50);
-  });
 });
 
 describe('cost consistency across callers', () => {
