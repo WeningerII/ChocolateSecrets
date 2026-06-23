@@ -29,7 +29,7 @@ export interface FrozenComposition {
   lactosePct: number;
   pac: number;
   pod: number;
-  /** Lactose as a percentage of MSNF — sandiness predictor. */
+  /** Lactose as a percentage of the unfrozen water (serum) — sandiness predictor. */
   lactoseInWaterPct: number;
 }
 

@@ -90,9 +90,9 @@ describe('deriveSearchSpace', () => {
     expect(dims.length).toBe(0);
   });
 
-  test('geneCount returns 2 for presence_with_variant, 1 otherwise', () => {
-    expect(geneCount({ kind: 'presence_with_variant' } as any)).toBe(2);
+  test('geneCount returns 3 for presence_with_variant, 1 otherwise', () => {
+    expect(geneCount({ kind: 'presence_with_variant' } as any)).toBe(3);
     expect(geneCount({ kind: 'continuous_mass' } as any)).toBe(1);
-    expect(totalGeneCount([{ kind: 'presence_with_variant' } as any, { kind: 'continuous_mass' } as any])).toBe(3);
+    expect(totalGeneCount([{ kind: 'presence_with_variant' } as any, { kind: 'continuous_mass' } as any])).toBe(4);
   });
 });

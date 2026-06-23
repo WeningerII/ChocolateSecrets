@@ -36,10 +36,12 @@ export const POD_FACTORS: Record<string, number> = {
 
 /**
  * Sandiness threshold. Lactose crystallizes during cabinet storage when its
- * mass fraction inside the MSNF rises past ~11%. Operational rule from
- * Goff & Hartel ch. 11.
+ * concentration in the unfrozen water (serum) rises past ~11 g per 100 g water
+ * — roughly its solubility limit. Operational rule from Goff & Hartel ch. 11.
+ * (The metric is lactose-in-water, NOT lactose-in-MSNF: lactose is ~50 % of MSNF
+ * for any dairy mix, so an MSNF fraction could never discriminate.)
  */
-export const SANDINESS_LACTOSE_IN_MSNF_PCT = 11.0;
+export const SANDINESS_LACTOSE_IN_WATER_PCT = 11.0;
 
 /**
  * Band ranges per recipe subtype. Inclusive on both ends.

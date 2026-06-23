@@ -1,6 +1,6 @@
 import type { FrozenComposition, FrozenWarning, ScoopabilityLevel } from './types';
 import type { FrozenRecipeSubtype } from '../../../types';
-import { FROZEN_BANDS_BY_SUBTYPE, SANDINESS_LACTOSE_IN_MSNF_PCT } from './constants';
+import { FROZEN_BANDS_BY_SUBTYPE, SANDINESS_LACTOSE_IN_WATER_PCT } from './constants';
 
 interface WarningContext {
   subtype: FrozenRecipeSubtype;
@@ -64,7 +64,7 @@ export function deriveFrozenWarnings(ctx: WarningContext): FrozenWarning[] {
   }
 
   // Sandiness
-  if (ctx.comp.lactoseInWaterPct > SANDINESS_LACTOSE_IN_MSNF_PCT) {
+  if (ctx.comp.lactoseInWaterPct > SANDINESS_LACTOSE_IN_WATER_PCT) {
     out.push({ kind: 'sandiness_risk', lactoseInWaterPct: ctx.comp.lactoseInWaterPct });
   }
 

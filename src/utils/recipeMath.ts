@@ -77,110 +77,137 @@ export function scaleIngredient(
   return ((ingredient.quantity || 0) / componentBaseWeight) * componentTargetWeight;
 }
 
-export function calculateRecipeCost(
-  recipe: Recipe, 
-  inventoryIngredients: Ingredient[], 
-  allRecipes: Recipe[] = [], 
-  _memo: Map<string, number | 'computing'> = new Map(),
-  _warnings: UnitConversionWarning[] = []
-): { cost: number; unitWarnings: UnitConversionWarning[] } {
+/** Resolve a sub-recipe's yield basis (amount + unit) for batch math. */
+function resolveSubRecipeYield(subRecipe: Recipe): { amount: number; unit: string } {
+  if (subRecipe.yield && subRecipe.yield.totalYieldAmount > 0) {
+    return { amount: subRecipe.yield.totalYieldAmount, unit: subRecipe.yield.totalYieldUnit || 'g' };
+  }
+  return { amount: calculateTotalTargetWeight(subRecipe) || 1, unit: 'g' };
+}
+
+/** One leaf ingredient's contribution, in the inventory ingredient's own unit. */
+interface LeafContribution {
+  ingredientId: string;
+  quantity: number;
+  /**
+   * True when a unit conversion failed. Such a leaf is KEPT (with the
+   * unconverted quantity) in the raw-ingredient/shopping view but FLAGGED so the
+   * cost rollup omits it — preserving the prior, divergent behavior of the two
+   * callers from a single traversal.
+   */
+  costExcluded: boolean;
+}
+
+/**
+ * Single source of truth for expanding a recipe into its leaf ingredient
+ * contributions: sub-recipes flattened to leaves, hardware/cavity yield and
+ * component buffers applied, units converted to each inventory ingredient's own
+ * unit, cycles broken via a "computing" memo sentinel and DAG reuse memoized at
+ * the per-unit (baseQuantity = 1) basis.
+ *
+ * Both calculateRecipeCost and getRecipeRawIngredients derive from this so the
+ * cost view and the shopping/allergen view can never drift. This is the
+ * ingredient-unit/cost basis; the physics path (resolveRecipeLeaves) is a
+ * separate grams + composition basis because it intentionally drops discrete
+ * (massless) leaves, which cost and shopping must keep.
+ */
+function expandRecipeContributions(
+  recipe: Recipe,
+  baseQuantity: number,
+  allRecipes: Recipe[],
+  inventoryIngredients: Ingredient[],
+  warnings: UnitConversionWarning[],
+  memo: Map<string, LeafContribution[] | 'computing'>,
+): LeafContribution[] {
+  const scaleAll = (leaves: LeafContribution[]) =>
+    leaves.map(c => ({ ...c, quantity: c.quantity * baseQuantity }));
+
   if (recipe.id) {
-    const mem = _memo.get(recipe.id);
-    if (mem === 'computing') return { cost: 0, unitWarnings: _warnings };
-    if (typeof mem === 'number') return { cost: mem, unitWarnings: _warnings };
-    _memo.set(recipe.id, 'computing');
+    const mem = memo.get(recipe.id);
+    if (mem === 'computing') return [];        // true cycle — contributes nothing
+    if (mem) return scaleAll(mem);             // memoized per-unit basis
+    memo.set(recipe.id, 'computing');
   }
 
-  const totalTargetYield = calculateTotalTargetYield(recipe);
-  const totalTargetWeight = calculateTotalTargetWeight(recipe);
-
-  let totalCost = 0;
+  const base: LeafContribution[] = [];
+  const totalYield = calculateTotalTargetYield(recipe, 1);
+  const totalWeight = calculateTotalTargetWeight(recipe, 1);
 
   for (const comp of recipe.components || []) {
-    const componentTargetWeight = calculateComponentTargetWeight(comp, totalTargetWeight, recipe.type);
-    
+    const componentTargetWeight = calculateComponentTargetWeight(comp, totalWeight, recipe.type, 1);
+
     for (const ing of comp.ingredients) {
-      const scaledQty = scaleIngredient(ing, comp, totalTargetYield, componentTargetWeight);
-      
+      const scaledQty = scaleIngredient(ing, comp, totalYield, componentTargetWeight);
+
       if (ing.type === 'recipe' && ing.recipeId) {
         const subRecipe = allRecipes.find(r => r.id === ing.recipeId);
-        if (subRecipe) {
-          const subResult = calculateRecipeCost(subRecipe, inventoryIngredients, allRecipes, _memo, _warnings);
-          const subRecipeCost = subResult.cost;
-          
-          let subRecipeYieldAmount = 1;
-          let subRecipeYieldUnit = 'g';
-          
-          if (subRecipe.yield && subRecipe.yield.totalYieldAmount > 0) {
-            subRecipeYieldAmount = subRecipe.yield.totalYieldAmount;
-            subRecipeYieldUnit = subRecipe.yield.totalYieldUnit || 'g';
-          } else {
-            subRecipeYieldAmount = calculateTotalTargetWeight(subRecipe) || 1;
-          }
-          
-          const costPerUnit = subRecipeCost / subRecipeYieldAmount;
-          
-          let finalQty = scaledQty;
-          if (ing.unit && ing.unit !== subRecipeYieldUnit) {
-            const converted = convertUnit(scaledQty, ing.unit, subRecipeYieldUnit);
-            if (converted !== null) {
-              finalQty = converted;
-            } else {
-              _warnings.push({
-                fromUnit: ing.unit,
-                toUnit: subRecipeYieldUnit,
-                subjectType: 'sub_recipe',
-                subjectName: subRecipe.name,
-              });
-              continue;
-            }
-          }
-          
-          totalCost += finalQty * costPerUnit;
+        if (!subRecipe) continue;
+        const { amount: subYield, unit: subUnit } = resolveSubRecipeYield(subRecipe);
+
+        let finalQty = scaledQty;
+        let convFailed = false;
+        if (ing.unit && ing.unit !== subUnit) {
+          const converted = convertUnit(scaledQty, ing.unit, subUnit);
+          if (converted !== null) finalQty = converted;
+          else { convFailed = true; warnings.push({ fromUnit: ing.unit, toUnit: subUnit, subjectType: 'sub_recipe', subjectName: subRecipe.name }); }
         }
-      } else {
-        const inventoryIng = inventoryIngredients.find(i => i.id === ing.ingredientId);
-        
-        if (inventoryIng) {
-          const costToUse = inventoryIng.weightedAverageCost || inventoryIng.costPerUnit || 0;
-          if (costToUse > 0) {
-            let finalQty = scaledQty;
-            if (ing.unit && inventoryIng.unit && ing.unit !== inventoryIng.unit) {
-              const converted = convertUnit(scaledQty, ing.unit, inventoryIng.unit, inventoryIng.density);
-              if (converted !== null) {
-                finalQty = converted;
-              } else {
-                _warnings.push({
-                  fromUnit: ing.unit,
-                  toUnit: inventoryIng.unit,
-                  subjectType: 'ingredient',
-                  subjectName: inventoryIng.name,
-                });
-                continue;
-              }
-            }
-            totalCost += finalQty * costToUse;
-          }
+
+        const batches = finalQty / subYield;
+        const subContribs = expandRecipeContributions(subRecipe, batches, allRecipes, inventoryIngredients, warnings, memo);
+        for (const c of subContribs) {
+          base.push({ ...c, costExcluded: c.costExcluded || convFailed });
         }
+      } else if (ing.ingredientId) {
+        const inv = inventoryIngredients.find(i => i.id === ing.ingredientId);
+        if (!inv) continue;
+
+        let finalQty = scaledQty;
+        let convFailed = false;
+        if (ing.unit && inv.unit && ing.unit !== inv.unit) {
+          const converted = convertUnit(scaledQty, ing.unit, inv.unit, inv.density);
+          if (converted !== null) finalQty = converted;
+          else { convFailed = true; warnings.push({ fromUnit: ing.unit, toUnit: inv.unit, subjectType: 'ingredient', subjectName: inv.name }); }
+        }
+
+        base.push({ ingredientId: ing.ingredientId, quantity: finalQty, costExcluded: convFailed });
       }
     }
   }
 
-  if (recipe.id) {
-    _memo.set(recipe.id, totalCost);
-  }
+  if (recipe.id) memo.set(recipe.id, base);
+  return scaleAll(base);
+}
 
-  // Structural dedupe — Set comparison is reference-based on objects, so
-  // serialize each warning to a stable key.
+function dedupeWarnings(warnings: UnitConversionWarning[]): UnitConversionWarning[] {
   const seen = new Set<string>();
   const deduped: UnitConversionWarning[] = [];
-  for (const w of _warnings) {
+  for (const w of warnings) {
     const key = `${w.subjectType}|${w.subjectName}|${w.fromUnit}|${w.toUnit}`;
     if (seen.has(key)) continue;
     seen.add(key);
     deduped.push(w);
   }
-  return { cost: totalCost, unitWarnings: deduped };
+  return deduped;
+}
+
+export function calculateRecipeCost(
+  recipe: Recipe,
+  inventoryIngredients: Ingredient[],
+  allRecipes: Recipe[] = [],
+): { cost: number; unitWarnings: UnitConversionWarning[] } {
+  const warnings: UnitConversionWarning[] = [];
+  const leaves = expandRecipeContributions(recipe, 1, allRecipes, inventoryIngredients, warnings, new Map());
+
+  let totalCost = 0;
+  for (const leaf of leaves) {
+    if (leaf.costExcluded) continue;
+    const inv = inventoryIngredients.find(i => i.id === leaf.ingredientId);
+    if (!inv) continue;
+    const costToUse = inv.weightedAverageCost || inv.costPerUnit || 0;
+    if (costToUse > 0) totalCost += leaf.quantity * costToUse;
+  }
+
+  return { cost: totalCost, unitWarnings: dedupeWarnings(warnings) };
 }
 
 export function getRecipeRawIngredients(
@@ -188,89 +215,16 @@ export function getRecipeRawIngredients(
   baseQuantity: number,
   allRecipes: Recipe[],
   inventoryIngredients: Ingredient[],
-  _memo: Map<string, Map<string, number> | 'computing'> = new Map()
 ): Map<string, number> {
-  if (recipe.id) {
-    const mem = _memo.get(recipe.id);
-    if (mem === 'computing') return new Map<string, number>();
-    if (mem && typeof mem !== 'string') {
-      const result = new Map<string, number>();
-      mem.forEach((qty, id) => result.set(id, qty * baseQuantity));
-      return result;
-    }
-    _memo.set(recipe.id, 'computing');
-  }
+  const warnings: UnitConversionWarning[] = [];
+  const leaves = expandRecipeContributions(recipe, baseQuantity, allRecipes, inventoryIngredients, warnings, new Map());
 
-  const rawBaseMap = new Map<string, number>();
-  
-  const totalYield = calculateTotalTargetYield(recipe, 1);
-  const totalWeight = calculateTotalTargetWeight(recipe, 1);
-
-  for (const component of recipe.components || []) {
-    const componentWeight = calculateComponentTargetWeight(component, totalWeight, recipe.type, 1);
-
-    for (const ing of component.ingredients) {
-      const scaledQty = scaleIngredient(ing, component, totalYield, componentWeight);
-
-      if (ing.type === 'recipe' && ing.recipeId) {
-        const subRecipe = allRecipes.find(r => r.id === ing.recipeId);
-        if (subRecipe) {
-          // Determine how many batches of the sub-recipe we need
-          let subRecipeYieldAmount = 1;
-          let subRecipeYieldUnit = 'g';
-          
-          if (subRecipe.yield && subRecipe.yield.totalYieldAmount > 0) {
-            subRecipeYieldAmount = subRecipe.yield.totalYieldAmount;
-            subRecipeYieldUnit = subRecipe.yield.totalYieldUnit || 'g';
-          } else {
-            subRecipeYieldAmount = calculateTotalTargetWeight(subRecipe) || 1;
-          }
-
-          let finalQty = scaledQty;
-          if (ing.unit && ing.unit !== subRecipeYieldUnit) {
-            const converted = convertUnit(scaledQty, ing.unit, subRecipeYieldUnit);
-            if (converted !== null) {
-              finalQty = converted;
-            }
-          }
-
-          const subRecipeBatches = finalQty / subRecipeYieldAmount;
-          
-          const subIngredients = getRecipeRawIngredients(subRecipe, subRecipeBatches, allRecipes, inventoryIngredients, _memo);
-          
-          subIngredients.forEach((qty, id) => {
-            const current = rawBaseMap.get(id) || 0;
-            rawBaseMap.set(id, current + qty);
-          });
-        }
-      } else if (ing.ingredientId) {
-        const baseIng = inventoryIngredients.find(i => i.id === ing.ingredientId);
-        if (baseIng) {
-          let qtyToAdd = scaledQty;
-          
-          if (ing.unit && ing.unit !== baseIng.unit) {
-            const converted = convertUnit(qtyToAdd, ing.unit, baseIng.unit, baseIng.density);
-            if (converted !== null) {
-              qtyToAdd = converted;
-            }
-          }
-
-          const current = rawBaseMap.get(ing.ingredientId) || 0;
-          rawBaseMap.set(ing.ingredientId, current + qtyToAdd);
-        }
-      }
-    }
-  }
-
-  if (recipe.id) {
-    _memo.set(recipe.id, rawBaseMap);
-  }
-
+  // Shopping/allergen view keeps every leaf, including unit-conversion failures
+  // (with the unconverted quantity), aggregated by ingredient id.
   const result = new Map<string, number>();
-  rawBaseMap.forEach((qty, id) => {
-    result.set(id, qty * baseQuantity);
-  });
-
+  for (const leaf of leaves) {
+    result.set(leaf.ingredientId, (result.get(leaf.ingredientId) ?? 0) + leaf.quantity);
+  }
   return result;
 }
 export function getRecipeAllergens(

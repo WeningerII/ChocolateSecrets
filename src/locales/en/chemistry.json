@@ -59,6 +59,63 @@
       "footnoteEthanol": "Ethanol K=1.60 is estimated; {{lossPct}}% volatility loss applied to recipe mass.",
       "constants": "Norrish constants (natural log scale): sucrose 6.47, maltose 4.54, glucose & fructose 2.25, lactose 10.2, sorbitol 1.66, glycerol 1.15, ethanol 1.60. Source: Chirife et al. 1980 via Ergun, Lietha & Hartel, Critical Reviews in Food Science 50:162–192 (2010). Model accuracy ±1.5% within calibration range; underestimates depression at extreme saturation (>75% solute by mass in aqueous phase)."
     },
+    "browning": {
+      "title": "Maillard browning",
+      "bandLabel": "Predicted band",
+      "indexLabel": "Browning index",
+      "cookValueLabel": "Equivalent bake",
+      "cookValueUnit": "{{minutes}} min @ 180°C",
+      "band": {
+        "none": "None",
+        "pale": "Pale",
+        "light": "Light",
+        "golden": "Golden",
+        "deep": "Deep",
+        "dark": "Dark / scorch risk"
+      },
+      "explanation": "Relative browning potential: reducing sugars + protein integrated over the bake time·temperature, modulated by water activity — not an absolute color.",
+      "noReactants": "Little browning expected: Maillard needs both reducing sugars and protein."
+    },
+    "doneness": {
+      "title": "Thermal doneness",
+      "bandLabel": "Core state",
+      "peakLabel": "Peak core temp",
+      "band": {
+        "none": "—",
+        "raw": "Raw",
+        "underdone": "Underdone",
+        "set": "Set",
+        "done": "Done"
+      },
+      "biotWarning": "Likely too thick for a uniform-core estimate; the true core runs cooler than shown.",
+      "caveat": "Estimated core temperature for a typical ~2 cm portion (Newtonian heating), treating step temperatures as the oven/medium, not the core. Add portion thickness for a recipe-specific result."
+    },
+    "oxidation": {
+      "title": "Lipid oxidation (rancidity)",
+      "bandLabel": "Rancidity risk",
+      "indexLabel": "Oxidation index",
+      "band": {
+        "none": "None",
+        "low": "Low",
+        "moderate": "Moderate",
+        "high": "High",
+        "severe": "Severe"
+      },
+      "estimatedFatNote": "Unsaturated fat not specified — estimated as 60% of total fat.",
+      "caveat": "Relative rancidity potential over an assumed ambient storage for the shelf life; driven by unsaturated fat, storage time·temperature and water activity. Not a measured peroxide value."
+    },
+    "moisture": {
+      "title": "Moisture migration",
+      "bandLabel": "Migration risk",
+      "gapLabel": "Phase a_w gap",
+      "band": {
+        "none": "None",
+        "low": "Low",
+        "moderate": "Moderate",
+        "high": "High"
+      },
+      "caveat": "Risk that moisture migrates between components at different water activity over storage — softening dry parts, drying moist ones. Assumes a default diffusion barrier; packaging and interface geometry are not modeled."
+    },
     "ph": {
       "title": "pH equilibrium (charge-balance solver)",
       "table": {

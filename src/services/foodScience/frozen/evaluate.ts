@@ -88,7 +88,8 @@ export function evaluateFrozen(input: EvalInput): FrozenEvaluation {
   // Freezing curve / ice fraction — the texture-causal coordinate. Reuses the
   // aqueous masses the Norrish kernel already produced (aw.massBy); null-safe so
   // callers that don't supply massBy simply get null freezing fields.
-  const freezing = input.aw.massBy ? computeFreezing(input.aw.massBy) : null;
+  const sodiumMass = input.resolved.reduce((s, r) => s + r.mass * ((r.composition.sodium ?? 0) / 100), 0);
+  const freezing = input.aw.massBy ? computeFreezing(input.aw.massBy, { sodiumMass }) : null;
   const servingTempC = (band.servingTempCRange[0] + band.servingTempCRange[1]) / 2;
   const initialFreezingPointC = freezing?.initialFreezingPointC ?? null;
   const frozenWaterPctAtServing =

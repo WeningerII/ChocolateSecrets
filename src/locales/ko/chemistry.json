@@ -59,6 +59,63 @@
       "footnoteEthanol": "Ethanol K=1.60 예측치, 알콜 증발 {{lossPct}}% 적용됨.",
       "constants": "Norrish 상수 (자연 로그): sucrose 6.47, maltose 4.54, glucose & fructose 2.25, lactose 10.2, sorbitol 1.66, glycerol 1.15, ethanol 1.60. 출처: Chirife 등 1980."
     },
+    "browning": {
+      "title": "마이야르 갈변",
+      "bandLabel": "예측 단계",
+      "indexLabel": "갈변 지수",
+      "cookValueLabel": "등가 굽기",
+      "cookValueUnit": "180°C에서 {{minutes}}분",
+      "band": {
+        "none": "없음",
+        "pale": "연함",
+        "light": "약간",
+        "golden": "황금색",
+        "deep": "진함",
+        "dark": "어두움 / 탈 위험"
+      },
+      "explanation": "굽는 시간·온도에 걸쳐 환원당 + 단백질을 적분하고 수분활성도로 보정한 상대적 갈변 잠재력입니다 — 절대 색상이 아닙니다.",
+      "noReactants": "갈변이 거의 예상되지 않음: 마이야르 반응에는 환원당과 단백질이 모두 필요합니다."
+    },
+    "doneness": {
+      "title": "내부 익힘",
+      "bandLabel": "중심부 상태",
+      "peakLabel": "최고 중심 온도",
+      "band": {
+        "none": "—",
+        "raw": "생",
+        "underdone": "덜 익음",
+        "set": "굳음",
+        "done": "익음"
+      },
+      "biotWarning": "두께가 두꺼워 균일한 중심 온도 추정이 어렵습니다; 실제 중심부는 표시값보다 낮습니다.",
+      "caveat": "일반적인 ~2 cm 두께를 가정한 추정 중심 온도입니다(뉴턴 가열). 단계 온도를 중심부가 아닌 오븐/매질 온도로 간주합니다. 정확한 결과를 위해 두께를 입력하세요."
+    },
+    "oxidation": {
+      "title": "지질 산화 (산패)",
+      "bandLabel": "산패 위험",
+      "indexLabel": "산화 지수",
+      "band": {
+        "none": "없음",
+        "low": "낮음",
+        "moderate": "보통",
+        "high": "높음",
+        "severe": "심각"
+      },
+      "estimatedFatNote": "불포화지방이 지정되지 않아 총지방의 60%로 추정했습니다.",
+      "caveat": "유통기한 동안의 상온 보관을 가정한 상대적 산패 잠재력입니다. 불포화지방, 보관 시간·온도, 수분활성도에 따라 달라집니다. 측정된 과산화물 값이 아닙니다."
+    },
+    "moisture": {
+      "title": "수분 이동",
+      "bandLabel": "이동 위험",
+      "gapLabel": "상(phase) 간 a_w 차이",
+      "band": {
+        "none": "없음",
+        "low": "낮음",
+        "moderate": "보통",
+        "high": "높음"
+      },
+      "caveat": "보관 중 수분활성도가 다른 구성 요소 사이로 수분이 이동하여 마른 부분은 눅눅해지고 촉촉한 부분은 마르는 위험입니다. 기본 확산 장벽을 가정하며, 포장이나 계면 형상은 모델링하지 않습니다."
+    },
     "ph": {
       "title": "pH 균형 (charge-balance)",
       "table": {

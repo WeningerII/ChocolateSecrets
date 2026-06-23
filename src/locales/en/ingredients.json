@@ -150,8 +150,12 @@
       "ethanol": "Ethanol",
       "fat": "Fat",
       "protein": "Protein",
-      "ash": "Ash"
-    }
+      "ash": "Ash",
+      "unsaturatedFat": "Unsaturated fat",
+      "sodium": "Sodium"
+    },
+    "subFractions": "Sub-fractions",
+    "subFractionsNote": "Breakdowns of the values above (unsaturated ⊆ fat, sodium ⊆ ash) — not counted in the % sum."
   },
   "bufferRef": {
     "label": "pH buffer reference",

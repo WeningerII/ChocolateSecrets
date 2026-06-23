@@ -6,6 +6,7 @@ import {
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
+  aggregateComposition,
   type ResolvedIngredient,
   type AwResult,
   type PHResult,
@@ -17,7 +18,15 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
+import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
+
+/** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
+ *  migration): ambient room temperature for the declared shelf life (or a
+ *  conservative default). Packaging/interface barriers are not modeled. */
+const STORAGE_TEMP_C = 20;
+const STORAGE_DEFAULT_DAYS = 90;
+const SECONDS_PER_DAY = 86_400;
 
 export interface PhysicsWarning {
   kind:
@@ -50,6 +59,14 @@ export interface RecipePhysics {
   confectionery: ConfectioneryEvaluation | null;
   frozen: FrozenEvaluation | null;
   bread: BreadEvaluation | null;
+  /** Maillard browning over the bake T·time profile; null when no thermal step. */
+  browning: MaillardResult | null;
+  /** Core-temperature doneness over the bake profile; null when no thermal step. */
+  doneness: DonenessResult | null;
+  /** Lipid-oxidation rancidity potential over an assumed storage scenario. */
+  oxidation: OxidationResult | null;
+  /** Moisture migration between phases (components) at different a_w; null when single-phase. */
+  moisture: MoistureMigrationResult | null;
 }
 
 function deriveWarnings(
@@ -146,6 +163,46 @@ export function useRecipePhysics(
       });
     }
 
+    // Process layer: integrate reaction kinetics over the recipe's bake T·time
+    // profile (assembled from every component's steps; extent is order-independent,
+    // so flattening components is exact). Null when there is no thermal step
+    // (unbaked / frozen items). Geometry for the doneness core-temperature model
+    // is unknown in the data model, so a default portion size is assumed.
+    const processProfile = buildProcessProfile(
+      (recipe.components ?? []).flatMap(c => c.steps ?? []),
+    );
+    const hasThermalProfile = processProfile.segments.length > 0;
+    const mixComposition = aggregateComposition(resolvedIngredients);
+    const browning: MaillardResult | null =
+      hasThermalProfile && aw.aw !== null
+        ? computeMaillardBrowning(mixComposition, aw.aw, processProfile)
+        : null;
+    const doneness: DonenessResult | null =
+      hasThermalProfile
+        ? computeDoneness({ profile: processProfile, composition: mixComposition, charLengthM: DEFAULT_CHAR_LENGTH_M })
+        : null;
+
+    // Storage-scenario models run over an assumed timeline (ambient × shelf life).
+    const storageDays = recipe.haccp?.shelfLifeDays ?? STORAGE_DEFAULT_DAYS;
+    const storageProfile = profileFromSegments([{ tempC: STORAGE_TEMP_C, durationS: storageDays * SECONDS_PER_DAY }]);
+    const oxidation: OxidationResult | null =
+      aw.aw !== null ? computeLipidOxidation(mixComposition, aw.aw, storageProfile) : null;
+
+    // Moisture migration between phases (components) at different a_w. a_w is
+    // intensive, so each component's a_w is computed by resolving it in isolation.
+    const recipeComponents = recipe.components ?? [];
+    let moisture: MoistureMigrationResult | null = null;
+    if (recipeComponents.length >= 2) {
+      const phaseAws: number[] = [];
+      for (const comp of recipeComponents) {
+        const { resolved } = resolveRecipeLeaves({ ...recipe, components: [comp] }, ingredients, allRecipes, scale);
+        if (resolved.length === 0) continue;
+        const a = calculateNorrishAw(resolved).aw;
+        if (a !== null) phaseAws.push(a);
+      }
+      moisture = computeMoistureMigration(phaseAws, storageProfile);
+    }
+
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
@@ -167,6 +224,10 @@ export function useRecipePhysics(
       confectionery,
       frozen,
       bread,
+      browning,
+      doneness,
+      oxidation,
+      moisture,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }
