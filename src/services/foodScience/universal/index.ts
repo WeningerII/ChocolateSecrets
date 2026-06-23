@@ -2,6 +2,7 @@ export * from './types';
 export * from './norrish';
 export * from './freezing';
 export * from './boiling';
+export * from './crystallization';
 export * from './glassTransition';
 export * from './solidFat';
 export * from './pH';

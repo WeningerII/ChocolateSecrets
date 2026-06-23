@@ -59,6 +59,7 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   // --- Microstructure ---
   { id: 'solid_fat_content', category: 'microstructure', predictability: 'calibrated', measurability: { instrument: 'pNMR (ISO 8292)' }, computedBy: 'sfcAtTemp' },
   { id: 'polymorph_temper_window', category: 'microstructure', predictability: 'calibrated', measurability: { instrument: 'XRD / DSC' }, computedBy: 'computePolymorphWindow' },
+  { id: 'sugar_crystallization', category: 'microstructure', predictability: 'calibrated', measurability: { instrument: 'microscopy / polarimetry' }, computedBy: 'computeSucroseCrystallization', notes: 'Graining risk: sucrose supersaturation vs the solubility curve, suppressed by doctoring sugars.' },
   { id: 'ice_crystal_size', category: 'microstructure', predictability: 'none', measurability: { instrument: 'cold-stage microscopy' }, computedBy: null, notes: 'Process/storage-set, not derivable from composition.' },
   { id: 'overrun', category: 'microstructure', predictability: 'none', measurability: { instrument: 'density / weight ratio' }, computedBy: null, notes: 'Aeration is a process variable.' },
 
