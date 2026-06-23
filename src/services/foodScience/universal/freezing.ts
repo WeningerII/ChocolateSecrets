@@ -21,13 +21,18 @@ import { MOLECULAR_WEIGHTS, NORRISH_SPECIES } from './norrish';
  * this reuses the same aqueous masses (`massBy`) the Norrish kernel produces —
  * no separate composition pass, and ethanol retention is already applied.
  *
- * Electrolytes (NaCl etc.) are not yet modeled — the Norrish solute set is
- * non-dissociating. Adding salt means extending FREEZING_ACTIVE with a van 't
- * Hoff factor; sweet frozen desserts are fully covered without it.
+ * Electrolytes (NaCl) are added via the optional `sodiumMass` input: sodium is
+ * treated as NaCl and contributes 2 osmotic moles per mole Na (van 't Hoff
+ * i = 2). Sweet frozen desserts (sodium ≈ 0) are unaffected.
  */
 
 /** Cryoscopic constant of water, °C·kg/mol. */
 export const KF_WATER = 1.86;
+
+/** Molar mass of sodium, g/mol. */
+const SODIUM_MOLAR_MASS = 22.99;
+/** van 't Hoff factor for NaCl (full dissociation into Na⁺ + Cl⁻). */
+const VAN_T_HOFF_NACL = 2;
 
 export type FreezingFlag =
   | { kind: 'no_water' }
@@ -36,7 +41,7 @@ export type FreezingFlag =
 export interface FreezingResult {
   /** Initial freezing point of the serum, °C (≤ 0). null when there is no water. */
   initialFreezingPointC: number | null;
-  /** Freezing-active osmotic moles (van 't Hoff i = 1 for the Norrish solutes). */
+  /** Freezing-active osmotic moles (Norrish solutes at i = 1, plus any NaCl at i = 2). */
   osmoticMoles: number;
   /** Grams of water in the serum. */
   waterMass: number;
@@ -53,7 +58,10 @@ const FREEZING_SOLUTES = NORRISH_SPECIES.filter((s) => s !== 'water');
  * Compute the freezing curve from aqueous solute masses (the `massBy` map the
  * Norrish kernel emits: species → grams, water included).
  */
-export function computeFreezing(massBy: Record<string, number>): FreezingResult {
+export function computeFreezing(
+  massBy: Record<string, number>,
+  opts: { sodiumMass?: number } = {},
+): FreezingResult {
   const waterMass = massBy.water ?? 0;
   const flags: FreezingFlag[] = [];
 
@@ -63,6 +71,10 @@ export function computeFreezing(massBy: Record<string, number>): FreezingResult 
     const mw = MOLECULAR_WEIGHTS[sp];
     if (m > 0 && mw) osmoticMoles += m / mw; // van 't Hoff i = 1 for sugars/polyols/ethanol
   }
+  // Electrolyte term: sodium (treated as NaCl) dissociates into two ions, so it
+  // contributes 2 osmotic moles per mole Na (van 't Hoff i = 2).
+  const sodiumMass = opts.sodiumMass ?? 0;
+  if (sodiumMass > 0) osmoticMoles += (VAN_T_HOFF_NACL * sodiumMass) / SODIUM_MOLAR_MASS;
 
   if (waterMass <= 0) {
     return {

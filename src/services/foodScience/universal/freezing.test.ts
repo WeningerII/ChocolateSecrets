@@ -51,6 +51,21 @@ describe('computeFreezing (ideal colligative freezing curve)', () => {
     expect(f.flags.some((x) => x.kind === 'no_water')).toBe(true);
   });
 
+  test('NaCl (sodium) depresses the freezing point further via electrolyte dissociation (i = 2)', () => {
+    const noSalt = computeFreezing({ water: 100, sucrose: 20 });
+    const salted = computeFreezing({ water: 100, sucrose: 20 }, { sodiumMass: 0.393 }); // ~1 g NaCl
+    expect(salted.initialFreezingPointC!).toBeLessThan(noSalt.initialFreezingPointC!);
+    // 20 g sucrose (0.0584 mol) + 0.393 g Na → 2 × 0.393/22.99 osmotic mol
+    expect(salted.osmoticMoles).toBeCloseTo(20 / 342.30 + (2 * 0.393) / 22.99, 4);
+  });
+
+  test('zero / omitted sodium leaves the curve identical (backward compatible)', () => {
+    const a = computeFreezing({ water: 100, sucrose: 20 });
+    const b = computeFreezing({ water: 100, sucrose: 20 }, { sodiumMass: 0 });
+    expect(b.initialFreezingPointC).toBe(a.initialFreezingPointC);
+    expect(b.osmoticMoles).toBe(a.osmoticMoles);
+  });
+
   test('lower-MW sugar depresses the freezing point more per gram (colligative)', () => {
     const sucrose = computeFreezing({ water: 100, sucrose: 20 });
     const dextrose = computeFreezing({ water: 100, glucose: 20 }); // ~half the MW → ~2× moles
