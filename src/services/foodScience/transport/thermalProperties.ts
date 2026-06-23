@@ -63,6 +63,14 @@ const RHO: Record<Component, Quad> = {
   ethanol: [789, 0, 0],
 };
 
+/** Ice (Choi–Okos, T < 0 °C) — used for the water fraction in the frozen state.
+ *  Ice conducts ~4× better than water, which is why frozen food cools/warms fast. */
+const ICE = {
+  cp:  [2062.3, 6.0769, 0] as Quad,
+  k:   [2.2196, -6.2489e-3, 1.0154e-4] as Quad,
+  rho: [916.89, -0.13071, 0] as Quad,
+};
+
 export interface ThermalProperties {
   /** Thermal conductivity [W·m⁻¹·K⁻¹]. */
   k: number;
@@ -96,10 +104,20 @@ function componentMasses(c: Composition): Record<Component, number> {
  * composition at temperature `tempC` (default 20 °C). Returns null if the
  * composition carries no mass to model.
  */
-export function computeThermalProperties(composition: Composition, tempC = 20): ThermalProperties | null {
+export function computeThermalProperties(
+  composition: Composition,
+  tempC = 20,
+  state: 'thawed' | 'frozen' = 'thawed',
+): ThermalProperties | null {
   const masses = componentMasses(composition);
   const totalMass = (Object.values(masses) as number[]).reduce((s, m) => s + m, 0);
   if (totalMass <= 0) return null;
+
+  // In the frozen state the water fraction behaves as ice.
+  const ice = state === 'frozen';
+  const cpQ = (c: Component) => (ice && c === 'water' ? ICE.cp : CP[c]);
+  const kQ = (c: Component) => (ice && c === 'water' ? ICE.k : K[c]);
+  const rhoQ = (c: Component) => (ice && c === 'water' ? ICE.rho : RHO[c]);
 
   // Mass fractions over the components we resolved.
   const components = Object.keys(masses) as Component[];
@@ -111,8 +129,8 @@ export function computeThermalProperties(composition: Composition, tempC = 20): 
   for (const comp of components) {
     const x = masses[comp] / totalMass;
     if (x <= 0) continue;
-    cp += x * quad(CP[comp], tempC);
-    const rhoI = quad(RHO[comp], tempC);
+    cp += x * quad(cpQ(comp), tempC);
+    const rhoI = quad(rhoQ(comp), tempC);
     invRho += x / rhoI;
     const v = x / rhoI;
     volContrib[comp] = v;
@@ -123,7 +141,7 @@ export function computeThermalProperties(composition: Composition, tempC = 20): 
   let k = 0;
   for (const comp of components) {
     const v = volContrib[comp];
-    if (v) k += (v / volTotal) * quad(K[comp], tempC);
+    if (v) k += (v / volTotal) * quad(kQ(comp), tempC);
   }
 
   const alpha = k / (rho * cp);
