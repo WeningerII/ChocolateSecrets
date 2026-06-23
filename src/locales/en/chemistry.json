@@ -52,6 +52,13 @@
       "moles": "Moles",
       "moleFraction": "Mole fraction"
     },
+    "nutrition": {
+      "title": "Energy & nutrition",
+      "energy": "Energy (per 100 g)",
+      "macros": "Macros (g/100 g)",
+      "macroSplit": "C {{carb}} · F {{fat}} · P {{protein}}",
+      "caveat": "Atwater energy from macronutrients, per 100 g of formula."
+    },
     "norrish": {
       "title": "Norrish equation (Chirife et al. 1980)",
       "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",
@@ -130,6 +137,77 @@
         "moderate": "Above casein's isoelectric point but in a sensitized range — standard technique works.",
         "low": "Below casein's isoelectric point (4.6) — curdle risk requires careful temperature control during fold.",
         "veryLow": "Well below casein's isoelectric point (4.6) — curdle is essentially guaranteed if cream contacts at high temperature."
+      }
+    },
+    "taste": {
+      "title": "Taste profile",
+      "quality": {
+        "sweet": "Sweet",
+        "salty": "Salty",
+        "sour": "Sour",
+        "bitter": "Bitter",
+        "umami": "Umami"
+      },
+      "balance": "Taste balance",
+      "caveat": "Perceived intensity 0–100 after taste interactions. Sourness uses pH (titratable acidity is better); bitter & umami await a compound inventory."
+    },
+    "structure": {
+      "title": "Structure & texture",
+      "emulsion": {
+        "label": "Emulsion",
+        "type": {
+          "oil_in_water": "Oil-in-water",
+          "water_in_oil": "Water-in-oil",
+          "none": "—"
+        },
+        "stability": {
+          "stable": "stable",
+          "metastable": "metastable",
+          "unstable": "unstable",
+          "none": "—"
+        }
+      },
+      "foam": {
+        "label": "Foam stability",
+        "band": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "none": "—"
+        }
+      },
+      "rheology": {
+        "label": "Consistency",
+        "consistency": {
+          "thin": "Thin",
+          "pourable": "Pourable",
+          "syrupy": "Syrupy",
+          "viscous": "Viscous",
+          "spoonable": "Spoonable",
+          "paste": "Paste"
+        },
+        "flow": {
+          "newtonian": "Newtonian",
+          "plastic_yield_stress": "Plastic (yield stress)"
+        }
+      },
+      "caveat": "Emulsifier and gelling agents are detected by ingredient name; HLB and agent identity are catalog estimates.",
+      "gelation": {
+        "label": "Gelation",
+        "agent": {
+          "gelatin": "Gelatin",
+          "agar": "Agar",
+          "pectin_hm": "Pectin (HM)",
+          "pectin_lm": "Pectin (LM)",
+          "kappa_carrageenan": "κ-Carrageenan",
+          "iota_carrageenan": "ι-Carrageenan",
+          "starch": "Starch",
+          "methylcellulose": "Methylcellulose",
+          "sodium_alginate": "Alginate"
+        },
+        "sets": "sets",
+        "setsAt": "sets at {{temp}}°C",
+        "wontSet": "won't set"
       }
     },
     "bands": {
@@ -338,7 +416,8 @@
       "warning_count": "Warnings",
       "composition_completeness": "Composition data",
       "ice_fraction_at_serving_distance": "Ice fraction at serving",
-      "recrystallization_margin": "Storage stability"
+      "recrystallization_margin": "Storage stability",
+      "palatability_balance": "Taste balance"
     },
     "searchSpace": {
       "title": "Search Space",

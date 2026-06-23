@@ -2,6 +2,7 @@ import type { OptimizerObjective, OptimizerTargets, ObjectiveWeights, Recipe, In
 import type { AwResult, FatRegime, ShelfLifePrediction } from '../universal';
 import { computeFreezing, estimateTgPrime } from '../universal';
 import type { ConfectioneryEvaluation } from '../confectionery';
+import type { PalatabilityResult } from '../perception';
 
 const RISK_RANK: Record<string, number> = { none: 0, low: 1, medium: 2, high: 3 };
 
@@ -13,6 +14,8 @@ interface EvalContext {
   costPerGram: number;
   warningCount: number;
   compositionCompleteness: number;
+  /** Population-level sensory balance (the "delicious" proxy); null if no taste data. */
+  palatability: PalatabilityResult | null;
   hardConstraintViolated: boolean;
 }
 
@@ -37,6 +40,7 @@ export function evaluateObjectives(
       composition_completeness: 0.05,
       ice_fraction_at_serving_distance: 0.05,
       recrystallization_margin: 0.05,
+      palatability_balance: 0.05,
     };
   }
 
@@ -103,6 +107,12 @@ export function evaluateObjectives(
     }
   }
 
+  // Palatability — the "make it delicious" objective. Population-level sensory
+  // balance from the taste profile (0–100), normalized to [0..1]. Neutral (1.0)
+  // when there is no taste data to score, so it never penalizes a candidate the
+  // model simply cannot taste.
+  const palatabilityBalance = ctx.palatability ? ctx.palatability.balance / 100 : 1.0;
+
   return {
     aw_distance_to_target: awDistanceToTarget,
     aw_below_threshold: awBelowThreshold,
@@ -114,6 +124,7 @@ export function evaluateObjectives(
     composition_completeness: ctx.compositionCompleteness,
     ice_fraction_at_serving_distance: iceFractionDistance,
     recrystallization_margin: recrystallizationMargin,
+    palatability_balance: palatabilityBalance,
   };
 }
 

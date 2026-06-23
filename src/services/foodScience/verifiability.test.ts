@@ -4,6 +4,8 @@ import * as universal from './universal';
 import * as frozen from './frozen';
 import * as confectionery from './confectionery';
 import * as processLayer from './process';
+import * as perception from './perception';
+import * as structure from './structure';
 
 describe('verifiability registry', () => {
   test('dimension ids are unique', () => {
@@ -17,13 +19,19 @@ describe('verifiability registry', () => {
     }
   });
 
-  test('aroma and hedonic liking are encoded as the hard wall', () => {
-    for (const id of ['aroma_character', 'hedonic_liking']) {
-      const d = QUALITY_DIMENSIONS.find((x) => x.id === id);
-      expect(d?.predictability).toBe('none');
-      expect(d?.measurability).toBe('panel_only');
-      expect(d?.computedBy).toBeNull();
-    }
+  test('hedonic liking remains the wall; aroma character is a frontier, not a wall', () => {
+    // The wall sits only at individual hedonic liking.
+    const hedonic = QUALITY_DIMENSIONS.find((x) => x.id === 'hedonic_liking');
+    expect(hedonic?.predictability).toBe('none');
+    expect(hedonic?.measurability).toBe('panel_only');
+    expect(hedonic?.computedBy).toBeNull();
+
+    // Aroma character is a frontier (structure→odor ML): modelable in principle,
+    // just not built yet — so 'proxy', not 'none'.
+    const aroma = QUALITY_DIMENSIONS.find((x) => x.id === 'aroma_character');
+    expect(aroma?.predictability).toBe('proxy');
+    expect(aroma?.measurability).toBe('panel_only');
+    expect(aroma?.computedBy).toBeNull();
   });
 
   // Measurability and predictability are orthogonal (the subtle scope point):
@@ -54,7 +62,7 @@ describe('verifiability registry ↔ kernel exports (anti-rot link check)', () =
   // Collect every callable exported from the kernel barrels the registry points at,
   // so a renamed or removed kernel function can't silently leave the ledger dangling.
   const callableExports = new Set<string>();
-  for (const ns of [universal, frozen, confectionery, processLayer]) {
+  for (const ns of [universal, frozen, confectionery, processLayer, perception, structure]) {
     for (const [name, value] of Object.entries(ns)) {
       if (typeof value === 'function') callableExports.add(name);
     }

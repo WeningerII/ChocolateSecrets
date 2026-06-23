@@ -155,15 +155,13 @@ function solvePH(mix: PhMixture): number {
   return (lo + hi) / 2;
 }
 
-/**
- * Calculate mixed-system pH from a list of resolved ingredients.
- * Only ingredients with a recognized bufferRef contribute to the pH calculation.
- * Returns null if no ingredient resolves to a buffer reference.
- */
-export function calculateMixedPH(ingredients: ResolvedIngredient[]): PHResult | null {
+/** Collect the buffer components an ingredient list contributes (shared by pH + TA). */
+function collectBufferComponents(ingredients: ResolvedIngredient[]): {
+  components: Array<{ bufferRef: string; comp: BufferComponent; waterMass: number }>;
+  flags: PHFlag[];
+} {
   const flags: PHFlag[] = [];
   const components: Array<{ bufferRef: string; comp: BufferComponent; waterMass: number }> = [];
-
   for (const ing of ingredients) {
     if (!ing.bufferRef) continue;
     const comp = BUFFER_REFERENCES[ing.bufferRef];
@@ -172,11 +170,18 @@ export function calculateMixedPH(ingredients: ResolvedIngredient[]): PHResult | 
       continue;
     }
     const waterMass = ing.mass * (ing.composition.water ?? 0) / 100;
-    if (waterMass > 0) {
-      components.push({ bufferRef: ing.bufferRef, comp, waterMass });
-    }
+    if (waterMass > 0) components.push({ bufferRef: ing.bufferRef, comp, waterMass });
   }
+  return { components, flags };
+}
 
+/**
+ * Calculate mixed-system pH from a list of resolved ingredients.
+ * Only ingredients with a recognized bufferRef contribute to the pH calculation.
+ * Returns null if no ingredient resolves to a buffer reference.
+ */
+export function calculateMixedPH(ingredients: ResolvedIngredient[]): PHResult | null {
+  const { components, flags } = collectBufferComponents(ingredients);
   if (components.length === 0) {
     flags.push({ kind: 'no_buffer_data' });
     return null;
@@ -195,6 +200,58 @@ export function calculateMixedPH(ingredients: ResolvedIngredient[]): PHResult | 
       waterMass: c.waterMass,
       fraction: c.waterMass / mix.totalWater,
     })),
+    flags,
+  };
+}
+
+/** Titration endpoint for titratable acidity (phenolphthalein, pH 8.2). */
+export const TITRATION_ENDPOINT_PH = 8.2;
+/** Citric-acid equivalent weight, g/eq (MW 192.12 / 3 protons). */
+const CITRIC_EQ_WEIGHT = 64.04;
+
+export interface TitratableAcidityResult {
+  /** Free-acidity pH of the mix. */
+  pH: number;
+  /** Titratable acidity: base required to reach the endpoint, eq per litre of water. */
+  eqPerLitre: number;
+  /** Expressed as % citric-acid equivalent (w/v, g per 100 mL). */
+  pctCitricEquivalent: number;
+  flags: PHFlag[];
+}
+
+/**
+ * Titratable acidity — the total neutralizable acid (the better predictor of
+ * perceived sourness than pH, which sees only free H⁺). Computed from the same
+ * acid model as the pH solver: the base needed to titrate the mix from its own
+ * pH up to the endpoint, i.e. the protons released by every acid plus free H⁺.
+ */
+export function computeTitratableAcidity(ingredients: ResolvedIngredient[]): TitratableAcidityResult | null {
+  const { components, flags } = collectBufferComponents(ingredients);
+  if (components.length === 0) {
+    flags.push({ kind: 'no_buffer_data' });
+    return null;
+  }
+
+  const mix = buildPhMixture(components);
+  if (!mix) return null;
+
+  const pH = solvePH(mix);
+  const hSample = Math.pow(10, -pH);
+  const hEnd = Math.pow(10, -TITRATION_ENDPOINT_PH);
+  const ohSample = 1e-14 / hSample;
+  const ohEnd = 1e-14 / hEnd;
+
+  // Base (eq/L water) = Δ(acid dissociation) over the titration + free H⁺/OH⁻ shift.
+  let eqPerLitre = (ohEnd - ohSample) - (hEnd - hSample);
+  for (const acid of mix.acids) {
+    eqPerLitre += negativeChargeFromAcid(acid, TITRATION_ENDPOINT_PH) - negativeChargeFromAcid(acid, pH);
+  }
+  eqPerLitre = Math.max(0, eqPerLitre);
+
+  return {
+    pH,
+    eqPerLitre,
+    pctCitricEquivalent: (eqPerLitre * CITRIC_EQ_WEIGHT) / 10,
     flags,
   };
 }

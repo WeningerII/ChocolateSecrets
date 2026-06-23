@@ -52,6 +52,13 @@
       "moles": "몰수",
       "moleFraction": "몰 분율"
     },
+    "nutrition": {
+      "title": "열량 및 영양",
+      "energy": "열량 (100 g당)",
+      "macros": "다량영양소 (g/100 g)",
+      "macroSplit": "탄 {{carb}} · 지 {{fat}} · 단 {{protein}}",
+      "caveat": "Atwater 방식 다량영양소 열량, 배합 100 g 기준."
+    },
     "norrish": {
       "title": "Norrish 방정식",
       "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",
@@ -130,6 +137,77 @@
         "moderate": "등전점(4.6) 위, 민감한 구간 - 보통 kỹ thuật로 조절 가능.",
         "low": "등전점(4.6) 이하 - 응고 위험 높음 (온도 주의).",
         "veryLow": "등전점(4.6) 한참 아래 - 따뜻한 반응 시 무조건 응고됨."
+      }
+    },
+    "taste": {
+      "title": "맛 프로필",
+      "quality": {
+        "sweet": "단맛",
+        "salty": "짠맛",
+        "sour": "신맛",
+        "bitter": "쓴맛",
+        "umami": "감칠맛"
+      },
+      "balance": "맛 균형",
+      "caveat": "맛 상호작용을 반영한 0–100 지각 강도입니다. 신맛은 pH를 사용합니다(적정산도가 더 정확). 쓴맛·감칠맛은 화합물 인벤토리가 필요합니다."
+    },
+    "structure": {
+      "title": "구조 및 식감",
+      "emulsion": {
+        "label": "에멀션",
+        "type": {
+          "oil_in_water": "수중유(O/W)",
+          "water_in_oil": "유중수(W/O)",
+          "none": "—"
+        },
+        "stability": {
+          "stable": "안정",
+          "metastable": "준안정",
+          "unstable": "불안정",
+          "none": "—"
+        }
+      },
+      "foam": {
+        "label": "거품 안정성",
+        "band": {
+          "poor": "낮음",
+          "fair": "보통",
+          "good": "좋음",
+          "none": "—"
+        }
+      },
+      "rheology": {
+        "label": "점도/농도",
+        "consistency": {
+          "thin": "묽음",
+          "pourable": "부을 수 있음",
+          "syrupy": "시럽",
+          "viscous": "점성",
+          "spoonable": "떠먹는 농도",
+          "paste": "페이스트"
+        },
+        "flow": {
+          "newtonian": "뉴턴 유체",
+          "plastic_yield_stress": "소성(항복응력)"
+        }
+      },
+      "caveat": "유화제·겔화제는 재료 이름으로 감지됩니다; HLB와 작용제 식별은 카탈로그 추정치입니다.",
+      "gelation": {
+        "label": "겔화",
+        "agent": {
+          "gelatin": "젤라틴",
+          "agar": "한천",
+          "pectin_hm": "펙틴(HM)",
+          "pectin_lm": "펙틴(LM)",
+          "kappa_carrageenan": "κ-카라기난",
+          "iota_carrageenan": "ι-카라기난",
+          "starch": "전분",
+          "methylcellulose": "메틸셀룰로스",
+          "sodium_alginate": "알긴산염"
+        },
+        "sets": "겔화됨",
+        "setsAt": "{{temp}}°C에서 겔화",
+        "wontSet": "겔화 안 됨"
       }
     },
     "bands": {
@@ -338,7 +416,8 @@
       "warning_count": "경고",
       "composition_completeness": "조성 데이터",
       "ice_fraction_at_serving_distance": "제공 시 빙결 비율",
-      "recrystallization_margin": "보관 안정성"
+      "recrystallization_margin": "보관 안정성",
+      "palatability_balance": "맛 균형"
     },
     "searchSpace": {
       "title": "탐색 공간",

@@ -3,22 +3,28 @@ import type { Recipe, Ingredient } from '../types';
 import {
   calculateNorrishAw,
   calculateMixedPH,
+  computeTitratableAcidity,
+  computeNutrition,
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
   aggregateComposition,
   type ResolvedIngredient,
+  type TitratableAcidityResult,
   type AwResult,
   type PHResult,
   type ShelfLifePrediction,
   type AwBand,
   type FatRegime,
+  type NutritionResult,
 } from '../services/foodScience/universal';
 
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
+import { computeTasteProfile, computePalatability, type TasteProfile, type PalatabilityResult } from '../services/foodScience/perception';
+import { computeEmulsion, computeFoam, computeRheology, computeGelation, resolveFunctionalAgent, type EmulsionResult, type FoamResult, type RheologyResult, type GelationResult, type GellingAgent } from '../services/foodScience/structure';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 /** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
@@ -27,6 +33,8 @@ import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipe
 const STORAGE_TEMP_C = 20;
 const STORAGE_DEFAULT_DAYS = 90;
 const SECONDS_PER_DAY = 86_400;
+/** Temperature at which consistency/viscosity is reported (working/room temp). */
+const RHEOLOGY_TEMP_C = 20;
 
 export interface PhysicsWarning {
   kind:
@@ -48,6 +56,7 @@ export interface PhysicsWarning {
 export interface RecipePhysics {
   aw: AwResult;
   pH: PHResult | null;
+  titratableAcidity: TitratableAcidityResult | null;
   shelfLife: ShelfLifePrediction;
   awBand: AwBand;
   fatRegime: FatRegime;
@@ -67,6 +76,20 @@ export interface RecipePhysics {
   oxidation: OxidationResult | null;
   /** Moisture migration between phases (components) at different a_w; null when single-phase. */
   moisture: MoistureMigrationResult | null;
+  /** Perceived basic-taste intensities (0–100) from composition + pH. */
+  taste: TasteProfile;
+  /** Population-level taste balance (0–100) — the optimizer's "delicious" target. */
+  palatability: PalatabilityResult;
+  /** Emulsion type & stability (composition-based; emulsifier not yet auto-detected). */
+  emulsion: EmulsionResult;
+  /** Foam capacity & stability. */
+  foam: FoamResult;
+  /** Apparent viscosity, flow type & consistency. */
+  rheology: RheologyResult;
+  /** Gel set/melt behavior when a gelling agent is detected; null otherwise. */
+  gelation: GelationResult | null;
+  /** Atwater energy + macronutrients (per 100 g). */
+  nutrition: NutritionResult;
 }
 
 function deriveWarnings(
@@ -127,6 +150,7 @@ export function useRecipePhysics(
 
     const aw = calculateNorrishAw(resolvedIngredients);
     const pH = calculateMixedPH(resolvedIngredients);
+    const titratableAcidity = computeTitratableAcidity(resolvedIngredients);
     const shelfLife = predictShelfLife(aw, resolvedIngredients, {
       declaredShelfLifeDays: recipe.haccp?.shelfLifeDays,
     });
@@ -203,6 +227,43 @@ export function useRecipePhysics(
       moisture = computeMoistureMigration(phaseAws, storageProfile);
     }
 
+    // Perception: receptor-level taste intensities from the mix composition + pH,
+    // then population-level palatability balance — the number the formulation
+    // optimizer maximizes ("make it delicious").
+    const taste = computeTasteProfile(mixComposition, pH?.pH ?? null, {
+      titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
+    });
+    const palatability = computePalatability(taste);
+
+    const nutrition = computeNutrition(mixComposition);
+
+    // Structure & texture. Detect functional agents by ingredient name so the
+    // emulsion (emulsifier HLB) and gelation (which agent + dose) are data-driven.
+    let emulsifierHlbMass = 0;
+    let emulsifierMass = 0;
+    let topGellingAgent: { agent: GellingAgent; mass: number } | null = null;
+    let leafTotalMass = 0;
+    for (const r of resolvedIngredients) {
+      leafTotalMass += r.mass;
+      const fa = resolveFunctionalAgent(r.name);
+      if (!fa) continue;
+      if (fa.kind === 'emulsifier') {
+        emulsifierHlbMass += fa.hlb * r.mass;
+        emulsifierMass += r.mass;
+      } else if (!topGellingAgent || r.mass > topGellingAgent.mass) {
+        topGellingAgent = { agent: fa.agent, mass: r.mass };
+      }
+    }
+    const emulsifierHLB = emulsifierMass > 0 ? emulsifierHlbMass / emulsifierMass : undefined;
+
+    const rheology = computeRheology(mixComposition, RHEOLOGY_TEMP_C);
+    const emulsion = computeEmulsion({ composition: mixComposition, emulsifierHLB });
+    const foam = computeFoam(mixComposition);
+    const gelation: GelationResult | null =
+      topGellingAgent && leafTotalMass > 0
+        ? computeGelation(topGellingAgent.agent, (topGellingAgent.mass / leafTotalMass) * 100, { sugarBrix: rheology.brix })
+        : null;
+
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
@@ -216,7 +277,7 @@ export function useRecipePhysics(
     }
 
     return {
-      aw, pH, shelfLife, awBand, fatRegime, warnings,
+      aw, pH, titratableAcidity, shelfLife, awBand, fatRegime, warnings,
       computedAmounts,
       totalMass,
       scale,
@@ -228,6 +289,13 @@ export function useRecipePhysics(
       doneness,
       oxidation,
       moisture,
+      taste,
+      palatability,
+      emulsion,
+      foam,
+      rheology,
+      gelation,
+      nutrition,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

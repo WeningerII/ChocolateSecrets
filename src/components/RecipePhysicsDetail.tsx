@@ -80,6 +80,30 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </tbody>
       </table>
 
+      {/* Energy & nutrition */}
+      {physics.nutrition.energyKcalPer100g > 0 && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.nutrition.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.nutrition.energy')}</span>
+              <span className="font-mono">{Math.round(physics.nutrition.energyKcalPer100g)} kcal · {Math.round(physics.nutrition.energyKJPer100g)} kJ</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.nutrition.macros')}</span>
+              <span className="font-mono">
+                {t('chemistry:detail.nutrition.macroSplit' as any, {
+                  carb: physics.nutrition.carbohydrateG.toFixed(1),
+                  fat: physics.nutrition.fatG.toFixed(1),
+                  protein: physics.nutrition.proteinG.toFixed(1),
+                })}
+              </span>
+            </div>
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.nutrition.caveat')}</p>
+        </>
+      )}
+
       {/* Norrish walkthrough */}
       <SectionHeader className="mt-5">{t('chemistry:detail.norrish.title')}</SectionHeader>
       {norrishWalkthrough}
@@ -135,6 +159,29 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
           {phInterpretationKey && (
             <p className="text-xs mt-1 italic text-cocoa-600">{t(phInterpretationKey as any)}</p>
           )}
+        </>
+      )}
+
+      {/* Taste profile (perception layer) */}
+      {(physics.taste.sweet + physics.taste.salty + physics.taste.sour) > 0.5 && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.taste.title')}</SectionHeader>
+          <div className="mt-2 space-y-1.5">
+            {(['sweet', 'salty', 'sour'] as const).map(q => (
+              <div key={q} className="grid grid-cols-[64px_1fr_32px] items-center gap-2 text-xs">
+                <span className="text-cocoa-500">{t(`chemistry:detail.taste.quality.${q}` as any)}</span>
+                <div className="h-1.5 bg-cream-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-cocoa-400 rounded-full" style={{ width: `${Math.min(100, physics.taste[q])}%` }} />
+                </div>
+                <span className="font-mono text-right text-cocoa-600">{Math.round(physics.taste[q])}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2.5 flex items-baseline justify-between text-xs">
+            <span className="text-cocoa-600 font-medium">{t('chemistry:detail.taste.balance')}</span>
+            <span className="font-mono text-cocoa-800">{Math.round(physics.palatability.balance)}<span className="text-cocoa-400">/100</span></span>
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.taste.caveat')}</p>
         </>
       )}
 
@@ -230,6 +277,56 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
             </div>
           </div>
           <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.moisture.caveat')}</p>
+        </>
+      )}
+
+      {/* Structure & texture */}
+      {(physics.emulsion.type !== 'none' || physics.foam.band !== 'none' || physics.gelation || physics.aw.waterPct > 5) && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.structure.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            {physics.emulsion.type !== 'none' && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.emulsion.label')}</span>
+                <span className="font-medium text-cocoa-900">
+                  {t(`chemistry:detail.structure.emulsion.type.${physics.emulsion.type}` as any)}
+                  {' · '}
+                  {t(`chemistry:detail.structure.emulsion.stability.${physics.emulsion.stability}` as any)}
+                </span>
+              </div>
+            )}
+            {physics.foam.band !== 'none' && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.foam.label')}</span>
+                <span className="font-medium text-cocoa-900">{t(`chemistry:detail.structure.foam.band.${physics.foam.band}` as any)}</span>
+              </div>
+            )}
+            {physics.aw.waterPct > 5 && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.rheology.label')}</span>
+                <span className="font-medium text-cocoa-900">
+                  {t(`chemistry:detail.structure.rheology.consistency.${physics.rheology.consistency}` as any)}
+                  {' · '}
+                  {t(`chemistry:detail.structure.rheology.flow.${physics.rheology.flowType}` as any)}
+                </span>
+              </div>
+            )}
+            {physics.gelation && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.gelation.label')}</span>
+                <span className="font-medium text-cocoa-900">
+                  {t(`chemistry:detail.structure.gelation.agent.${physics.gelation.agent}` as any)}
+                  {' · '}
+                  {physics.gelation.gels
+                    ? (physics.gelation.setTempC !== null
+                        ? t('chemistry:detail.structure.gelation.setsAt' as any, { temp: physics.gelation.setTempC })
+                        : t('chemistry:detail.structure.gelation.sets'))
+                    : t('chemistry:detail.structure.gelation.wontSet')}
+                </span>
+              </div>
+            )}
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.structure.caveat')}</p>
         </>
       )}
 

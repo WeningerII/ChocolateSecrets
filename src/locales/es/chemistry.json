@@ -52,6 +52,13 @@
       "moles": "Moles",
       "moleFraction": "Fracción molar"
     },
+    "nutrition": {
+      "title": "Energía y nutrición",
+      "energy": "Energía (por 100 g)",
+      "macros": "Macros (g/100 g)",
+      "macroSplit": "C {{carb}} · G {{fat}} · P {{protein}}",
+      "caveat": "Energía Atwater de los macronutrientes, por 100 g de fórmula."
+    },
     "norrish": {
       "title": "Ecuación de Norrish (Chirife et al. 1980)",
       "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",
@@ -130,6 +137,77 @@
         "moderate": "Por encima del punto isoeléctrico de caseína pero en área sensible — técnica regular.",
         "low": "Por debajo del punto isoeléctrico (4.6) — riesgo de corte necesita temperatura medida.",
         "veryLow": "Muy por debajo del punto isoeléctrico (4.6) — corte garantizado a alta temperatura."
+      }
+    },
+    "taste": {
+      "title": "Perfil de sabor",
+      "quality": {
+        "sweet": "Dulce",
+        "salty": "Salado",
+        "sour": "Ácido",
+        "bitter": "Amargo",
+        "umami": "Umami"
+      },
+      "balance": "Equilibrio de sabor",
+      "caveat": "Intensidad percibida 0–100 tras las interacciones de sabor. El ácido usa el pH (la acidez titulable es mejor); amargo y umami requieren un inventario de compuestos."
+    },
+    "structure": {
+      "title": "Estructura y textura",
+      "emulsion": {
+        "label": "Emulsión",
+        "type": {
+          "oil_in_water": "Aceite en agua",
+          "water_in_oil": "Agua en aceite",
+          "none": "—"
+        },
+        "stability": {
+          "stable": "estable",
+          "metastable": "metaestable",
+          "unstable": "inestable",
+          "none": "—"
+        }
+      },
+      "foam": {
+        "label": "Estabilidad de espuma",
+        "band": {
+          "poor": "Baja",
+          "fair": "Media",
+          "good": "Buena",
+          "none": "—"
+        }
+      },
+      "rheology": {
+        "label": "Consistencia",
+        "consistency": {
+          "thin": "Fluida",
+          "pourable": "Vertible",
+          "syrupy": "Jarabe",
+          "viscous": "Viscosa",
+          "spoonable": "Cremosa",
+          "paste": "Pasta"
+        },
+        "flow": {
+          "newtonian": "Newtoniana",
+          "plastic_yield_stress": "Plástica (umbral)"
+        }
+      },
+      "caveat": "Los emulsionantes y gelificantes se detectan por el nombre del ingrediente; el HLB y la identidad del agente son estimaciones de catálogo.",
+      "gelation": {
+        "label": "Gelificación",
+        "agent": {
+          "gelatin": "Gelatina",
+          "agar": "Agar",
+          "pectin_hm": "Pectina (AM)",
+          "pectin_lm": "Pectina (BM)",
+          "kappa_carrageenan": "κ-Carragenina",
+          "iota_carrageenan": "ι-Carragenina",
+          "starch": "Almidón",
+          "methylcellulose": "Metilcelulosa",
+          "sodium_alginate": "Alginato"
+        },
+        "sets": "gelifica",
+        "setsAt": "gelifica a {{temp}}°C",
+        "wontSet": "no gelifica"
       }
     },
     "bands": {
@@ -338,7 +416,8 @@
       "warning_count": "Advertencias",
       "composition_completeness": "Datos de composición",
       "ice_fraction_at_serving_distance": "Fracción de hielo al servir",
-      "recrystallization_margin": "Estabilidad en almacenamiento"
+      "recrystallization_margin": "Estabilidad en almacenamiento",
+      "palatability_balance": "Equilibrio de sabor"
     },
     "searchSpace": {
       "title": "Espacio de búsqueda",

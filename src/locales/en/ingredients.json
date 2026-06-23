@@ -152,7 +152,10 @@
       "protein": "Protein",
       "ash": "Ash",
       "unsaturatedFat": "Unsaturated fat",
-      "sodium": "Sodium"
+      "sodium": "Sodium",
+      "caffeine": "Caffeine",
+      "theobromine": "Theobromine",
+      "glutamate": "Glutamate (free)"
     },
     "subFractions": "Sub-fractions",
     "subFractionsNote": "Breakdowns of the values above (unsaturated ⊆ fat, sodium ⊆ ash) — not counted in the % sum."

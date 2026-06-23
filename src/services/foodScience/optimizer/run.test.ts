@@ -45,6 +45,17 @@ describe('runFormulationOptimizer', () => {
     expect(first.paretoRank).toBe(0);
   });
 
+  test('can optimize toward palatability (the "make it delicious" objective)', () => {
+    const res = runFormulationOptimizer({
+      ...baseInput,
+      weights: { palatability_balance: 1.0 },
+    });
+    expect(res.candidates.length).toBeGreaterThan(0);
+    const score = res.candidates[0].objectives.palatability_balance;
+    expect(score).toBeGreaterThanOrEqual(0);
+    expect(score).toBeLessThanOrEqual(1);
+  });
+
   test('returns only base recipe if search space empty', () => {
     const input: OptimizerInput = {
       ...baseInput,

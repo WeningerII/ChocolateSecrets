@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { calculateMixedPH, BUFFER_REFERENCES, alphaPolyprotic, calibrateCounterion } from './pH';
+import { calculateMixedPH, computeTitratableAcidity, BUFFER_REFERENCES, alphaPolyprotic, calibrateCounterion } from './pH';
 import type { ResolvedIngredient } from './types';
 
 function ing(name: string, mass: number, composition: Record<string, number>, bufferRef?: string): ResolvedIngredient {
@@ -34,6 +34,26 @@ describe('calibrateCounterion + BUFFER_REFERENCES', () => {
       expect(result).not.toBeNull();
       expect(result!.pH).toBeCloseTo(ref.naturalPH, 1);
     }
+  });
+});
+
+describe('computeTitratableAcidity', () => {
+  test('returns null without buffer data', () => {
+    expect(computeTitratableAcidity([ing('water', 100, { water: 100 })])).toBeNull();
+  });
+
+  test('a high-acid puree has higher titratable acidity than a mild one', () => {
+    const passion = computeTitratableAcidity([ing('passion', 100, { water: 85 }, 'puree.passion')]);
+    const pear = computeTitratableAcidity([ing('pear', 100, { water: 85 }, 'puree.pear')]);
+    expect(passion!.eqPerLitre).toBeGreaterThan(pear!.eqPerLitre);
+  });
+
+  test('passion-fruit TA is a realistic few-% citric equivalent at its natural pH', () => {
+    const r = computeTitratableAcidity([ing('passion', 100, { water: 85 }, 'puree.passion')]);
+    expect(r!.eqPerLitre).toBeGreaterThan(0);
+    expect(r!.pctCitricEquivalent).toBeGreaterThan(1);
+    expect(r!.pctCitricEquivalent).toBeLessThan(8);
+    expect(r!.pH).toBeCloseTo(2.9, 0);
   });
 });
 
