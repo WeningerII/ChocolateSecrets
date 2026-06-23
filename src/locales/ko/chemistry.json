@@ -49,6 +49,7 @@
     "targetCore": "목표 중심 (°C)",
     "timeToCore": "중심 목표 도달 시간",
     "coreVsTime": "중심 °C 대 시간",
+    "hBreakdown": "표면 h ≈ {{h}} W/m²·K (대류 {{conv}} + 복사 {{rad}})",
     "unreachable": "이 매질에서는 중심이 목표에 도달할 수 없습니다 — 매질 온도를 높이세요.",
     "diffusant": "확산 물질",
     "diffOpt": {

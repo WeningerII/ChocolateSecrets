@@ -49,6 +49,19 @@ describe('computeHeatPenetration', () => {
     expect(r.flags.map(f => f.kind)).toContain('target_unreachable');
   });
 
+  test('a first-principles surface spec derives h from convection + radiation', () => {
+    const r = computeHeatPenetration({
+      geometry: 'sphere', characteristicLengthM: 0.025, composition: meat,
+      initialTempC: 5, mediumTempC: 180, propertyTempC: 40, targetCoreTempC: 70,
+      surface: { medium: 'air', regime: 'forced', velocityMS: 3 },
+    })!;
+    expect(r.surfaceCoefficient).toBeDefined();
+    expect(r.surfaceCoefficient!.hConv).toBeGreaterThan(0);
+    expect(r.surfaceCoefficient!.hRad).toBeGreaterThan(0); // radiation counts in an oven
+    expect(r.h).toBeCloseTo(r.surfaceCoefficient!.hConv + r.surfaceCoefficient!.hRad, 5);
+    expect(r.timeToCoreTargetS!).toBeGreaterThan(0);
+  });
+
   test('named methods set h; steaming nearly pins the surface to the medium', () => {
     const r = computeHeatPenetration({
       geometry: 'slab', characteristicLengthM: 0.01, composition: meat,

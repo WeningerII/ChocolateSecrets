@@ -22,6 +22,7 @@
 import type { Composition } from '../../../types';
 import { computeThermalProperties, type ThermalProperties } from './thermalProperties';
 import { solveTransient, fourierForCenterTheta, positionShape, firstEigenvalue, type Geometry } from './transient';
+import { computeSurfaceCoefficient, type SurfaceCoefficientResult, type Medium, type ConvectionRegime } from './surfaceCoefficient';
 
 /** Cooking method → representative surface heat-transfer coefficient h [W·m⁻²·K⁻¹]. */
 export type CookingMethod =
@@ -48,9 +49,18 @@ export interface HeatPenetrationInput {
   composition: Composition;
   initialTempC: number;
   mediumTempC: number;
-  /** Cooking method (sets h) — or pass surfaceCoeffWm2K explicitly. */
+  /** Cooking method (sets h from a preset table) — or pass surfaceCoeffWm2K explicitly. */
   method?: CookingMethod;
   surfaceCoeffWm2K?: number;
+  /** First-principles surface coefficient: derive h from the boundary-layer + radiation. */
+  surface?: {
+    medium: Medium;
+    regime: ConvectionRegime;
+    velocityMS?: number;
+    emissivity?: number;
+    /** Convection length [m]; defaults to the diameter/thickness (2·L). */
+    flowLengthM?: number;
+  };
   /** Evaluate properties at this temperature; defaults to the mean of initial and target. */
   propertyTempC?: number;
   /** If given, report center/surface temperature after this long [s]. */
@@ -62,6 +72,8 @@ export interface HeatPenetrationInput {
 export interface HeatPenetrationResult {
   thermal: ThermalProperties;
   h: number;
+  /** Boundary-layer + radiation breakdown when h was derived (surface spec). */
+  surfaceCoefficient?: SurfaceCoefficientResult;
   Bi: number;
   /** Center & surface temperature at `timeS` (when provided). */
   atTime?: { timeS: number; coreTempC: number; surfaceTempC: number; Fo: number };
@@ -83,12 +95,28 @@ export function computeHeatPenetration(input: HeatPenetrationInput): HeatPenetra
   const thermal = computeThermalProperties(composition, evalT);
   if (!thermal) return null;
 
-  const h = input.surfaceCoeffWm2K ?? METHOD_H[input.method ?? 'fan_oven'];
+  // h: explicit value > first-principles surface spec > preset method table.
+  let h: number;
+  let surfaceCoefficient: SurfaceCoefficientResult | undefined;
+  if (input.surfaceCoeffWm2K !== undefined) {
+    h = input.surfaceCoeffWm2K;
+  } else if (input.surface) {
+    surfaceCoefficient = computeSurfaceCoefficient({
+      medium: input.surface.medium, regime: input.surface.regime, geometry,
+      characteristicLengthM: input.surface.flowLengthM ?? 2 * L,
+      surfaceTempC: (Ti + Tinf) / 2,   // representative mid-cook surface temperature
+      mediumTempC: Tinf, velocityMS: input.surface.velocityMS, emissivity: input.surface.emissivity,
+    });
+    h = surfaceCoefficient.h;
+  } else {
+    h = METHOD_H[input.method ?? 'fan_oven'];
+  }
+
   const Bi = (h * L) / thermal.k;
   const flags: HeatPenetrationFlag[] = [];
   if (thermal.coverage < 0.6) flags.push({ kind: 'low_composition_coverage', coverage: thermal.coverage });
 
-  const result: HeatPenetrationResult = { thermal, h, Bi, flags };
+  const result: HeatPenetrationResult = { thermal, h, surfaceCoefficient, Bi, flags };
 
   if (input.timeS !== undefined) {
     const Fo = (thermal.alpha * input.timeS) / (L * L);

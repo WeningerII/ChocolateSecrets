@@ -49,6 +49,7 @@
     "targetCore": "Centro objetivo (°C)",
     "timeToCore": "Tiempo hasta el centro objetivo",
     "coreVsTime": "°C del centro vs tiempo",
+    "hBreakdown": "h superficial ≈ {{h}} W/m²·K (convección {{conv}} + radiación {{rad}})",
     "unreachable": "El centro no puede alcanzar ese objetivo en este medio — sube la temperatura del medio.",
     "diffusant": "Difundente",
     "diffOpt": {

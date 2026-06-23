@@ -49,6 +49,7 @@
     "targetCore": "Target core (°C)",
     "timeToCore": "Time to core target",
     "coreVsTime": "core °C vs time",
+    "hBreakdown": "surface h ≈ {{h}} W/m²·K (convection {{conv}} + radiation {{rad}})",
     "unreachable": "The core can't reach that target in this medium — raise the medium temperature.",
     "diffusant": "Diffusant",
     "diffOpt": {
