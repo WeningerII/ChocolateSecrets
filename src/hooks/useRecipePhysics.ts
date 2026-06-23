@@ -284,7 +284,8 @@ export function useRecipePhysics(
     const diagnostics = collectFaults({
       emulsion, gelation, formulaBalance, taste, palatability, oxidation, moisture,
       curdleLevel: confectionery?.derived.curdle.level ?? null,
-      doneness, crystallization,
+      doneness, browning, crystallization, shelfLife,
+      chocolateClassesMixed: confectionery?.warnings.some(w => w.kind === 'multiple_chocolate_classes') ?? false,
       aw: aw.aw, pH: pH?.pH ?? null,
       declaredShelfLifeDays: recipe.haccp?.shelfLifeDays ?? null,
     });

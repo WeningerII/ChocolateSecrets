@@ -23,8 +23,8 @@
  */
 import type { EmulsionResult, GelationResult, FormulaBalanceResult } from '../structure';
 import type { TasteProfile, PalatabilityResult } from '../perception';
-import type { OxidationResult, MoistureMigrationResult, DonenessResult } from '../process';
-import type { CrystallizationResult } from '../universal';
+import type { OxidationResult, MoistureMigrationResult, DonenessResult, MaillardResult } from '../process';
+import type { CrystallizationResult, ShelfLifePrediction } from '../universal';
 
 export type FaultDomain = 'safety' | 'structure' | 'process' | 'stability' | 'flavor';
 export type FaultSeverity = 'info' | 'warn' | 'high';
@@ -51,8 +51,14 @@ export interface DiagnosticsInput {
   curdleLevel?: 'none' | 'low' | 'medium' | 'high' | null;
   /** Core-temperature doneness over the bake profile (null when no thermal step). */
   doneness?: DonenessResult | null;
+  /** Maillard browning over the bake profile (null when no thermal step). */
+  browning?: MaillardResult | null;
   /** Sugar graining risk at storage temperature. */
   crystallization?: CrystallizationResult | null;
+  /** True when incompatible chocolate classes are mixed (temper/bloom risk). */
+  chocolateClassesMixed?: boolean;
+  /** Shelf-life prediction (read for the declared-vs-predicted divergence). */
+  shelfLife?: ShelfLifePrediction | null;
   // --- intent-aware food-safety inputs ---
   /** Equilibrium water activity (null when no water). */
   aw?: number | null;
@@ -134,6 +140,26 @@ const donenessFaults: Source = ({ doneness }) => {
   return [];
 };
 
+/** Bake/cook outcome: browning saturated to the dark extreme reads as over-baked. */
+const browningFaults: Source = ({ browning }) => {
+  if (browning?.band === 'dark') return [{ code: 'over_browning', domain: 'process', severity: 'warn' }];
+  return [];
+};
+
+/** Mixing chocolate classes disrupts cocoa-butter crystallization → temper/bloom. */
+const chocolateFaults: Source = ({ chocolateClassesMixed }) => {
+  if (!chocolateClassesMixed) return [];
+  return [{ code: 'chocolate_bloom_risk', domain: 'structure', severity: 'warn' }];
+};
+
+/** The declared shelf life exceeds what the preservation model can support. */
+const shelfLifeFaults: Source = ({ shelfLife }) => {
+  if (shelfLife?.flags.some(f => f.kind === 'declared_diverges')) {
+    return [{ code: 'shelf_life_short', domain: 'stability', severity: 'high' }];
+  }
+  return [];
+};
+
 /** Sugar graining: a supersaturated syrup that will crystallize gritty. */
 const grainingFaults: Source = ({ crystallization }) => {
   if (!crystallization) return [];
@@ -179,9 +205,9 @@ const flavorFaults: Source = ({ taste, palatability }) => {
 
 /** Registry. Append a source to extend the pass to a new fault. */
 const SOURCES: Source[] = [
-  safetyFaults,
-  formulaFaults, emulsionFaults, gelationFaults, donenessFaults, grainingFaults,
-  stabilityFaults, flavorFaults,
+  safetyFaults, shelfLifeFaults,
+  formulaFaults, emulsionFaults, gelationFaults, donenessFaults, browningFaults,
+  grainingFaults, chocolateFaults, stabilityFaults, flavorFaults,
 ];
 
 const SEVERITY_RANK: Record<FaultSeverity, number> = { high: 0, warn: 1, info: 2 };

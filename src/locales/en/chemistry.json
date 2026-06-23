@@ -246,7 +246,10 @@
         "safety_not_shelf_stable": "Not shelf-stable: low-acid + high-moisture, but a long ambient shelf life is declared (needs refrigeration or processing).",
         "doneness_raw": "Predicted raw/undercooked core for the given bake.",
         "doneness_underdone": "Predicted underdone core for the given bake.",
-        "graining_risk": "Sugar likely to crystallize gritty (supersaturated, under-doctored)."
+        "graining_risk": "Sugar likely to crystallize gritty (supersaturated, under-doctored).",
+        "over_browning": "Likely over-browned for the given bake (burnt/bitter notes).",
+        "chocolate_bloom_risk": "Mixing chocolate types risks poor temper and fat bloom.",
+        "shelf_life_short": "Declared shelf life exceeds what the preservation model supports."
       }
     },
     "bands": {

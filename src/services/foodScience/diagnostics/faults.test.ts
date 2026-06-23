@@ -96,4 +96,20 @@ describe('collectFaults (universal diagnostics)', () => {
     expect(collectFaults({ crystallization: { risk: 'moderate' } as any }).faults[0].severity).toBe('info');
     expect(collectFaults({ crystallization: { risk: 'none' } as any }).faults).toHaveLength(0);
   });
+
+  test('over-browning fires only at the dark extreme', () => {
+    expect(collectFaults({ browning: { band: 'dark' } as any }).faults[0]).toMatchObject({ code: 'over_browning', domain: 'process' });
+    expect(collectFaults({ browning: { band: 'golden' } as any }).faults).toHaveLength(0);
+  });
+
+  test('mixing chocolate classes raises a temper/bloom risk', () => {
+    expect(collectFaults({ chocolateClassesMixed: true }).faults[0]).toMatchObject({ code: 'chocolate_bloom_risk' });
+    expect(collectFaults({ chocolateClassesMixed: false }).faults).toHaveLength(0);
+  });
+
+  test('a declared shelf life beyond the model is a high stability fault', () => {
+    const shelfLife = { flags: [{ kind: 'declared_diverges', declaredDays: 180, predictedWeeks: 4 }] } as any;
+    expect(collectFaults({ shelfLife }).faults[0]).toMatchObject({ code: 'shelf_life_short', severity: 'high', domain: 'stability' });
+    expect(collectFaults({ shelfLife: { flags: [] } as any }).faults).toHaveLength(0);
+  });
 });

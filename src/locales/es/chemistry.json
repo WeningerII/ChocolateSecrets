@@ -246,7 +246,10 @@
         "safety_not_shelf_stable": "No es estable a temperatura ambiente: poco ácido + mucha humedad, pero se declara una vida útil ambiente larga (necesita refrigeración o procesado).",
         "doneness_raw": "Centro crudo/poco cocido previsto para el horneado dado.",
         "doneness_underdone": "Centro poco hecho previsto para el horneado dado.",
-        "graining_risk": "El azúcar probablemente cristalice arenoso (sobresaturado, poco corregido)."
+        "graining_risk": "El azúcar probablemente cristalice arenoso (sobresaturado, poco corregido).",
+        "over_browning": "Probable exceso de dorado para el horneado dado (notas quemadas/amargas).",
+        "chocolate_bloom_risk": "Mezclar tipos de chocolate arriesga mal templado y 'fat bloom'.",
+        "shelf_life_short": "La vida útil declarada supera lo que el modelo de conservación admite."
       }
     },
     "bands": {
