@@ -210,6 +210,18 @@
         "wontSet": "won't set"
       }
     },
+    "balance": {
+      "title": "Recipe balance",
+      "balanced": "Balanced — no structural faults predicted from the ratios.",
+      "fault": {
+        "sugar_below_flour": "Low sugar for the flour — predicted denser, tougher, bread-like crumb.",
+        "sugar_excess": "Very high sugar for the flour — over-tender; the cake may sink or crust.",
+        "low_liquid": "Too little liquid for the sugar — predicted dry, tight, dense crumb.",
+        "fat_exceeds_protein": "Fat outweighs the eggs — greasy, over-tender; structure may collapse.",
+        "high_fat": "Very rich (high fat) — tender to the point of fragile."
+      },
+      "caveat": "Documented high-ratio cake balance (Figoni): sugar≥flour, liquid≥sugar, egg≥fat. A directional screen from ingredient roles, not a measured crumb. Numbers are the actual ratio vs the documented threshold."
+    },
     "bands": {
       "title": "Aw band interpretation",
       "current": "Current"

@@ -24,7 +24,7 @@ import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/f
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
 import { computeTasteProfile, computePalatability, type TasteProfile, type PalatabilityResult } from '../services/foodScience/perception';
-import { computeEmulsion, computeFoam, computeRheology, computeGelation, resolveFunctionalAgent, type EmulsionResult, type FoamResult, type RheologyResult, type GelationResult, type GellingAgent } from '../services/foodScience/structure';
+import { computeEmulsion, computeFoam, computeRheology, computeGelation, resolveFunctionalAgent, computeFormulaBalance, type EmulsionResult, type FoamResult, type RheologyResult, type GelationResult, type GellingAgent, type FormulaBalanceResult } from '../services/foodScience/structure';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 /** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
@@ -88,6 +88,8 @@ export interface RecipePhysics {
   rheology: RheologyResult;
   /** Gel set/melt behavior when a gelling agent is detected; null otherwise. */
   gelation: GelationResult | null;
+  /** Cake-balance screen: predicted crumb faults from ingredient-role ratios. */
+  formulaBalance: FormulaBalanceResult;
   /** Atwater energy + macronutrients (per 100 g). */
   nutrition: NutritionResult;
 }
@@ -264,6 +266,10 @@ export function useRecipePhysics(
         ? computeGelation(topGellingAgent.agent, (topGellingAgent.mass / leafTotalMass) * 100, { sugarBrix: rheology.brix })
         : null;
 
+    // Formula balance: screen the role/mass ratios against documented cake-balance
+    // rules to predict a structural fault (dense / tough / greasy) before mixing.
+    const formulaBalance = computeFormulaBalance(resolvedIngredients);
+
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
@@ -295,6 +301,7 @@ export function useRecipePhysics(
       foam,
       rheology,
       gelation,
+      formulaBalance,
       nutrition,
     };
   }, [recipe, ingredients, allRecipes, scale]);

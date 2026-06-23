@@ -210,6 +210,18 @@
         "wontSet": "no gelifica"
       }
     },
+    "balance": {
+      "title": "Equilibrio de la receta",
+      "balanced": "Equilibrada — las proporciones no predicen fallos estructurales.",
+      "fault": {
+        "sugar_below_flour": "Poco azúcar para la harina — miga más densa, dura y apanada.",
+        "sugar_excess": "Demasiado azúcar para la harina — muy tierna; el bizcocho puede hundirse o acostrarse.",
+        "low_liquid": "Poco líquido para el azúcar — miga seca, cerrada y densa.",
+        "fat_exceeds_protein": "La grasa supera a los huevos — grasienta y muy tierna; la estructura puede colapsar.",
+        "high_fat": "Muy rica (mucha grasa) — tierna hasta volverse frágil."
+      },
+      "caveat": "Equilibrio documentado de pastel de alta proporción (Figoni): azúcar≥harina, líquido≥azúcar, huevo≥grasa. Es un cribado direccional según los roles de los ingredientes, no una miga medida. Los números son la proporción real frente al umbral documentado."
+    },
     "bands": {
       "title": "Interpretación de la banda Aw",
       "current": "Actual"
