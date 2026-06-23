@@ -150,8 +150,12 @@
       "ethanol": "Ethanol",
       "fat": "Fat",
       "protein": "Protein",
-      "ash": "Ash"
-    }
+      "ash": "Ash",
+      "unsaturatedFat": "불포화지방",
+      "sodium": "나트륨"
+    },
+    "subFractions": "세부 분율",
+    "subFractionsNote": "위 값의 세부 분해입니다(불포화 ⊆ 지방, 나트륨 ⊆ 회분) — 합계에 포함되지 않습니다."
   },
   "bufferRef": {
     "label": "pH buffer reference",

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import type { Composition } from '../types';
-import { compositionSum, isCompositionComplete, DEFAULT_COMPOSITION_BY_CATEGORY, COMPOSITION_SPECIES } from '../services/foodScience/universal/composition';
+import { compositionSum, isCompositionComplete, DEFAULT_COMPOSITION_BY_CATEGORY, COMPOSITION_SPECIES, COMPOSITION_DESCRIPTORS } from '../services/foodScience/universal/composition';
 import { lookupUsdaSnapshot } from '../services/usdaFoodData';
 
 interface CompositionEditorProps {
@@ -89,6 +89,32 @@ export function CompositionEditor({
                 />
               </label>
             ))}
+          </div>
+
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-cocoa-400 mb-1">
+              {t('ingredients:composition.subFractions')}
+            </div>
+            <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+              {COMPOSITION_DESCRIPTORS.map(species => (
+                <label key={species} className="flex flex-col gap-0.5">
+                  <span className="text-[11px] uppercase tracking-wide text-cocoa-500">
+                    {t(`ingredients:composition.species.${species}` as any)}
+                  </span>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={current[species] ?? ''}
+                    onChange={e => handleField(species, e.target.value)}
+                    placeholder="—"
+                    className="font-mono text-sm border border-cream-300 rounded px-2 py-1 focus:outline-none focus:border-cocoa-400"
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="text-[11px] text-cocoa-400 italic mt-1">{t('ingredients:composition.subFractionsNote')}</p>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-1">

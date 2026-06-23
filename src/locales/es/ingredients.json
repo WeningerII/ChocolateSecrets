@@ -150,8 +150,12 @@
       "ethanol": "Ethanol",
       "fat": "Fat",
       "protein": "Protein",
-      "ash": "Ash"
-    }
+      "ash": "Ash",
+      "unsaturatedFat": "Grasa insaturada",
+      "sodium": "Sodio"
+    },
+    "subFractions": "Subfracciones",
+    "subFractionsNote": "Desgloses de los valores anteriores (insaturada ⊆ grasa, sodio ⊆ cenizas) — no se cuentan en la suma %."
   },
   "bufferRef": {
     "label": "pH buffer reference",
