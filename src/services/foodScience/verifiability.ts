@@ -59,6 +59,7 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   { id: 'scoopability', category: 'mechanical', predictability: 'calibrated', measurability: { instrument: 'penetrometer / TPA' }, computedBy: 'classifyFrozenWaterScoopability', notes: 'Physics path (ice fraction) alongside the hardening-factor heuristic.' },
   { id: 'chocolate_snap', category: 'mechanical', predictability: 'proxy', measurability: { instrument: 'three-point bend' }, computedBy: 'computeChocolateSnap', notes: 'Class-based fat estimate; composition lumps fat.' },
   { id: 'viscosity', category: 'mechanical', predictability: 'calibrated', measurability: { instrument: 'viscometer / rheometer' }, computedBy: 'computeRheology', notes: 'Relative viscosity (solute jamming divergence × Arrhenius temperature) + flow type + consistency band.' },
+  { id: 'formula_balance', category: 'mechanical', predictability: 'calibrated', measurability: { instrument: 'crumb texture (TPA) / specific volume' }, computedBy: 'computeFormulaBalance', notes: 'High-ratio cake balance (Figoni): sugar≥flour, liquid≥sugar, egg≥fat. Screens ingredient-role ratios for a directional crumb fault (dense/tough vs over-tender/sinking) before mixing.' },
 
   // --- Microstructure ---
   { id: 'solid_fat_content', category: 'microstructure', predictability: 'calibrated', measurability: { instrument: 'pNMR (ISO 8292)' }, computedBy: 'sfcAtTemp' },

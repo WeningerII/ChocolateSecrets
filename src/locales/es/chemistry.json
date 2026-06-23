@@ -1,4 +1,27 @@
 {
+  "dosing": {
+    "title": "Ajustar una adición",
+    "intro": "Elige un ingrediente para añadir a esta receta y un objetivo: calcularé cuánto.",
+    "pickIngredient": "Ingrediente a añadir",
+    "pickPlaceholder": "Selecciona un ingrediente…",
+    "goal": "Objetivo",
+    "goalBalance": "Mejor equilibrio",
+    "goalTarget": "Apuntar a un sabor",
+    "targetTaste": "Sabor",
+    "targetValue": "Objetivo = {{value}}",
+    "empty": "Selecciona un ingrediente para ver una recomendación.",
+    "recommended": "Añade unos",
+    "grams": "g",
+    "balanceBeforeAfter": "Equilibrio de sabor {{before}} → {{after}}",
+    "curveLabel": "equilibrio vs cantidad añadida",
+    "ceiling": "Se vuelve excesivo más allá de {{dose}} g",
+    "flag": {
+      "aroma_dominant_addition": "Dosificado solo por su ácido/sabor: el aroma no se modela, tómalo como un mínimo, no como un veredicto de maridaje.",
+      "no_measurable_effect": "Esta adición apenas cambia el sabor medible.",
+      "optimum_at_zero": "Para este objetivo, lo mejor es no añadir nada.",
+      "optimum_at_max": "Pide más de lo mostrado: prueba una cantidad mayor."
+    }
+  },
   "tier": {
     "aw": "Actividad de agua",
     "ph": "pH",
@@ -208,6 +231,48 @@
         "sets": "gelifica",
         "setsAt": "gelifica a {{temp}}°C",
         "wontSet": "no gelifica"
+      }
+    },
+    "balance": {
+      "title": "Equilibrio de la receta",
+      "balanced": "Equilibrada — las proporciones no predicen fallos estructurales.",
+      "fault": {
+        "sugar_below_flour": "Poco azúcar para la harina — miga más densa, dura y apanada.",
+        "sugar_excess": "Demasiado azúcar para la harina — muy tierna; el bizcocho puede hundirse o acostrarse.",
+        "low_liquid": "Poco líquido para el azúcar — miga seca, cerrada y densa.",
+        "fat_exceeds_protein": "La grasa supera a los huevos — grasienta y muy tierna; la estructura puede colapsar.",
+        "high_fat": "Muy rica (mucha grasa) — tierna hasta volverse frágil."
+      },
+      "caveat": "Equilibrio documentado de pastel de alta proporción (Figoni): azúcar≥harina, líquido≥azúcar, huevo≥grasa. Es un cribado direccional según los roles de los ingredientes, no una miga medida. Los números son la proporción real frente al umbral documentado."
+    },
+    "diagnostics": {
+      "title": "Diagnóstico",
+      "allClear": "No se detectaron fallos.",
+      "fault": {
+        "emulsion_will_split": "La emulsión probablemente se corte (demasiada grasa para la fase acuosa).",
+        "gelation_wont_set": "Gelificante por debajo de su dosis — no gelifica.",
+        "gelation_cofactor_missing": "El gelificante necesita un cofactor (azúcar/calcio/potasio) que puede faltar.",
+        "formula_sugar_below_flour": "Poco azúcar para la harina — miga más densa y dura.",
+        "formula_sugar_excess": "Demasiado azúcar — muy tierna; puede hundirse.",
+        "formula_low_liquid": "Poco líquido — miga seca, cerrada y densa.",
+        "formula_fat_exceeds_protein": "La grasa supera a los huevos — grasienta; la estructura puede colapsar.",
+        "formula_high_fat": "Muy rica (mucha grasa) — frágil.",
+        "oxidation_rancidity": "Alto riesgo de rancidez durante el almacenamiento (grasa insaturada).",
+        "moisture_migration": "La humedad puede migrar entre capas — ablandando/secando.",
+        "curdle_risk": "Riesgo de corte (ácido + calor sobre las proteínas lácteas).",
+        "flavor_too_sweet": "Excesivamente dulce.",
+        "flavor_too_salty": "Excesivamente salado.",
+        "flavor_too_sour": "Excesivamente ácido.",
+        "flavor_too_bitter": "Excesivamente amargo.",
+        "flavor_dominant_sour": "El ácido domina sin suficiente para equilibrarlo.",
+        "flavor_dominant_bitter": "El amargo domina sin suficiente para equilibrarlo.",
+        "safety_not_shelf_stable": "No es estable a temperatura ambiente: poco ácido + mucha humedad, pero se declara una vida útil ambiente larga (necesita refrigeración o procesado).",
+        "doneness_raw": "Centro crudo/poco cocido previsto para el horneado dado.",
+        "doneness_underdone": "Centro poco hecho previsto para el horneado dado.",
+        "graining_risk": "El azúcar probablemente cristalice arenoso (sobresaturado, poco corregido).",
+        "over_browning": "Probable exceso de dorado para el horneado dado (notas quemadas/amargas).",
+        "chocolate_bloom_risk": "Mezclar tipos de chocolate arriesga mal templado y 'fat bloom'.",
+        "shelf_life_short": "La vida útil declarada supera lo que el modelo de conservación admite."
       }
     },
     "bands": {

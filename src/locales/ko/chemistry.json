@@ -1,4 +1,27 @@
 {
+  "dosing": {
+    "title": "추가 재료 조정",
+    "intro": "이 레시피에 추가할 재료와 목표를 고르면 얼마나 넣을지 계산합니다.",
+    "pickIngredient": "추가할 재료",
+    "pickPlaceholder": "재료 선택…",
+    "goal": "목표",
+    "goalBalance": "최적 균형",
+    "goalTarget": "특정 맛 목표",
+    "targetTaste": "맛",
+    "targetValue": "목표 = {{value}}",
+    "empty": "추천을 보려면 재료를 선택하세요.",
+    "recommended": "약",
+    "grams": "g",
+    "balanceBeforeAfter": "맛 균형 {{before}} → {{after}}",
+    "curveLabel": "추가량 대비 균형",
+    "ceiling": "{{dose}} g를 넘으면 과해짐",
+    "flag": {
+      "aroma_dominant_addition": "산/맛 기준으로만 계산됨 — 향은 모델링되지 않으므로 페어링 판단이 아닌 최소치로 보세요.",
+      "no_measurable_effect": "이 추가는 측정 가능한 맛을 거의 바꾸지 않습니다.",
+      "optimum_at_zero": "이 목표에서는 추가하지 않는 것이 최선입니다.",
+      "optimum_at_max": "표시된 범위보다 더 필요합니다 — 더 큰 양을 시도하세요."
+    }
+  },
   "tier": {
     "aw": "수분 활성도",
     "ph": "pH",
@@ -208,6 +231,48 @@
         "sets": "겔화됨",
         "setsAt": "{{temp}}°C에서 겔화",
         "wontSet": "겔화 안 됨"
+      }
+    },
+    "balance": {
+      "title": "레시피 균형",
+      "balanced": "균형 잡힘 — 비율상 구조적 결함이 예측되지 않습니다.",
+      "fault": {
+        "sugar_below_flour": "밀가루 대비 설탕 부족 — 더 조밀하고 질긴, 빵 같은 속결로 예측됩니다.",
+        "sugar_excess": "밀가루 대비 설탕 과다 — 지나치게 부드러워 가라앉거나 표면이 굳을 수 있습니다.",
+        "low_liquid": "설탕 대비 수분 부족 — 건조하고 촘촘하며 조밀한 속결.",
+        "fat_exceeds_protein": "지방이 달걀보다 많음 — 기름지고 지나치게 부드러워 구조가 무너질 수 있습니다.",
+        "high_fat": "매우 리치함(고지방) — 부드럽다 못해 부서지기 쉬움."
+      },
+      "caveat": "문서화된 하이레이쇼 케이크 균형(Figoni): 설탕≥밀가루, 수분≥설탕, 달걀≥지방. 측정된 속결이 아니라 재료 역할 비율에 따른 방향성 선별입니다. 숫자는 실제 비율 대 문서화된 임계값입니다."
+    },
+    "diagnostics": {
+      "title": "진단",
+      "allClear": "발견된 결함 없음.",
+      "fault": {
+        "emulsion_will_split": "유화액이 분리될 가능성 높음(수분 상 대비 지방 과다).",
+        "gelation_wont_set": "겔화제가 응고 용량 미만 — 겔화되지 않음.",
+        "gelation_cofactor_missing": "겔화제에 필요한 보조 인자(설탕/칼슘/칼륨)가 부족할 수 있음.",
+        "formula_sugar_below_flour": "밀가루 대비 설탕 부족 — 더 조밀하고 질긴 속결.",
+        "formula_sugar_excess": "설탕 과다 — 지나치게 부드러움; 가라앉을 수 있음.",
+        "formula_low_liquid": "수분 부족 — 건조하고 촘촘하며 조밀한 속결.",
+        "formula_fat_exceeds_protein": "지방이 달걀보다 많음 — 기름지고 구조가 무너질 수 있음.",
+        "formula_high_fat": "매우 리치함(고지방) — 부서지기 쉬움.",
+        "oxidation_rancidity": "보관 중 산패 위험 높음(불포화지방).",
+        "moisture_migration": "층 사이로 수분이 이동할 수 있음 — 무르거나 건조해짐.",
+        "curdle_risk": "응고 위험(유단백에 작용하는 산 + 열).",
+        "flavor_too_sweet": "단맛이 지나치게 강함.",
+        "flavor_too_salty": "짠맛이 지나치게 강함.",
+        "flavor_too_sour": "신맛이 지나치게 강함.",
+        "flavor_too_bitter": "쓴맛이 지나치게 강함.",
+        "flavor_dominant_sour": "신맛이 지배적이고 균형을 잡을 요소가 부족함.",
+        "flavor_dominant_bitter": "쓴맛이 지배적이고 균형을 잡을 요소가 부족함.",
+        "safety_not_shelf_stable": "상온 보관 부적합: 저산성 + 고수분인데 긴 상온 유통기한이 선언됨(냉장 또는 가공 필요).",
+        "doneness_raw": "해당 가열 조건에서 중심부가 설익을 것으로 예측됨.",
+        "doneness_underdone": "해당 가열 조건에서 중심부가 덜 익을 것으로 예측됨.",
+        "graining_risk": "설탕이 거칠게 결정화될 가능성(과포화, 도터링 부족).",
+        "over_browning": "해당 가열 조건에서 과도하게 갈변할 가능성(탄 맛/쓴맛).",
+        "chocolate_bloom_risk": "초콜릿 종류를 섞으면 템퍼링 불량과 팻 블룸 위험.",
+        "shelf_life_short": "선언된 유통기한이 보존 모델이 뒷받침하는 범위를 초과함."
       }
     },
     "bands": {

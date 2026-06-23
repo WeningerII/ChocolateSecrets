@@ -50,6 +50,26 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
 
   return (
     <div className="rounded-md bg-cream-50 px-5 py-5 mt-2 border border-cream-200 text-sm leading-relaxed text-cocoa-700">
+      {/* Diagnostics digest — universal "what could go wrong" pass, triage first */}
+      <SectionHeader>{t('chemistry:detail.diagnostics.title')}</SectionHeader>
+      {physics.diagnostics.faults.length === 0 ? (
+        <p className="mt-2 mb-4 text-xs text-emerald-700">{t('chemistry:detail.diagnostics.allClear')}</p>
+      ) : (
+        <ul className="mt-2 mb-4 space-y-1.5">
+          {physics.diagnostics.faults.map((f, i) => (
+            <li key={`${f.code}-${i}`} className="text-xs flex gap-2">
+              <span className={faultColor(f.severity)}>●</span>
+              <span className="text-cocoa-700">
+                {t(`chemistry:detail.diagnostics.fault.${f.code}` as any)}
+                {f.detail && (
+                  <span className="text-cocoa-400 font-mono ml-1">({f.detail.value.toFixed(2)}/{f.detail.threshold.toFixed(2)})</span>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {/* Composition table */}
       <SectionHeader>{t('chemistry:detail.compositionTable.title')}</SectionHeader>
       <table className="w-full text-xs font-mono mt-2">
@@ -330,6 +350,29 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Recipe balance — cake structural screen (predicted crumb faults) */}
+      {physics.formulaBalance.applicable && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.balance.title')}</SectionHeader>
+          {physics.formulaBalance.faults.length === 0 ? (
+            <p className="mt-2 text-xs text-emerald-700">{t('chemistry:detail.balance.balanced')}</p>
+          ) : (
+            <ul className="mt-2 space-y-1.5">
+              {physics.formulaBalance.faults.map(f => (
+                <li key={f.kind} className="text-xs flex gap-2">
+                  <span className={faultColor(f.severity)}>●</span>
+                  <span className="text-cocoa-700">
+                    {t(`chemistry:detail.balance.fault.${f.kind}` as any)}
+                    <span className="text-cocoa-400 font-mono ml-1">({f.ratio.toFixed(2)}/{f.threshold.toFixed(2)})</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.balance.caveat')}</p>
+        </>
+      )}
+
       {/* Aw band interpretation */}
       <SectionHeader className="mt-5">{t('chemistry:detail.bands.title')}</SectionHeader>
       <div className="mt-2 space-y-1">
@@ -371,4 +414,11 @@ function SectionHeader({ children, className = '' }: { children: React.ReactNode
       {children}
     </h4>
   );
+}
+
+/** Bullet color for a formula-balance fault by severity. */
+function faultColor(severity: 'info' | 'warn' | 'high'): string {
+  if (severity === 'high') return 'text-red-500';
+  if (severity === 'warn') return 'text-amber-500';
+  return 'text-cocoa-400';
 }
