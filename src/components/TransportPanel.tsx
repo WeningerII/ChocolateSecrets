@@ -5,7 +5,7 @@ import { resolveRecipeLeaves } from '../utils/resolveRecipeLeaves';
 import { aggregateComposition } from '../services/foodScience/universal';
 import {
   computeHeatPenetration, computeMassPenetration, computeThermalProperties,
-  computePlankTime, computeSurfaceCoefficient,
+  computePlankTime, computeSurfaceCoefficient, computeDryingRate,
   type Geometry, type CookingMethod, type Diffusant, type Medium, type ConvectionRegime,
 } from '../services/foodScience/transport';
 
@@ -45,7 +45,7 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
   const { t } = useTranslation('chemistry');
   const [geometry, setGeometry] = useState<Geometry>('sphere');
   const [sizeCm, setSizeCm] = useState(2.5);
-  const [mode, setMode] = useState<'cook' | 'brine' | 'freeze'>('cook');
+  const [mode, setMode] = useState<'cook' | 'brine' | 'freeze' | 'dry'>('cook');
   const [method, setMethod] = useState<CookingMethod>('fan_oven');
   const [initialTempC, setInitial] = useState(5);
   const [mediumTempC, setMedium] = useState(180);
@@ -55,6 +55,9 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
   const [freezeEnv, setFreezeEnv] = useState('blast_freezer');
   const [freezeDir, setFreezeDir] = useState<'freeze' | 'thaw'>('freeze');
   const [freezeMediumTempC, setFreezeMedium] = useState(-25);
+  const [dryAirTempC, setDryAirTemp] = useState(60);
+  const [dryRH, setDryRH] = useState(30);
+  const [dryAirflow, setDryAirflow] = useState<'still' | 'moving'>('moving');
 
   const composition = useMemo(() => {
     const { resolved } = resolveRecipeLeaves(recipe, ingredients, recipes, 1);
@@ -114,6 +117,12 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
     return { plank, h: surf.h };
   }, [mode, freezeEnv, freezeDir, freezeMediumTempC, geometry, L, composition]);
 
+  const dry = useMemo(() => {
+    if (mode !== 'dry') return null;
+    const h = dryAirflow === 'moving' ? 35 : 12; // moving vs still air
+    return computeDryingRate({ airTempC: dryAirTempC, relativeHumidity: dryRH / 100, surfaceCoeffWm2K: h });
+  }, [mode, dryAirTempC, dryRH, dryAirflow]);
+
   const fmtTime = (s: number | null | undefined): string => {
     if (s == null || !isFinite(s)) return '—';
     if (s < 90) return `${Math.round(s)} ${t('chemistry:transport.sec')}`;
@@ -160,6 +169,8 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
               className={`flex-1 px-2 py-1 rounded border ${mode === 'brine' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.brine')}</button>
             <button type="button" onClick={() => setMode('freeze')}
               className={`flex-1 px-2 py-1 rounded border ${mode === 'freeze' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.freeze')}</button>
+            <button type="button" onClick={() => setMode('dry')}
+              className={`flex-1 px-2 py-1 rounded border ${mode === 'dry' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.dry')}</button>
           </div>
         </div>
       </div>
@@ -273,6 +284,35 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
             <p className="text-[11px] text-amber-600 mt-2">{t('chemistry:transport.phaseImpossible')}</p>
           )}
           <p className="text-[11px] text-cocoa-500 mt-2">{t('chemistry:transport.freezeNote')}</p>
+        </>
+      )}
+
+      {mode === 'dry' && (
+        <>
+          <div className="grid sm:grid-cols-3 gap-3 text-xs mt-3">
+            <NumField label={t('chemistry:transport.airTemp')} value={dryAirTempC} onChange={setDryAirTemp} />
+            <label className="flex flex-col gap-1">
+              <span className="text-cocoa-600">{t('chemistry:transport.humidity' as any, { value: dryRH })}</span>
+              <input type="range" min={5} max={95} step={5} value={dryRH}
+                onChange={e => setDryRH(parseInt(e.target.value, 10))} className="w-full" />
+            </label>
+            <div className="flex flex-col gap-1">
+              <span className="text-cocoa-600">{t('chemistry:transport.airflow')}</span>
+              <div className="flex gap-1">
+                <button type="button" onClick={() => setDryAirflow('still')}
+                  className={`flex-1 px-2 py-1 rounded border ${dryAirflow === 'still' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.airflowStill')}</button>
+                <button type="button" onClick={() => setDryAirflow('moving')}
+                  className={`flex-1 px-2 py-1 rounded border ${dryAirflow === 'moving' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.airflowMoving')}</button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+            <Stat label={t('chemistry:transport.surfaceTemp')} value={dry ? dry.surfaceTempC.toFixed(1) : '—'} unit="°C" />
+            <Stat label={t('chemistry:transport.dryingRate')} value={dry ? dry.fluxKgM2h.toFixed(2) : '—'} unit="kg/m²·h" />
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2">
+            {t('chemistry:transport.dryNote' as any, { cooling: dry ? dry.evaporativeCoolingC.toFixed(0) : '0' })}
+          </p>
         </>
       )}
 
