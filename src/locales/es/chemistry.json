@@ -242,7 +242,11 @@
         "flavor_too_sour": "Excesivamente ácido.",
         "flavor_too_bitter": "Excesivamente amargo.",
         "flavor_dominant_sour": "El ácido domina sin suficiente para equilibrarlo.",
-        "flavor_dominant_bitter": "El amargo domina sin suficiente para equilibrarlo."
+        "flavor_dominant_bitter": "El amargo domina sin suficiente para equilibrarlo.",
+        "safety_not_shelf_stable": "No es estable a temperatura ambiente: poco ácido + mucha humedad, pero se declara una vida útil ambiente larga (necesita refrigeración o procesado).",
+        "doneness_raw": "Centro crudo/poco cocido previsto para el horneado dado.",
+        "doneness_underdone": "Centro poco hecho previsto para el horneado dado.",
+        "graining_risk": "El azúcar probablemente cristalice arenoso (sobresaturado, poco corregido)."
       }
     },
     "bands": {

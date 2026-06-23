@@ -5,6 +5,7 @@ import {
   calculateMixedPH,
   computeTitratableAcidity,
   computeNutrition,
+  computeSucroseCrystallization,
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
@@ -273,12 +274,19 @@ export function useRecipePhysics(
     // rules to predict a structural fault (dense / tough / greasy) before mixing.
     const formulaBalance = computeFormulaBalance(resolvedIngredients);
 
+    // Sugar graining risk at storage temperature (fed to the diagnostics digest).
+    const crystallization = computeSucroseCrystallization(mixComposition, STORAGE_TEMP_C);
+
     // Diagnostics: collect every kernel's faults into one "what could go wrong"
-    // digest. Each source self-gates, so a cake, a ganache, a custard or a stored
-    // fatty food each light up only their relevant faults.
+    // digest. Each source self-gates, so a cake, a ganache, a custard, a syrup or
+    // a stored fatty food each light up only their relevant faults. Safety is
+    // intent-aware (fires only when a shelf-stable shelf life is declared).
     const diagnostics = collectFaults({
       emulsion, gelation, formulaBalance, taste, palatability, oxidation, moisture,
       curdleLevel: confectionery?.derived.curdle.level ?? null,
+      doneness, crystallization,
+      aw: aw.aw, pH: pH?.pH ?? null,
+      declaredShelfLifeDays: recipe.haccp?.shelfLifeDays ?? null,
     });
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);

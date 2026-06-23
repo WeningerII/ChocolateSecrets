@@ -242,7 +242,11 @@
         "flavor_too_sour": "신맛이 지나치게 강함.",
         "flavor_too_bitter": "쓴맛이 지나치게 강함.",
         "flavor_dominant_sour": "신맛이 지배적이고 균형을 잡을 요소가 부족함.",
-        "flavor_dominant_bitter": "쓴맛이 지배적이고 균형을 잡을 요소가 부족함."
+        "flavor_dominant_bitter": "쓴맛이 지배적이고 균형을 잡을 요소가 부족함.",
+        "safety_not_shelf_stable": "상온 보관 부적합: 저산성 + 고수분인데 긴 상온 유통기한이 선언됨(냉장 또는 가공 필요).",
+        "doneness_raw": "해당 가열 조건에서 중심부가 설익을 것으로 예측됨.",
+        "doneness_underdone": "해당 가열 조건에서 중심부가 덜 익을 것으로 예측됨.",
+        "graining_risk": "설탕이 거칠게 결정화될 가능성(과포화, 도터링 부족)."
       }
     },
     "bands": {

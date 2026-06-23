@@ -242,7 +242,11 @@
         "flavor_too_sour": "Overpoweringly sour.",
         "flavor_too_bitter": "Overpoweringly bitter.",
         "flavor_dominant_sour": "Sourness dominates with too little to balance it.",
-        "flavor_dominant_bitter": "Bitterness dominates with too little to balance it."
+        "flavor_dominant_bitter": "Bitterness dominates with too little to balance it.",
+        "safety_not_shelf_stable": "Not shelf-stable: low-acid + high-moisture, but a long ambient shelf life is declared (needs refrigeration or processing).",
+        "doneness_raw": "Predicted raw/undercooked core for the given bake.",
+        "doneness_underdone": "Predicted underdone core for the given bake.",
+        "graining_risk": "Sugar likely to crystallize gritty (supersaturated, under-doctored)."
       }
     },
     "bands": {

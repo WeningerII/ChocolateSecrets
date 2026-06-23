@@ -73,4 +73,27 @@ describe('collectFaults (universal diagnostics)', () => {
     const palatability = { balance: 30, acceptability: {}, flags: [{ kind: 'dominant_aversive', taste: 'bitter' }] } as PalatabilityResult;
     expect(collectFaults({ palatability }).faults[0].code).toBe('flavor_dominant_bitter');
   });
+
+  test('safety is intent-aware: low-acid + high-moisture only faults when shelf-stable is claimed', () => {
+    // Fresh (no/short shelf life declared) → no safety fault even at risky aw/pH.
+    expect(collectFaults({ aw: 0.95, pH: 6.5 }).faults).toHaveLength(0);
+    expect(collectFaults({ aw: 0.95, pH: 6.5, declaredShelfLifeDays: 5 }).faults).toHaveLength(0);
+    // Declared shelf-stable (long ambient life) but low-acid + high-moisture → high fault.
+    const r = collectFaults({ aw: 0.95, pH: 6.5, declaredShelfLifeDays: 120 });
+    expect(r.faults[0]).toMatchObject({ code: 'safety_not_shelf_stable', domain: 'safety', severity: 'high' });
+    // An acid hurdle (pH ≤ 4.6) clears it even with a long shelf life.
+    expect(collectFaults({ aw: 0.95, pH: 4.2, declaredShelfLifeDays: 120 }).faults).toHaveLength(0);
+  });
+
+  test('doneness: raw core is high severity, underdone is a warning', () => {
+    expect(collectFaults({ doneness: { band: 'raw' } as any }).faults[0]).toMatchObject({ code: 'doneness_raw', severity: 'high' });
+    expect(collectFaults({ doneness: { band: 'underdone' } as any }).faults[0]).toMatchObject({ code: 'doneness_underdone', severity: 'warn' });
+    expect(collectFaults({ doneness: { band: 'done' } as any }).faults).toHaveLength(0);
+  });
+
+  test('graining: high risk warns, moderate is informational', () => {
+    expect(collectFaults({ crystallization: { risk: 'high' } as any }).faults[0]).toMatchObject({ code: 'graining_risk', severity: 'warn' });
+    expect(collectFaults({ crystallization: { risk: 'moderate' } as any }).faults[0].severity).toBe('info');
+    expect(collectFaults({ crystallization: { risk: 'none' } as any }).faults).toHaveLength(0);
+  });
 });

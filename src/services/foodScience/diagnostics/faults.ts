@@ -16,15 +16,17 @@
  * new fault is one source function appended to SOURCES — that is how the pass
  * grows to cover more of the field without a rewrite.
  *
- * Scope note: keeping-quality faults (texture, set, rancidity, migration, flavor
- * balance) live here. Microbial SAFETY (a_w / pH / declared-shelf-life) is
- * intent-dependent and is surfaced separately as recipe warnings for now.
+ * Safety: the food-safety source is intent-aware. A high-moisture, low-acid food
+ * is perfectly normal when eaten fresh; it is only a fault when the recipe also
+ * DECLARES a shelf-stable (long, ambient) shelf life it cannot support. The
+ * pH 4.6 / a_w 0.85 hurdle thresholds are the FDA Food Code TCS boundaries.
  */
 import type { EmulsionResult, GelationResult, FormulaBalanceResult } from '../structure';
 import type { TasteProfile, PalatabilityResult } from '../perception';
-import type { OxidationResult, MoistureMigrationResult } from '../process';
+import type { OxidationResult, MoistureMigrationResult, DonenessResult } from '../process';
+import type { CrystallizationResult } from '../universal';
 
-export type FaultDomain = 'structure' | 'stability' | 'flavor';
+export type FaultDomain = 'safety' | 'structure' | 'process' | 'stability' | 'flavor';
 export type FaultSeverity = 'info' | 'warn' | 'high';
 
 export interface Fault {
@@ -47,6 +49,17 @@ export interface DiagnosticsInput {
   oxidation?: OxidationResult | null;
   moisture?: MoistureMigrationResult | null;
   curdleLevel?: 'none' | 'low' | 'medium' | 'high' | null;
+  /** Core-temperature doneness over the bake profile (null when no thermal step). */
+  doneness?: DonenessResult | null;
+  /** Sugar graining risk at storage temperature. */
+  crystallization?: CrystallizationResult | null;
+  // --- intent-aware food-safety inputs ---
+  /** Equilibrium water activity (null when no water). */
+  aw?: number | null;
+  /** Mixed-system pH (null when no buffer data). */
+  pH?: number | null;
+  /** Declared shelf life (days); used to infer shelf-stable/ambient intent. */
+  declaredShelfLifeDays?: number | null;
 }
 
 export interface DiagnosticsResult {
@@ -60,7 +73,24 @@ export interface DiagnosticsResult {
 /** A single taste this loud reads as "too much of it." */
 const OVER_INTENSE = 85;
 
+// Food-safety hurdle thresholds (FDA Food Code TCS / 21 CFR 114).
+const TCS_PH = 4.6;     // at or below: acid hurdle holds
+const TCS_AW = 0.85;    // at or below: water-activity hurdle holds
+/** Declared shelf life (days) at/above which we infer shelf-stable (ambient) intent. */
+const SHELF_STABLE_DAYS = 30;
+
 type Source = (input: DiagnosticsInput) => Fault[];
+
+/** Food safety: a low-acid, high-moisture food sold as shelf-stable is unsafe.
+ *  Intent-aware — only fires when a long ambient shelf life is declared. */
+const safetyFaults: Source = ({ aw, pH, declaredShelfLifeDays }) => {
+  if (aw == null || pH == null || declaredShelfLifeDays == null) return [];
+  const claimsShelfStable = declaredShelfLifeDays >= SHELF_STABLE_DAYS;
+  if (claimsShelfStable && pH > TCS_PH && aw > TCS_AW) {
+    return [{ code: 'safety_not_shelf_stable', domain: 'safety', severity: 'high' }];
+  }
+  return [];
+};
 
 /** Cake-balance ratios → predicted crumb faults (already self-gated to batters). */
 const formulaFaults: Source = ({ formulaBalance }) => {
@@ -93,6 +123,22 @@ const gelationFaults: Source = ({ gelation }) => {
   if (gelation.flags.some(f => f.kind === 'cofactor_required' || f.kind === 'cofactor_unknown')) {
     return [{ code: 'gelation_cofactor_missing', domain: 'structure', severity: 'warn' }];
   }
+  return [];
+};
+
+/** Bake/cook outcome: core temperature short of set is under-/undercooked. */
+const donenessFaults: Source = ({ doneness }) => {
+  if (!doneness) return [];
+  if (doneness.band === 'raw') return [{ code: 'doneness_raw', domain: 'process', severity: 'high' }];
+  if (doneness.band === 'underdone') return [{ code: 'doneness_underdone', domain: 'process', severity: 'warn' }];
+  return [];
+};
+
+/** Sugar graining: a supersaturated syrup that will crystallize gritty. */
+const grainingFaults: Source = ({ crystallization }) => {
+  if (!crystallization) return [];
+  if (crystallization.risk === 'high') return [{ code: 'graining_risk', domain: 'structure', severity: 'warn' }];
+  if (crystallization.risk === 'moderate') return [{ code: 'graining_risk', domain: 'structure', severity: 'info' }];
   return [];
 };
 
@@ -133,7 +179,9 @@ const flavorFaults: Source = ({ taste, palatability }) => {
 
 /** Registry. Append a source to extend the pass to a new fault. */
 const SOURCES: Source[] = [
-  formulaFaults, emulsionFaults, gelationFaults, stabilityFaults, flavorFaults,
+  safetyFaults,
+  formulaFaults, emulsionFaults, gelationFaults, donenessFaults, grainingFaults,
+  stabilityFaults, flavorFaults,
 ];
 
 const SEVERITY_RANK: Record<FaultSeverity, number> = { high: 0, warn: 1, info: 2 };
