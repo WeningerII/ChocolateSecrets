@@ -4,6 +4,7 @@ import {
   calculateNorrishAw,
   calculateMixedPH,
   computeTitratableAcidity,
+  computeNutrition,
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
@@ -15,6 +16,7 @@ import {
   type ShelfLifePrediction,
   type AwBand,
   type FatRegime,
+  type NutritionResult,
 } from '../services/foodScience/universal';
 
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
@@ -84,6 +86,8 @@ export interface RecipePhysics {
   rheology: RheologyResult;
   /** Gel set/melt behavior when a gelling agent is detected; null otherwise. */
   gelation: GelationResult | null;
+  /** Atwater energy + macronutrients (per 100 g). */
+  nutrition: NutritionResult;
 }
 
 function deriveWarnings(
@@ -226,6 +230,8 @@ export function useRecipePhysics(
       titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
     });
 
+    const nutrition = computeNutrition(mixComposition);
+
     // Structure & texture. Detect functional agents by ingredient name so the
     // emulsion (emulsifier HLB) and gelation (which agent + dose) are data-driven.
     let emulsifierHlbMass = 0;
@@ -283,6 +289,7 @@ export function useRecipePhysics(
       foam,
       rheology,
       gelation,
+      nutrition,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

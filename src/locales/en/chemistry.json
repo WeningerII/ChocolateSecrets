@@ -52,6 +52,13 @@
       "moles": "Moles",
       "moleFraction": "Mole fraction"
     },
+    "nutrition": {
+      "title": "Energy & nutrition",
+      "energy": "Energy (per 100 g)",
+      "macros": "Macros (g/100 g)",
+      "macroSplit": "C {{carb}} · F {{fat}} · P {{protein}}",
+      "caveat": "Atwater energy from macronutrients, per 100 g of formula."
+    },
     "norrish": {
       "title": "Norrish equation (Chirife et al. 1980)",
       "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",

@@ -52,6 +52,13 @@
       "moles": "몰수",
       "moleFraction": "몰 분율"
     },
+    "nutrition": {
+      "title": "열량 및 영양",
+      "energy": "열량 (100 g당)",
+      "macros": "다량영양소 (g/100 g)",
+      "macroSplit": "탄 {{carb}} · 지 {{fat}} · 단 {{protein}}",
+      "caveat": "Atwater 방식 다량영양소 열량, 배합 100 g 기준."
+    },
     "norrish": {
       "title": "Norrish 방정식",
       "equation": "ln(Aw) = ln(Xw) − Σᵢ Kᵢ · Xᵢ²",

@@ -80,6 +80,30 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </tbody>
       </table>
 
+      {/* Energy & nutrition */}
+      {physics.nutrition.energyKcalPer100g > 0 && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.nutrition.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.nutrition.energy')}</span>
+              <span className="font-mono">{Math.round(physics.nutrition.energyKcalPer100g)} kcal · {Math.round(physics.nutrition.energyKJPer100g)} kJ</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.nutrition.macros')}</span>
+              <span className="font-mono">
+                {t('chemistry:detail.nutrition.macroSplit' as any, {
+                  carb: physics.nutrition.carbohydrateG.toFixed(1),
+                  fat: physics.nutrition.fatG.toFixed(1),
+                  protein: physics.nutrition.proteinG.toFixed(1),
+                })}
+              </span>
+            </div>
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.nutrition.caveat')}</p>
+        </>
+      )}
+
       {/* Norrish walkthrough */}
       <SectionHeader className="mt-5">{t('chemistry:detail.norrish.title')}</SectionHeader>
       {norrishWalkthrough}
