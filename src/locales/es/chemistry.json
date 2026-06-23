@@ -222,6 +222,29 @@
       },
       "caveat": "Equilibrio documentado de pastel de alta proporción (Figoni): azúcar≥harina, líquido≥azúcar, huevo≥grasa. Es un cribado direccional según los roles de los ingredientes, no una miga medida. Los números son la proporción real frente al umbral documentado."
     },
+    "diagnostics": {
+      "title": "Diagnóstico",
+      "allClear": "No se detectaron fallos.",
+      "fault": {
+        "emulsion_will_split": "La emulsión probablemente se corte (demasiada grasa para la fase acuosa).",
+        "gelation_wont_set": "Gelificante por debajo de su dosis — no gelifica.",
+        "gelation_cofactor_missing": "El gelificante necesita un cofactor (azúcar/calcio/potasio) que puede faltar.",
+        "formula_sugar_below_flour": "Poco azúcar para la harina — miga más densa y dura.",
+        "formula_sugar_excess": "Demasiado azúcar — muy tierna; puede hundirse.",
+        "formula_low_liquid": "Poco líquido — miga seca, cerrada y densa.",
+        "formula_fat_exceeds_protein": "La grasa supera a los huevos — grasienta; la estructura puede colapsar.",
+        "formula_high_fat": "Muy rica (mucha grasa) — frágil.",
+        "oxidation_rancidity": "Alto riesgo de rancidez durante el almacenamiento (grasa insaturada).",
+        "moisture_migration": "La humedad puede migrar entre capas — ablandando/secando.",
+        "curdle_risk": "Riesgo de corte (ácido + calor sobre las proteínas lácteas).",
+        "flavor_too_sweet": "Excesivamente dulce.",
+        "flavor_too_salty": "Excesivamente salado.",
+        "flavor_too_sour": "Excesivamente ácido.",
+        "flavor_too_bitter": "Excesivamente amargo.",
+        "flavor_dominant_sour": "El ácido domina sin suficiente para equilibrarlo.",
+        "flavor_dominant_bitter": "El amargo domina sin suficiente para equilibrarlo."
+      }
+    },
     "bands": {
       "title": "Interpretación de la banda Aw",
       "current": "Actual"

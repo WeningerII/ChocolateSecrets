@@ -222,6 +222,29 @@
       },
       "caveat": "문서화된 하이레이쇼 케이크 균형(Figoni): 설탕≥밀가루, 수분≥설탕, 달걀≥지방. 측정된 속결이 아니라 재료 역할 비율에 따른 방향성 선별입니다. 숫자는 실제 비율 대 문서화된 임계값입니다."
     },
+    "diagnostics": {
+      "title": "진단",
+      "allClear": "발견된 결함 없음.",
+      "fault": {
+        "emulsion_will_split": "유화액이 분리될 가능성 높음(수분 상 대비 지방 과다).",
+        "gelation_wont_set": "겔화제가 응고 용량 미만 — 겔화되지 않음.",
+        "gelation_cofactor_missing": "겔화제에 필요한 보조 인자(설탕/칼슘/칼륨)가 부족할 수 있음.",
+        "formula_sugar_below_flour": "밀가루 대비 설탕 부족 — 더 조밀하고 질긴 속결.",
+        "formula_sugar_excess": "설탕 과다 — 지나치게 부드러움; 가라앉을 수 있음.",
+        "formula_low_liquid": "수분 부족 — 건조하고 촘촘하며 조밀한 속결.",
+        "formula_fat_exceeds_protein": "지방이 달걀보다 많음 — 기름지고 구조가 무너질 수 있음.",
+        "formula_high_fat": "매우 리치함(고지방) — 부서지기 쉬움.",
+        "oxidation_rancidity": "보관 중 산패 위험 높음(불포화지방).",
+        "moisture_migration": "층 사이로 수분이 이동할 수 있음 — 무르거나 건조해짐.",
+        "curdle_risk": "응고 위험(유단백에 작용하는 산 + 열).",
+        "flavor_too_sweet": "단맛이 지나치게 강함.",
+        "flavor_too_salty": "짠맛이 지나치게 강함.",
+        "flavor_too_sour": "신맛이 지나치게 강함.",
+        "flavor_too_bitter": "쓴맛이 지나치게 강함.",
+        "flavor_dominant_sour": "신맛이 지배적이고 균형을 잡을 요소가 부족함.",
+        "flavor_dominant_bitter": "쓴맛이 지배적이고 균형을 잡을 요소가 부족함."
+      }
+    },
     "bands": {
       "title": "Aw 밴드",
       "current": "현재"
