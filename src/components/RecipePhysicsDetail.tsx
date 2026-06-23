@@ -213,6 +213,26 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Moisture migration — only when there is a multi-phase a_w gradient */}
+      {physics.moisture && physics.moisture.band !== 'none' && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.moisture.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.moisture.bandLabel')}</span>
+              <span className="font-medium text-cocoa-900">
+                {t(`chemistry:detail.moisture.band.${physics.moisture.band}` as any)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.moisture.gapLabel')}</span>
+              <span className="font-mono">{physics.moisture.drivingAwGap.toFixed(3)}</span>
+            </div>
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.moisture.caveat')}</p>
+        </>
+      )}
+
       {/* Aw band interpretation */}
       <SectionHeader className="mt-5">{t('chemistry:detail.bands.title')}</SectionHeader>
       <div className="mt-2 space-y-1">

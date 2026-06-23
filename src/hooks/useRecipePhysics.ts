@@ -18,13 +18,14 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
-import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult } from '../services/foodScience/process';
+import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
-/** Assumed storage scenario for lipid oxidation: ambient room temperature for the
- *  declared shelf life (or a conservative default). Packaging barriers are not modeled. */
-const OXIDATION_STORAGE_TEMP_C = 20;
-const OXIDATION_DEFAULT_STORAGE_DAYS = 90;
+/** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
+ *  migration): ambient room temperature for the declared shelf life (or a
+ *  conservative default). Packaging/interface barriers are not modeled. */
+const STORAGE_TEMP_C = 20;
+const STORAGE_DEFAULT_DAYS = 90;
 const SECONDS_PER_DAY = 86_400;
 
 export interface PhysicsWarning {
@@ -64,6 +65,8 @@ export interface RecipePhysics {
   doneness: DonenessResult | null;
   /** Lipid-oxidation rancidity potential over an assumed storage scenario. */
   oxidation: OxidationResult | null;
+  /** Moisture migration between phases (components) at different a_w; null when single-phase. */
+  moisture: MoistureMigrationResult | null;
 }
 
 function deriveWarnings(
@@ -179,17 +182,26 @@ export function useRecipePhysics(
         ? computeDoneness({ profile: processProfile, composition: mixComposition, charLengthM: DEFAULT_CHAR_LENGTH_M })
         : null;
 
-    // Lipid oxidation runs over an assumed storage timeline (ambient × shelf life),
-    // independent of any bake — relevant to any fat-bearing product on the shelf.
-    const storageDays = recipe.haccp?.shelfLifeDays ?? OXIDATION_DEFAULT_STORAGE_DAYS;
+    // Storage-scenario models run over an assumed timeline (ambient × shelf life).
+    const storageDays = recipe.haccp?.shelfLifeDays ?? STORAGE_DEFAULT_DAYS;
+    const storageProfile = profileFromSegments([{ tempC: STORAGE_TEMP_C, durationS: storageDays * SECONDS_PER_DAY }]);
     const oxidation: OxidationResult | null =
-      aw.aw !== null
-        ? computeLipidOxidation(
-            mixComposition,
-            aw.aw,
-            profileFromSegments([{ tempC: OXIDATION_STORAGE_TEMP_C, durationS: storageDays * SECONDS_PER_DAY }]),
-          )
-        : null;
+      aw.aw !== null ? computeLipidOxidation(mixComposition, aw.aw, storageProfile) : null;
+
+    // Moisture migration between phases (components) at different a_w. a_w is
+    // intensive, so each component's a_w is computed by resolving it in isolation.
+    const recipeComponents = recipe.components ?? [];
+    let moisture: MoistureMigrationResult | null = null;
+    if (recipeComponents.length >= 2) {
+      const phaseAws: number[] = [];
+      for (const comp of recipeComponents) {
+        const { resolved } = resolveRecipeLeaves({ ...recipe, components: [comp] }, ingredients, allRecipes, scale);
+        if (resolved.length === 0) continue;
+        const a = calculateNorrishAw(resolved).aw;
+        if (a !== null) phaseAws.push(a);
+      }
+      moisture = computeMoistureMigration(phaseAws, storageProfile);
+    }
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
@@ -215,6 +227,7 @@ export function useRecipePhysics(
       browning,
       doneness,
       oxidation,
+      moisture,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

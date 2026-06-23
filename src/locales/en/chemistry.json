@@ -104,6 +104,18 @@
       "estimatedFatNote": "Unsaturated fat not specified — estimated as 60% of total fat.",
       "caveat": "Relative rancidity potential over an assumed ambient storage for the shelf life; driven by unsaturated fat, storage time·temperature and water activity. Not a measured peroxide value."
     },
+    "moisture": {
+      "title": "Moisture migration",
+      "bandLabel": "Migration risk",
+      "gapLabel": "Phase a_w gap",
+      "band": {
+        "none": "None",
+        "low": "Low",
+        "moderate": "Moderate",
+        "high": "High"
+      },
+      "caveat": "Risk that moisture migrates between components at different water activity over storage — softening dry parts, drying moist ones. Assumes a default diffusion barrier; packaging and interface geometry are not modeled."
+    },
     "ph": {
       "title": "pH equilibrium (charge-balance solver)",
       "table": {

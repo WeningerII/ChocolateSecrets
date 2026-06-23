@@ -104,6 +104,18 @@
       "estimatedFatNote": "Grasa insaturada no especificada — estimada como 60% de la grasa total.",
       "caveat": "Potencial de rancidez relativo durante un almacenamiento ambiente asumido para la vida útil; depende de la grasa insaturada, el tiempo·temperatura de almacenamiento y la actividad de agua. No es un valor de peróxidos medido."
     },
+    "moisture": {
+      "title": "Migración de humedad",
+      "bandLabel": "Riesgo de migración",
+      "gapLabel": "Diferencia de a_w entre fases",
+      "band": {
+        "none": "Ninguno",
+        "low": "Bajo",
+        "moderate": "Moderado",
+        "high": "Alto"
+      },
+      "caveat": "Riesgo de que la humedad migre entre componentes con distinta actividad de agua durante el almacenamiento — ablandando las partes secas y secando las húmedas. Asume una barrera de difusión por defecto; no se modela el empaque ni la geometría de la interfaz."
+    },
     "ph": {
       "title": "Equilibrio de pH (Cálculo de balance de cargas)",
       "table": {

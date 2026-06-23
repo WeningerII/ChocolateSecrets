@@ -4,3 +4,4 @@ export * from './profile';
 export * from './maillard';
 export * from './doneness';
 export * from './oxidation';
+export * from './moisture';
