@@ -18,8 +18,14 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
-import { buildProcessProfile, computeMaillardBrowning, computeDoneness, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult } from '../services/foodScience/process';
+import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult } from '../services/foodScience/process';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
+
+/** Assumed storage scenario for lipid oxidation: ambient room temperature for the
+ *  declared shelf life (or a conservative default). Packaging barriers are not modeled. */
+const OXIDATION_STORAGE_TEMP_C = 20;
+const OXIDATION_DEFAULT_STORAGE_DAYS = 90;
+const SECONDS_PER_DAY = 86_400;
 
 export interface PhysicsWarning {
   kind:
@@ -56,6 +62,8 @@ export interface RecipePhysics {
   browning: MaillardResult | null;
   /** Core-temperature doneness over the bake profile; null when no thermal step. */
   doneness: DonenessResult | null;
+  /** Lipid-oxidation rancidity potential over an assumed storage scenario. */
+  oxidation: OxidationResult | null;
 }
 
 function deriveWarnings(
@@ -161,14 +169,26 @@ export function useRecipePhysics(
       (recipe.components ?? []).flatMap(c => c.steps ?? []),
     );
     const hasThermalProfile = processProfile.segments.length > 0;
-    const mixComposition = hasThermalProfile ? aggregateComposition(resolvedIngredients) : null;
+    const mixComposition = aggregateComposition(resolvedIngredients);
     const browning: MaillardResult | null =
-      mixComposition && aw.aw !== null
+      hasThermalProfile && aw.aw !== null
         ? computeMaillardBrowning(mixComposition, aw.aw, processProfile)
         : null;
     const doneness: DonenessResult | null =
-      mixComposition
+      hasThermalProfile
         ? computeDoneness({ profile: processProfile, composition: mixComposition, charLengthM: DEFAULT_CHAR_LENGTH_M })
+        : null;
+
+    // Lipid oxidation runs over an assumed storage timeline (ambient × shelf life),
+    // independent of any bake — relevant to any fat-bearing product on the shelf.
+    const storageDays = recipe.haccp?.shelfLifeDays ?? OXIDATION_DEFAULT_STORAGE_DAYS;
+    const oxidation: OxidationResult | null =
+      aw.aw !== null
+        ? computeLipidOxidation(
+            mixComposition,
+            aw.aw,
+            profileFromSegments([{ tempC: OXIDATION_STORAGE_TEMP_C, durationS: storageDays * SECONDS_PER_DAY }]),
+          )
         : null;
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
@@ -194,6 +214,7 @@ export function useRecipePhysics(
       bread,
       browning,
       doneness,
+      oxidation,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

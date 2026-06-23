@@ -90,6 +90,20 @@
       "biotWarning": "Likely too thick for a uniform-core estimate; the true core runs cooler than shown.",
       "caveat": "Estimated core temperature for a typical ~2 cm portion (Newtonian heating), treating step temperatures as the oven/medium, not the core. Add portion thickness for a recipe-specific result."
     },
+    "oxidation": {
+      "title": "Lipid oxidation (rancidity)",
+      "bandLabel": "Rancidity risk",
+      "indexLabel": "Oxidation index",
+      "band": {
+        "none": "None",
+        "low": "Low",
+        "moderate": "Moderate",
+        "high": "High",
+        "severe": "Severe"
+      },
+      "estimatedFatNote": "Unsaturated fat not specified — estimated as 60% of total fat.",
+      "caveat": "Relative rancidity potential over an assumed ambient storage for the shelf life; driven by unsaturated fat, storage time·temperature and water activity. Not a measured peroxide value."
+    },
     "ph": {
       "title": "pH equilibrium (charge-balance solver)",
       "table": {

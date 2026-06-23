@@ -190,6 +190,29 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Lipid oxidation (storage rancidity) — only for fat-bearing products */}
+      {physics.oxidation && physics.oxidation.band !== 'none' && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.oxidation.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.oxidation.bandLabel')}</span>
+              <span className="font-medium text-cocoa-900">
+                {t(`chemistry:detail.oxidation.band.${physics.oxidation.band}` as any)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.oxidation.indexLabel')}</span>
+              <span className="font-mono">{physics.oxidation.index.toFixed(2)}</span>
+            </div>
+          </div>
+          {physics.oxidation.flags.some(f => f.kind === 'unsaturated_fat_estimated') && (
+            <p className="text-[11px] italic text-cocoa-500 mt-1">{t('chemistry:detail.oxidation.estimatedFatNote')}</p>
+          )}
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.oxidation.caveat')}</p>
+        </>
+      )}
+
       {/* Aw band interpretation */}
       <SectionHeader className="mt-5">{t('chemistry:detail.bands.title')}</SectionHeader>
       <div className="mt-2 space-y-1">

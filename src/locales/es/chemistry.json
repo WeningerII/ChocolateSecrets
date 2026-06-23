@@ -90,6 +90,20 @@
       "biotWarning": "Probablemente demasiado grueso para estimar un centro uniforme; el centro real queda más frío de lo mostrado.",
       "caveat": "Temperatura del centro estimada para una porción típica de ~2 cm (calentamiento newtoniano), tomando las temperaturas de los pasos como las del horno/medio, no del centro. Añade el grosor de la porción para un resultado específico."
     },
+    "oxidation": {
+      "title": "Oxidación de lípidos (rancidez)",
+      "bandLabel": "Riesgo de rancidez",
+      "indexLabel": "Índice de oxidación",
+      "band": {
+        "none": "Ninguno",
+        "low": "Bajo",
+        "moderate": "Moderado",
+        "high": "Alto",
+        "severe": "Severo"
+      },
+      "estimatedFatNote": "Grasa insaturada no especificada — estimada como 60% de la grasa total.",
+      "caveat": "Potencial de rancidez relativo durante un almacenamiento ambiente asumido para la vida útil; depende de la grasa insaturada, el tiempo·temperatura de almacenamiento y la actividad de agua. No es un valor de peróxidos medido."
+    },
     "ph": {
       "title": "Equilibrio de pH (Cálculo de balance de cargas)",
       "table": {
