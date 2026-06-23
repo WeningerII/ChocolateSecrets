@@ -115,11 +115,10 @@ describe('frozen evaluate end-to-end', () => {
       dummyResolved('sucrose', 150, { sucrose: 100 }),
       dummyResolved('nfdm', 200, { lactose: 52, protein: 36, ash: 8, water: 4 }), // way too much!
     ];
-    // MSNF is going to be 200 * 0.96 / 1000 ~ 19% + milk ~ 22%.
-    // Lactose alone from nfdm is 100g, which is > 11% of MSNF? Wait, lactose in MSNF is lactose / msnf.
-    // Lactose = 100g. MSNF = 100g (nfdm lactose) + 72 (protein) + 16 (ash)...
-    // Actually, lactose in MSNF = lactose / MSNF. NFDM is 52% lactose, 96% MSNF.
-    // So 52/96 = 54% lactose in MSNF. This alone is > 11% sandiness threshold.
+    // Sandiness is driven by lactose concentration in the unfrozen water (serum),
+    // not in the MSNF. Total lactose ≈ 7.5 (cream) + 19.2 (milk) + 104 (nfdm) ≈ 131 g;
+    // against the test's 50 % waterPct that is far past the ~11 g/100 g-water
+    // solubility threshold, so sandiness_risk fires.
     const rec: any = { name: 'Ice cream', categories: ['frozen'] };
     const res = evaluateFrozen({
       recipe: rec as Recipe,

@@ -89,14 +89,17 @@ export function applyDecisionVector(
       }
 
       case 'presence_with_variant': {
+        // Three genes: presence flag, variant choice, mass. All three are read
+        // before any early break so geneIdx stays aligned for later dimensions.
         const presenceGene = clamp01(vector[geneIdx++]);
+        const choiceGene = clamp01(vector[geneIdx++]);
         const massGene = clamp01(vector[geneIdx++]);
         const isPresent = presenceGene > 0.5;
         if (!isPresent) break;
 
         const choiceIdx = Math.min(
           dim.candidateIngredientIds.length - 1,
-          Math.floor(presenceGene * dim.candidateIngredientIds.length)
+          Math.floor(choiceGene * dim.candidateIngredientIds.length)
         );
         const chosenId = dim.candidateIngredientIds[choiceIdx];
         const newMass = dim.maxMass * massGene;

@@ -138,10 +138,11 @@ export function deriveSearchSpace({
 
 /**
  * For a given decision vector encoded in [0..1], return the gene count.
- * presence_with_variant uses 2 genes (presence flag + mass); all others use 1.
+ * presence_with_variant uses 3 genes (presence flag + variant choice + mass);
+ * all others use 1.
  */
 export function geneCount(dimension: SearchDimension): number {
-  return dimension.kind === 'presence_with_variant' ? 2 : 1;
+  return dimension.kind === 'presence_with_variant' ? 3 : 1;
 }
 
 export function totalGeneCount(dimensions: SearchDimension[]): number {

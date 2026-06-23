@@ -46,14 +46,24 @@ describe('applyDecisionVector', () => {
 
   test('presence_with_variant inserts based on presence gene and scales mass', () => {
     const dims: SearchDimension[] = [{ kind: 'presence_with_variant', role: 'sweetener', componentIndex: 0, candidateIngredientIds: ['ing2'], maxMass: 20 }];
-    const resAbsent = applyDecisionVector(baseRecipe, [0.4, 1.0], dims, catalog);
+    // genes: [presence, choice, mass]
+    const resAbsent = applyDecisionVector(baseRecipe, [0.4, 0.0, 1.0], dims, catalog);
     expect(resAbsent.recipe.components![0].ingredients!.length).toBe(2);
 
-    const resPresent = applyDecisionVector(baseRecipe, [0.6, 0.5], dims, catalog);
+    const resPresent = applyDecisionVector(baseRecipe, [0.6, 0.0, 0.5], dims, catalog);
     expect(resPresent.recipe.components![0].ingredients!.length).toBe(3);
     const added = resPresent.recipe.components![0].ingredients![2];
     expect(added.ingredientId).toBe('ing2');
     expect(added.quantity).toBe(10); // 20 * 0.5
     expect(resPresent.diff).toContainEqual({ kind: 'added', ingredientName: 'Ingredient 2', mass: 10 });
+  });
+
+  test('presence_with_variant selects the variant via its own choice gene (not the presence gene)', () => {
+    const dims: SearchDimension[] = [{ kind: 'presence_with_variant', role: 'sweetener', componentIndex: 0, candidateIngredientIds: ['ing1', 'ing2'], maxMass: 20 }];
+    // Same presence gene (0.6), different choice gene → different candidate.
+    const resHigh = applyDecisionVector(baseRecipe, [0.6, 0.99, 0.5], dims, catalog);
+    expect(resHigh.recipe.components![0].ingredients![2].ingredientId).toBe('ing2');
+    const resLow = applyDecisionVector(baseRecipe, [0.6, 0.0, 0.5], dims, catalog);
+    expect(resLow.recipe.components![0].ingredients![2].ingredientId).toBe('ing1');
   });
 });
