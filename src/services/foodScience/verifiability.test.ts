@@ -6,6 +6,7 @@ import * as confectionery from './confectionery';
 import * as processLayer from './process';
 import * as perception from './perception';
 import * as structure from './structure';
+import * as transport from './transport';
 
 describe('verifiability registry', () => {
   test('dimension ids are unique', () => {
@@ -62,7 +63,7 @@ describe('verifiability registry ↔ kernel exports (anti-rot link check)', () =
   // Collect every callable exported from the kernel barrels the registry points at,
   // so a renamed or removed kernel function can't silently leave the ledger dangling.
   const callableExports = new Set<string>();
-  for (const ns of [universal, frozen, confectionery, processLayer, perception, structure]) {
+  for (const ns of [universal, frozen, confectionery, processLayer, perception, structure, transport]) {
     for (const [name, value] of Object.entries(ns)) {
       if (typeof value === 'function') callableExports.add(name);
     }
