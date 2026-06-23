@@ -57,6 +57,7 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   // --- Mechanical / texture ---
   { id: 'scoopability', category: 'mechanical', predictability: 'calibrated', measurability: { instrument: 'penetrometer / TPA' }, computedBy: 'classifyFrozenWaterScoopability', notes: 'Physics path (ice fraction) alongside the hardening-factor heuristic.' },
   { id: 'chocolate_snap', category: 'mechanical', predictability: 'proxy', measurability: { instrument: 'three-point bend' }, computedBy: 'computeChocolateSnap', notes: 'Class-based fat estimate; composition lumps fat.' },
+  { id: 'viscosity', category: 'mechanical', predictability: 'calibrated', measurability: { instrument: 'viscometer / rheometer' }, computedBy: 'computeRheology', notes: 'Relative viscosity (solute jamming divergence × Arrhenius temperature) + flow type + consistency band.' },
 
   // --- Microstructure ---
   { id: 'solid_fat_content', category: 'microstructure', predictability: 'calibrated', measurability: { instrument: 'pNMR (ISO 8292)' }, computedBy: 'sfcAtTemp' },
