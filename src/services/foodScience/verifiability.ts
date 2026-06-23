@@ -40,6 +40,7 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   // --- Thermodynamic state (the strongest ground) ---
   { id: 'water_activity', category: 'state', predictability: 'first_principles', measurability: { instrument: 'water-activity meter' }, computedBy: 'calculateNorrishAw' },
   { id: 'ph', category: 'state', predictability: 'first_principles', measurability: { instrument: 'pH meter' }, computedBy: 'calculateMixedPH' },
+  { id: 'titratable_acidity', category: 'state', predictability: 'first_principles', measurability: { instrument: 'titration (autotitrator)' }, computedBy: 'computeTitratableAcidity', notes: 'Total neutralizable acid to the pH 8.2 endpoint — a better sourness predictor than pH.' },
   { id: 'initial_freezing_point', category: 'state', predictability: 'first_principles', measurability: { instrument: 'cryoscope / DSC' }, computedBy: 'computeFreezing' },
   { id: 'ice_fraction_at_serving', category: 'state', predictability: 'first_principles', measurability: { instrument: 'DSC / calorimetry' }, computedBy: 'computeFreezing', notes: 'The texture-causal coordinate; ideal colligative model.' },
   { id: 'glass_transition_tg_prime', category: 'state', predictability: 'calibrated', measurability: { instrument: 'DSC' }, computedBy: 'estimateTgPrime', notes: 'Proteins/stabilizers raise Tg′ and are not yet modeled.' },

@@ -10,7 +10,7 @@
  * Covers all five basic tastes:
  *   sweet  — sucrose-equivalents from the sugars/polyols (relative sweetness)
  *   salty  — sodium (as NaCl)
- *   sour   — pH proxy (titratable acidity is the better predictor — flagged)
+ *   sour   — titratable acidity when available (the better predictor), else a pH proxy
  *   bitter — caffeine + theobromine (the chemical-inventory descriptors)
  *   umami  — free glutamate (5′-nucleotide synergy not yet modeled)
  * bitter/umami return null (flagged) when the inventory carries no agonist.
@@ -34,6 +34,8 @@ const SODIUM_TO_NACL = 2.54;
 /** pH window for the sourness proxy. */
 const SOUR_PH_FLAT = 4.5;     // at/above this, ~no sourness
 const SOUR_PH_MAX = 2.5;      // at/below this, maximal sourness
+/** Beidler half-maximum for titratable-acidity sourness, eq/L. */
+const K_SOUR_TA_EQ_PER_L = 0.1;
 /** Bitter half-maximum (caffeine-equivalent %) and theobromine's relative bitterness. */
 const K_BITTER_PCT = 0.05;
 const THEOBROMINE_REL_BITTER = 0.4;
@@ -45,7 +47,13 @@ export type TasteQuality = 'sweet' | 'salty' | 'sour' | 'bitter' | 'umami';
 export type TasteFlag =
   | { kind: 'no_bitter_inventory' }
   | { kind: 'no_umami_inventory' }
-  | { kind: 'sourness_from_ph_proxy' };
+  | { kind: 'sourness_from_ph_proxy' }
+  | { kind: 'sourness_from_titratable_acidity' };
+
+export interface TasteInputs {
+  /** Titratable acidity (eq/L of water) — the preferred sourness driver when known. */
+  titratableAcidityEqPerL?: number | null;
+}
 
 export interface TasteProfile {
   /** Perceived intensities 0–100 after mixture interactions; null = no data. */
@@ -83,13 +91,26 @@ function rawSourness(pH: number | null): number {
  * Perceived taste profile from composition + pH. Returns pre-interaction stimuli
  * run through the documented mixture interactions.
  */
-export function computeTasteProfile(composition: Composition, pH: number | null): TasteProfile {
+export function computeTasteProfile(
+  composition: Composition,
+  pH: number | null,
+  opts: TasteInputs = {},
+): TasteProfile {
   const flags: TasteFlag[] = [];
 
   const sweetRaw = beidler(sucroseEquivalentPct(composition), K_SWEET_SEQ_PCT);
   const saltRaw = beidler((composition.sodium ?? 0) * SODIUM_TO_NACL, K_SALT_NACL_PCT);
-  const sourRaw = rawSourness(pH);
-  if (pH !== null) flags.push({ kind: 'sourness_from_ph_proxy' });
+
+  // Sourness: titratable acidity is the better predictor; fall back to the pH proxy.
+  let sourRaw: number;
+  const ta = opts.titratableAcidityEqPerL;
+  if (ta !== undefined && ta !== null) {
+    sourRaw = beidler(ta, K_SOUR_TA_EQ_PER_L);
+    flags.push({ kind: 'sourness_from_titratable_acidity' });
+  } else {
+    sourRaw = rawSourness(pH);
+    if (pH !== null) flags.push({ kind: 'sourness_from_ph_proxy' });
+  }
 
   // Mixture interactions (Keast & Breslin 2003), scaled by the suppressor's
   // intensity: acids suppress sweetness; sugar suppresses sourness; a little salt

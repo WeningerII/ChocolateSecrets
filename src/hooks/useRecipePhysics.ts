@@ -3,11 +3,13 @@ import type { Recipe, Ingredient } from '../types';
 import {
   calculateNorrishAw,
   calculateMixedPH,
+  computeTitratableAcidity,
   predictShelfLife,
   classifyAwBand,
   classifyFatRegime,
   aggregateComposition,
   type ResolvedIngredient,
+  type TitratableAcidityResult,
   type AwResult,
   type PHResult,
   type ShelfLifePrediction,
@@ -49,6 +51,7 @@ export interface PhysicsWarning {
 export interface RecipePhysics {
   aw: AwResult;
   pH: PHResult | null;
+  titratableAcidity: TitratableAcidityResult | null;
   shelfLife: ShelfLifePrediction;
   awBand: AwBand;
   fatRegime: FatRegime;
@@ -130,6 +133,7 @@ export function useRecipePhysics(
 
     const aw = calculateNorrishAw(resolvedIngredients);
     const pH = calculateMixedPH(resolvedIngredients);
+    const titratableAcidity = computeTitratableAcidity(resolvedIngredients);
     const shelfLife = predictShelfLife(aw, resolvedIngredients, {
       declaredShelfLifeDays: recipe.haccp?.shelfLifeDays,
     });
@@ -207,7 +211,9 @@ export function useRecipePhysics(
     }
 
     // Perception: receptor-level taste intensities from the mix composition + pH.
-    const taste = computeTasteProfile(mixComposition, pH?.pH ?? null);
+    const taste = computeTasteProfile(mixComposition, pH?.pH ?? null, {
+      titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
+    });
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
@@ -222,7 +228,7 @@ export function useRecipePhysics(
     }
 
     return {
-      aw, pH, shelfLife, awBand, fatRegime, warnings,
+      aw, pH, titratableAcidity, shelfLife, awBand, fatRegime, warnings,
       computedAmounts,
       totalMass,
       scale,

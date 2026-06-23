@@ -33,6 +33,13 @@ describe('computeTasteProfile', () => {
     expect(computeTasteProfile({}, 3).flags).toContainEqual({ kind: 'sourness_from_ph_proxy' });
   });
 
+  test('sourness uses titratable acidity when provided, overriding the pH proxy', () => {
+    const r = computeTasteProfile({}, 6, { titratableAcidityEqPerL: 0.1 }); // pH 6 would read ~no sour
+    expect(r.sour).toBeGreaterThan(40);
+    expect(r.flags).toContainEqual({ kind: 'sourness_from_titratable_acidity' });
+    expect(r.flags).not.toContainEqual({ kind: 'sourness_from_ph_proxy' });
+  });
+
   test('sweet and sour mutually suppress (mixture interaction)', () => {
     expect(computeTasteProfile({ sucrose: 10 }, 3).sweet)
       .toBeLessThan(computeTasteProfile({ sucrose: 10 }, null).sweet);
