@@ -143,6 +143,48 @@
       },
       "caveat": "Perceived intensity 0–100 after taste interactions. Sourness uses pH (titratable acidity is better); bitter & umami await a compound inventory."
     },
+    "structure": {
+      "title": "Structure & texture",
+      "emulsion": {
+        "label": "Emulsion",
+        "type": {
+          "oil_in_water": "Oil-in-water",
+          "water_in_oil": "Water-in-oil",
+          "none": "—"
+        },
+        "stability": {
+          "stable": "stable",
+          "metastable": "metastable",
+          "unstable": "unstable",
+          "none": "—"
+        }
+      },
+      "foam": {
+        "label": "Foam stability",
+        "band": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "none": "—"
+        }
+      },
+      "rheology": {
+        "label": "Consistency",
+        "consistency": {
+          "thin": "Thin",
+          "pourable": "Pourable",
+          "syrupy": "Syrupy",
+          "viscous": "Viscous",
+          "spoonable": "Spoonable",
+          "paste": "Paste"
+        },
+        "flow": {
+          "newtonian": "Newtonian",
+          "plastic_yield_stress": "Plastic (yield stress)"
+        }
+      },
+      "caveat": "Assumes the relevant phase is present. Emulsifier and gelling agents are not auto-detected yet, so an emulsion reads as unstable until one is identified."
+    },
     "bands": {
       "title": "Aw band interpretation",
       "current": "Current"

@@ -143,6 +143,48 @@
       },
       "caveat": "맛 상호작용을 반영한 0–100 지각 강도입니다. 신맛은 pH를 사용합니다(적정산도가 더 정확). 쓴맛·감칠맛은 화합물 인벤토리가 필요합니다."
     },
+    "structure": {
+      "title": "구조 및 식감",
+      "emulsion": {
+        "label": "에멀션",
+        "type": {
+          "oil_in_water": "수중유(O/W)",
+          "water_in_oil": "유중수(W/O)",
+          "none": "—"
+        },
+        "stability": {
+          "stable": "안정",
+          "metastable": "준안정",
+          "unstable": "불안정",
+          "none": "—"
+        }
+      },
+      "foam": {
+        "label": "거품 안정성",
+        "band": {
+          "poor": "낮음",
+          "fair": "보통",
+          "good": "좋음",
+          "none": "—"
+        }
+      },
+      "rheology": {
+        "label": "점도/농도",
+        "consistency": {
+          "thin": "묽음",
+          "pourable": "부을 수 있음",
+          "syrupy": "시럽",
+          "viscous": "점성",
+          "spoonable": "떠먹는 농도",
+          "paste": "페이스트"
+        },
+        "flow": {
+          "newtonian": "뉴턴 유체",
+          "plastic_yield_stress": "소성(항복응력)"
+        }
+      },
+      "caveat": "해당 상(phase)이 존재한다고 가정합니다. 유화제·겔화제는 아직 자동 감지되지 않으므로, 식별 전까지 에멀션은 불안정으로 표시됩니다."
+    },
     "bands": {
       "title": "Aw 밴드",
       "current": "현재"

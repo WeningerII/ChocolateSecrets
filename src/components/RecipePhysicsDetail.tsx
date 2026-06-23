@@ -252,6 +252,42 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Structure & texture */}
+      {(physics.emulsion.type !== 'none' || physics.foam.band !== 'none' || physics.aw.waterPct > 5) && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.structure.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            {physics.emulsion.type !== 'none' && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.emulsion.label')}</span>
+                <span className="font-medium text-cocoa-900">
+                  {t(`chemistry:detail.structure.emulsion.type.${physics.emulsion.type}` as any)}
+                  {' · '}
+                  {t(`chemistry:detail.structure.emulsion.stability.${physics.emulsion.stability}` as any)}
+                </span>
+              </div>
+            )}
+            {physics.foam.band !== 'none' && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.foam.label')}</span>
+                <span className="font-medium text-cocoa-900">{t(`chemistry:detail.structure.foam.band.${physics.foam.band}` as any)}</span>
+              </div>
+            )}
+            {physics.aw.waterPct > 5 && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.rheology.label')}</span>
+                <span className="font-medium text-cocoa-900">
+                  {t(`chemistry:detail.structure.rheology.consistency.${physics.rheology.consistency}` as any)}
+                  {' · '}
+                  {t(`chemistry:detail.structure.rheology.flow.${physics.rheology.flowType}` as any)}
+                </span>
+              </div>
+            )}
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.structure.caveat')}</p>
+        </>
+      )}
+
       {/* Aw band interpretation */}
       <SectionHeader className="mt-5">{t('chemistry:detail.bands.title')}</SectionHeader>
       <div className="mt-2 space-y-1">

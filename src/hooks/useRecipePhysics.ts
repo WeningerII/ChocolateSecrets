@@ -22,6 +22,7 @@ import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/f
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
 import { computeTasteProfile, type TasteProfile } from '../services/foodScience/perception';
+import { computeEmulsion, computeFoam, computeRheology, type EmulsionResult, type FoamResult, type RheologyResult } from '../services/foodScience/structure';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 /** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
@@ -30,6 +31,8 @@ import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipe
 const STORAGE_TEMP_C = 20;
 const STORAGE_DEFAULT_DAYS = 90;
 const SECONDS_PER_DAY = 86_400;
+/** Temperature at which consistency/viscosity is reported (working/room temp). */
+const RHEOLOGY_TEMP_C = 20;
 
 export interface PhysicsWarning {
   kind:
@@ -73,6 +76,12 @@ export interface RecipePhysics {
   moisture: MoistureMigrationResult | null;
   /** Perceived basic-taste intensities (0–100) from composition + pH. */
   taste: TasteProfile;
+  /** Emulsion type & stability (composition-based; emulsifier not yet auto-detected). */
+  emulsion: EmulsionResult;
+  /** Foam capacity & stability. */
+  foam: FoamResult;
+  /** Apparent viscosity, flow type & consistency. */
+  rheology: RheologyResult;
 }
 
 function deriveWarnings(
@@ -215,6 +224,13 @@ export function useRecipePhysics(
       titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
     });
 
+    // Structure & texture (composition-based). Emulsifier/gelling-agent detection
+    // arrives with the functional-ingredient inventory; until then emulsion has no
+    // emulsifier signal.
+    const emulsion = computeEmulsion({ composition: mixComposition });
+    const foam = computeFoam(mixComposition);
+    const rheology = computeRheology(mixComposition, RHEOLOGY_TEMP_C);
+
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
@@ -241,6 +257,9 @@ export function useRecipePhysics(
       oxidation,
       moisture,
       taste,
+      emulsion,
+      foam,
+      rheology,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

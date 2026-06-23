@@ -143,6 +143,48 @@
       },
       "caveat": "Intensidad percibida 0–100 tras las interacciones de sabor. El ácido usa el pH (la acidez titulable es mejor); amargo y umami requieren un inventario de compuestos."
     },
+    "structure": {
+      "title": "Estructura y textura",
+      "emulsion": {
+        "label": "Emulsión",
+        "type": {
+          "oil_in_water": "Aceite en agua",
+          "water_in_oil": "Agua en aceite",
+          "none": "—"
+        },
+        "stability": {
+          "stable": "estable",
+          "metastable": "metaestable",
+          "unstable": "inestable",
+          "none": "—"
+        }
+      },
+      "foam": {
+        "label": "Estabilidad de espuma",
+        "band": {
+          "poor": "Baja",
+          "fair": "Media",
+          "good": "Buena",
+          "none": "—"
+        }
+      },
+      "rheology": {
+        "label": "Consistencia",
+        "consistency": {
+          "thin": "Fluida",
+          "pourable": "Vertible",
+          "syrupy": "Jarabe",
+          "viscous": "Viscosa",
+          "spoonable": "Cremosa",
+          "paste": "Pasta"
+        },
+        "flow": {
+          "newtonian": "Newtoniana",
+          "plastic_yield_stress": "Plástica (umbral)"
+        }
+      },
+      "caveat": "Supone que la fase correspondiente está presente. Los emulsionantes y gelificantes aún no se detectan automáticamente, así que una emulsión aparece como inestable hasta identificar uno."
+    },
     "bands": {
       "title": "Interpretación de la banda Aw",
       "current": "Actual"
