@@ -24,7 +24,7 @@ import { evaluateConfectionery, type ConfectioneryEvaluation, type Confectionery
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
-import { computeTasteProfile, computePalatability, type TasteProfile, type PalatabilityResult } from '../services/foodScience/perception';
+import { computeTasteProfile, computePalatability, computeAromaRelease, type TasteProfile, type PalatabilityResult, type AromaReleaseResult } from '../services/foodScience/perception';
 import { computeEmulsion, computeFoam, computeRheology, computeGelation, resolveFunctionalAgent, computeFormulaBalance, type EmulsionResult, type FoamResult, type RheologyResult, type GelationResult, type GellingAgent, type FormulaBalanceResult } from '../services/foodScience/structure';
 import { collectFaults, type DiagnosticsResult } from '../services/foodScience/diagnostics';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
@@ -82,6 +82,8 @@ export interface RecipePhysics {
   taste: TasteProfile;
   /** Population-level taste balance (0–100) — the optimizer's "delicious" target. */
   palatability: PalatabilityResult;
+  /** Matrix modulation of aroma delivery (fat trapping), by volatile polarity. */
+  aromaRelease: AromaReleaseResult;
   /** Emulsion type & stability (composition-based; emulsifier not yet auto-detected). */
   emulsion: EmulsionResult;
   /** Foam capacity & stability. */
@@ -240,6 +242,9 @@ export function useRecipePhysics(
       titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
     });
     const palatability = computePalatability(taste);
+    // Aroma release: how the matrix (fat above all) re-weights aroma delivery by
+    // volatile polarity. The tractable half of aroma — release, not character.
+    const aromaRelease = computeAromaRelease(mixComposition);
 
     const nutrition = computeNutrition(mixComposition);
 
@@ -317,6 +322,7 @@ export function useRecipePhysics(
       moisture,
       taste,
       palatability,
+      aromaRelease,
       emulsion,
       foam,
       rheology,

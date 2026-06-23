@@ -174,6 +174,25 @@
       "balance": "Taste balance",
       "caveat": "Perceived intensity 0–100 after taste interactions. Sourness uses pH (titratable acidity is better); bitter & umami await a compound inventory."
     },
+    "aroma": {
+      "title": "Aroma release",
+      "polarity": {
+        "polar": "Water-soluble",
+        "medium": "Medium",
+        "nonpolar": "Oil-soluble"
+      },
+      "example": {
+        "ethyl_acetate": "fruity ester",
+        "hexanal": "green/grassy",
+        "limonene": "citrus terpene"
+      },
+      "band": {
+        "muted": "Muted by fat",
+        "moderate": "Moderate",
+        "free": "Projects freely"
+      },
+      "caveat": "How the fat in the matrix re-weights aroma DELIVERY by volatile polarity (three-phase partition; fat holds oil-soluble aromas in reserve). Relative headspace, not which aromas are present — character isn't modeled."
+    },
     "structure": {
       "title": "Structure & texture",
       "emulsion": {

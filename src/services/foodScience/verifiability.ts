@@ -90,7 +90,8 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   { id: 'taste_umami', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'From free glutamate, salt-enhanced. 5′-nucleotide synergy (multiplicative) not yet modeled.' },
 
   // --- Perception: aroma & liking (the relocated frontier) ---
-  { id: 'aroma_character', category: 'perceptual', predictability: 'proxy', measurability: 'panel_only', computedBy: null, notes: 'Frontier, not a wall: volatile RELEASE is tractable physics; structure→odor is increasingly ML-tractable (Principal Odor Map, 2023).' },
+  { id: 'aroma_release', category: 'perceptual', predictability: 'first_principles', measurability: { instrument: 'headspace GC-MS / APCI-MS' }, computedBy: 'computeAromaRelease', notes: 'Matrix modulation of aroma delivery: three-phase partition (fat traps lipophilic volatiles), relative headspace by polarity class. The tractable half of aroma — release, not character.' },
+  { id: 'aroma_character', category: 'perceptual', predictability: 'proxy', measurability: 'panel_only', computedBy: null, notes: 'Still the frontier: WHICH volatiles and what they smell like (structure→odor). Release is now modeled (aroma_release); character is increasingly ML-tractable (Principal Odor Map, 2023).' },
   { id: 'palatability_balance', category: 'perceptual', predictability: 'proxy', measurability: 'panel_only', computedBy: 'computePalatability', notes: 'Population-level sensory balance from the taste profile — the optimization target. A tunable heuristic, NOT individual liking.' },
   { id: 'hedonic_liking', category: 'perceptual', predictability: 'none', measurability: 'panel_only', computedBy: null, notes: 'Only the individual/contextual variance is irreducible; the population-level part is palatability_balance.' },
 ] as const;
