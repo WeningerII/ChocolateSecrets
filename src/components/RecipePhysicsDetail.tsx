@@ -253,7 +253,7 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
       )}
 
       {/* Structure & texture */}
-      {(physics.emulsion.type !== 'none' || physics.foam.band !== 'none' || physics.aw.waterPct > 5) && (
+      {(physics.emulsion.type !== 'none' || physics.foam.band !== 'none' || physics.gelation || physics.aw.waterPct > 5) && (
         <>
           <SectionHeader className="mt-5">{t('chemistry:detail.structure.title')}</SectionHeader>
           <div className="mt-2 text-xs space-y-1">
@@ -280,6 +280,20 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
                   {t(`chemistry:detail.structure.rheology.consistency.${physics.rheology.consistency}` as any)}
                   {' · '}
                   {t(`chemistry:detail.structure.rheology.flow.${physics.rheology.flowType}` as any)}
+                </span>
+              </div>
+            )}
+            {physics.gelation && (
+              <div className="flex justify-between">
+                <span className="text-cocoa-500">{t('chemistry:detail.structure.gelation.label')}</span>
+                <span className="font-medium text-cocoa-900">
+                  {t(`chemistry:detail.structure.gelation.agent.${physics.gelation.agent}` as any)}
+                  {' · '}
+                  {physics.gelation.gels
+                    ? (physics.gelation.setTempC !== null
+                        ? t('chemistry:detail.structure.gelation.setsAt' as any, { temp: physics.gelation.setTempC })
+                        : t('chemistry:detail.structure.gelation.sets'))
+                    : t('chemistry:detail.structure.gelation.wontSet')}
                 </span>
               </div>
             )}

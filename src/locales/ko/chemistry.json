@@ -183,7 +183,24 @@
           "plastic_yield_stress": "소성(항복응력)"
         }
       },
-      "caveat": "해당 상(phase)이 존재한다고 가정합니다. 유화제·겔화제는 아직 자동 감지되지 않으므로, 식별 전까지 에멀션은 불안정으로 표시됩니다."
+      "caveat": "유화제·겔화제는 재료 이름으로 감지됩니다; HLB와 작용제 식별은 카탈로그 추정치입니다.",
+      "gelation": {
+        "label": "겔화",
+        "agent": {
+          "gelatin": "젤라틴",
+          "agar": "한천",
+          "pectin_hm": "펙틴(HM)",
+          "pectin_lm": "펙틴(LM)",
+          "kappa_carrageenan": "κ-카라기난",
+          "iota_carrageenan": "ι-카라기난",
+          "starch": "전분",
+          "methylcellulose": "메틸셀룰로스",
+          "sodium_alginate": "알긴산염"
+        },
+        "sets": "겔화됨",
+        "setsAt": "{{temp}}°C에서 겔화",
+        "wontSet": "겔화 안 됨"
+      }
     },
     "bands": {
       "title": "Aw 밴드",

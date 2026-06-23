@@ -183,7 +183,24 @@
           "plastic_yield_stress": "Plástica (umbral)"
         }
       },
-      "caveat": "Supone que la fase correspondiente está presente. Los emulsionantes y gelificantes aún no se detectan automáticamente, así que una emulsión aparece como inestable hasta identificar uno."
+      "caveat": "Los emulsionantes y gelificantes se detectan por el nombre del ingrediente; el HLB y la identidad del agente son estimaciones de catálogo.",
+      "gelation": {
+        "label": "Gelificación",
+        "agent": {
+          "gelatin": "Gelatina",
+          "agar": "Agar",
+          "pectin_hm": "Pectina (AM)",
+          "pectin_lm": "Pectina (BM)",
+          "kappa_carrageenan": "κ-Carragenina",
+          "iota_carrageenan": "ι-Carragenina",
+          "starch": "Almidón",
+          "methylcellulose": "Metilcelulosa",
+          "sodium_alginate": "Alginato"
+        },
+        "sets": "gelifica",
+        "setsAt": "gelifica a {{temp}}°C",
+        "wontSet": "no gelifica"
+      }
     },
     "bands": {
       "title": "Interpretación de la banda Aw",

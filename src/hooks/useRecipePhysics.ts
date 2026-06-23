@@ -22,7 +22,7 @@ import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/f
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
 import { computeTasteProfile, type TasteProfile } from '../services/foodScience/perception';
-import { computeEmulsion, computeFoam, computeRheology, type EmulsionResult, type FoamResult, type RheologyResult } from '../services/foodScience/structure';
+import { computeEmulsion, computeFoam, computeRheology, computeGelation, resolveFunctionalAgent, type EmulsionResult, type FoamResult, type RheologyResult, type GelationResult, type GellingAgent } from '../services/foodScience/structure';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 /** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
@@ -82,6 +82,8 @@ export interface RecipePhysics {
   foam: FoamResult;
   /** Apparent viscosity, flow type & consistency. */
   rheology: RheologyResult;
+  /** Gel set/melt behavior when a gelling agent is detected; null otherwise. */
+  gelation: GelationResult | null;
 }
 
 function deriveWarnings(
@@ -224,12 +226,32 @@ export function useRecipePhysics(
       titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
     });
 
-    // Structure & texture (composition-based). Emulsifier/gelling-agent detection
-    // arrives with the functional-ingredient inventory; until then emulsion has no
-    // emulsifier signal.
-    const emulsion = computeEmulsion({ composition: mixComposition });
-    const foam = computeFoam(mixComposition);
+    // Structure & texture. Detect functional agents by ingredient name so the
+    // emulsion (emulsifier HLB) and gelation (which agent + dose) are data-driven.
+    let emulsifierHlbMass = 0;
+    let emulsifierMass = 0;
+    let topGellingAgent: { agent: GellingAgent; mass: number } | null = null;
+    let leafTotalMass = 0;
+    for (const r of resolvedIngredients) {
+      leafTotalMass += r.mass;
+      const fa = resolveFunctionalAgent(r.name);
+      if (!fa) continue;
+      if (fa.kind === 'emulsifier') {
+        emulsifierHlbMass += fa.hlb * r.mass;
+        emulsifierMass += r.mass;
+      } else if (!topGellingAgent || r.mass > topGellingAgent.mass) {
+        topGellingAgent = { agent: fa.agent, mass: r.mass };
+      }
+    }
+    const emulsifierHLB = emulsifierMass > 0 ? emulsifierHlbMass / emulsifierMass : undefined;
+
     const rheology = computeRheology(mixComposition, RHEOLOGY_TEMP_C);
+    const emulsion = computeEmulsion({ composition: mixComposition, emulsifierHLB });
+    const foam = computeFoam(mixComposition);
+    const gelation: GelationResult | null =
+      topGellingAgent && leafTotalMass > 0
+        ? computeGelation(topGellingAgent.agent, (topGellingAgent.mass / leafTotalMass) * 100, { sugarBrix: rheology.brix })
+        : null;
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
@@ -260,6 +282,7 @@ export function useRecipePhysics(
       emulsion,
       foam,
       rheology,
+      gelation,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

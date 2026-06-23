@@ -183,7 +183,24 @@
           "plastic_yield_stress": "Plastic (yield stress)"
         }
       },
-      "caveat": "Assumes the relevant phase is present. Emulsifier and gelling agents are not auto-detected yet, so an emulsion reads as unstable until one is identified."
+      "caveat": "Emulsifier and gelling agents are detected by ingredient name; HLB and agent identity are catalog estimates.",
+      "gelation": {
+        "label": "Gelation",
+        "agent": {
+          "gelatin": "Gelatin",
+          "agar": "Agar",
+          "pectin_hm": "Pectin (HM)",
+          "pectin_lm": "Pectin (LM)",
+          "kappa_carrageenan": "κ-Carrageenan",
+          "iota_carrageenan": "ι-Carrageenan",
+          "starch": "Starch",
+          "methylcellulose": "Methylcellulose",
+          "sodium_alginate": "Alginate"
+        },
+        "sets": "sets",
+        "setsAt": "sets at {{temp}}°C",
+        "wontSet": "won't set"
+      }
     },
     "bands": {
       "title": "Aw band interpretation",
