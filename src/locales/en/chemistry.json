@@ -76,6 +76,20 @@
       "explanation": "Relative browning potential: reducing sugars + protein integrated over the bake time·temperature, modulated by water activity — not an absolute color.",
       "noReactants": "Little browning expected: Maillard needs both reducing sugars and protein."
     },
+    "doneness": {
+      "title": "Thermal doneness",
+      "bandLabel": "Core state",
+      "peakLabel": "Peak core temp",
+      "band": {
+        "none": "—",
+        "raw": "Raw",
+        "underdone": "Underdone",
+        "set": "Set",
+        "done": "Done"
+      },
+      "biotWarning": "Likely too thick for a uniform-core estimate; the true core runs cooler than shown.",
+      "caveat": "Estimated core temperature for a typical ~2 cm portion (Newtonian heating), treating step temperatures as the oven/medium, not the core. Add portion thickness for a recipe-specific result."
+    },
     "ph": {
       "title": "pH equilibrium (charge-balance solver)",
       "table": {

@@ -18,7 +18,7 @@ import {
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
-import { buildProcessProfile, computeMaillardBrowning, type MaillardResult } from '../services/foodScience/process';
+import { buildProcessProfile, computeMaillardBrowning, computeDoneness, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult } from '../services/foodScience/process';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 export interface PhysicsWarning {
@@ -54,6 +54,8 @@ export interface RecipePhysics {
   bread: BreadEvaluation | null;
   /** Maillard browning over the bake T·time profile; null when no thermal step. */
   browning: MaillardResult | null;
+  /** Core-temperature doneness over the bake profile; null when no thermal step. */
+  doneness: DonenessResult | null;
 }
 
 function deriveWarnings(
@@ -150,16 +152,23 @@ export function useRecipePhysics(
       });
     }
 
-    // Maillard browning: integrate reducing-sugar + protein reactivity over the
-    // recipe's bake T·time profile (assembled from every component's steps).
-    // Browning extent is order-independent, so flattening components is exact.
-    // Null when there is no thermal step to integrate (unbaked / frozen items).
+    // Process layer: integrate reaction kinetics over the recipe's bake T·time
+    // profile (assembled from every component's steps; extent is order-independent,
+    // so flattening components is exact). Null when there is no thermal step
+    // (unbaked / frozen items). Geometry for the doneness core-temperature model
+    // is unknown in the data model, so a default portion size is assumed.
     const processProfile = buildProcessProfile(
       (recipe.components ?? []).flatMap(c => c.steps ?? []),
     );
+    const hasThermalProfile = processProfile.segments.length > 0;
+    const mixComposition = hasThermalProfile ? aggregateComposition(resolvedIngredients) : null;
     const browning: MaillardResult | null =
-      processProfile.segments.length > 0 && aw.aw !== null
-        ? computeMaillardBrowning(aggregateComposition(resolvedIngredients), aw.aw, processProfile)
+      mixComposition && aw.aw !== null
+        ? computeMaillardBrowning(mixComposition, aw.aw, processProfile)
+        : null;
+    const doneness: DonenessResult | null =
+      mixComposition
+        ? computeDoneness({ profile: processProfile, composition: mixComposition, charLengthM: DEFAULT_CHAR_LENGTH_M })
         : null;
 
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
@@ -184,6 +193,7 @@ export function useRecipePhysics(
       frozen,
       bread,
       browning,
+      doneness,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

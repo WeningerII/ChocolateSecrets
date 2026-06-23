@@ -167,6 +167,29 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Thermal doneness (core-temperature model) */}
+      {physics.doneness && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.doneness.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.doneness.bandLabel')}</span>
+              <span className="font-medium text-cocoa-900">
+                {t(`chemistry:detail.doneness.band.${physics.doneness.band}` as any)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-cocoa-500">{t('chemistry:detail.doneness.peakLabel')}</span>
+              <span className="font-mono">{physics.doneness.peakCoreTempC.toFixed(1)} °C</span>
+            </div>
+          </div>
+          {physics.doneness.flags.some(f => f.kind === 'lumped_capacitance_invalid') && (
+            <p className="text-[11px] italic text-cocoa-500 mt-1">{t('chemistry:detail.doneness.biotWarning')}</p>
+          )}
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.doneness.caveat')}</p>
+        </>
+      )}
+
       {/* Aw band interpretation */}
       <SectionHeader className="mt-5">{t('chemistry:detail.bands.title')}</SectionHeader>
       <div className="mt-2 space-y-1">

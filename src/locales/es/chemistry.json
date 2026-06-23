@@ -76,6 +76,20 @@
       "explanation": "Potencial de dorado relativo: azúcares reductores + proteína integrados sobre el tiempo·temperatura de horneado, modulado por la actividad de agua — no es un color absoluto.",
       "noReactants": "Poco dorado previsto: la reacción de Maillard requiere azúcares reductores y proteína."
     },
+    "doneness": {
+      "title": "Cocción interna",
+      "bandLabel": "Estado del centro",
+      "peakLabel": "Temp. máx. del centro",
+      "band": {
+        "none": "—",
+        "raw": "Crudo",
+        "underdone": "Poco hecho",
+        "set": "Cuajado",
+        "done": "Hecho"
+      },
+      "biotWarning": "Probablemente demasiado grueso para estimar un centro uniforme; el centro real queda más frío de lo mostrado.",
+      "caveat": "Temperatura del centro estimada para una porción típica de ~2 cm (calentamiento newtoniano), tomando las temperaturas de los pasos como las del horno/medio, no del centro. Añade el grosor de la porción para un resultado específico."
+    },
     "ph": {
       "title": "Equilibrio de pH (Cálculo de balance de cargas)",
       "table": {

@@ -37,6 +37,8 @@ export const DEFAULT_DENSITY_KG_PER_M3 = 1050;
 export const DEFAULT_H_W_PER_M2K = 20;
 /** Evaporative plateau a moist core cannot exceed until it dries, °C. */
 export const BOILING_PLATEAU_C = 100;
+/** Default characteristic length Lc when recipe geometry is unknown (~2 cm portion). */
+export const DEFAULT_CHAR_LENGTH_M = 0.01;
 /** Above this water fraction the evaporative plateau applies. */
 const MOIST_WATER_FRACTION = 0.2;
 /** Thermal transition temperatures, °C. */
