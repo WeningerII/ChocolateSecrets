@@ -132,6 +132,17 @@
         "veryLow": "Well below casein's isoelectric point (4.6) — curdle is essentially guaranteed if cream contacts at high temperature."
       }
     },
+    "taste": {
+      "title": "Taste profile",
+      "quality": {
+        "sweet": "Sweet",
+        "salty": "Salty",
+        "sour": "Sour",
+        "bitter": "Bitter",
+        "umami": "Umami"
+      },
+      "caveat": "Perceived intensity 0–100 after taste interactions. Sourness uses pH (titratable acidity is better); bitter & umami await a compound inventory."
+    },
     "bands": {
       "title": "Aw band interpretation",
       "current": "Current"

@@ -132,6 +132,17 @@
         "veryLow": "Muy por debajo del punto isoeléctrico (4.6) — corte garantizado a alta temperatura."
       }
     },
+    "taste": {
+      "title": "Perfil de sabor",
+      "quality": {
+        "sweet": "Dulce",
+        "salty": "Salado",
+        "sour": "Ácido",
+        "bitter": "Amargo",
+        "umami": "Umami"
+      },
+      "caveat": "Intensidad percibida 0–100 tras las interacciones de sabor. El ácido usa el pH (la acidez titulable es mejor); amargo y umami requieren un inventario de compuestos."
+    },
     "bands": {
       "title": "Interpretación de la banda Aw",
       "current": "Actual"

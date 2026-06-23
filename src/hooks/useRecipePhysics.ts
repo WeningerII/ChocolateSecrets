@@ -19,6 +19,7 @@ import { evaluateConfectionery, type ConfectioneryEvaluation, type Confectionery
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
+import { computeTasteProfile, type TasteProfile } from '../services/foodScience/perception';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
 /** Assumed storage scenario for the shelf-life models (lipid oxidation, moisture
@@ -67,6 +68,8 @@ export interface RecipePhysics {
   oxidation: OxidationResult | null;
   /** Moisture migration between phases (components) at different a_w; null when single-phase. */
   moisture: MoistureMigrationResult | null;
+  /** Perceived basic-taste intensities (0–100) from composition + pH. */
+  taste: TasteProfile;
 }
 
 function deriveWarnings(
@@ -203,6 +206,9 @@ export function useRecipePhysics(
       moisture = computeMoistureMigration(phaseAws, storageProfile);
     }
 
+    // Perception: receptor-level taste intensities from the mix composition + pH.
+    const taste = computeTasteProfile(mixComposition, pH?.pH ?? null);
+
     const warnings = deriveWarnings(aw, pH, shelfLife, fallbackCount, recipe.categories ?? [], resolvedIngredients.length, bread, unmassableLeaves, recipe.haccp?.shelfLifeDays);
 
     // Production-accurate per-ingredient amounts and total mass derive directly
@@ -228,6 +234,7 @@ export function useRecipePhysics(
       doneness,
       oxidation,
       moisture,
+      taste,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

@@ -138,6 +138,25 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Taste profile (perception layer) */}
+      {(physics.taste.sweet + physics.taste.salty + physics.taste.sour) > 0.5 && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.taste.title')}</SectionHeader>
+          <div className="mt-2 space-y-1.5">
+            {(['sweet', 'salty', 'sour'] as const).map(q => (
+              <div key={q} className="grid grid-cols-[64px_1fr_32px] items-center gap-2 text-xs">
+                <span className="text-cocoa-500">{t(`chemistry:detail.taste.quality.${q}` as any)}</span>
+                <div className="h-1.5 bg-cream-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-cocoa-400 rounded-full" style={{ width: `${Math.min(100, physics.taste[q])}%` }} />
+                </div>
+                <span className="font-mono text-right text-cocoa-600">{Math.round(physics.taste[q])}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.taste.caveat')}</p>
+        </>
+      )}
+
       {/* Maillard browning (time·temperature process layer) */}
       {physics.browning && (
         <>
