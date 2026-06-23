@@ -1,4 +1,27 @@
 {
+  "dosing": {
+    "title": "추가 재료 조정",
+    "intro": "이 레시피에 추가할 재료와 목표를 고르면 얼마나 넣을지 계산합니다.",
+    "pickIngredient": "추가할 재료",
+    "pickPlaceholder": "재료 선택…",
+    "goal": "목표",
+    "goalBalance": "최적 균형",
+    "goalTarget": "특정 맛 목표",
+    "targetTaste": "맛",
+    "targetValue": "목표 = {{value}}",
+    "empty": "추천을 보려면 재료를 선택하세요.",
+    "recommended": "약",
+    "grams": "g",
+    "balanceBeforeAfter": "맛 균형 {{before}} → {{after}}",
+    "curveLabel": "추가량 대비 균형",
+    "ceiling": "{{dose}} g를 넘으면 과해짐",
+    "flag": {
+      "aroma_dominant_addition": "산/맛 기준으로만 계산됨 — 향은 모델링되지 않으므로 페어링 판단이 아닌 최소치로 보세요.",
+      "no_measurable_effect": "이 추가는 측정 가능한 맛을 거의 바꾸지 않습니다.",
+      "optimum_at_zero": "이 목표에서는 추가하지 않는 것이 최선입니다.",
+      "optimum_at_max": "표시된 범위보다 더 필요합니다 — 더 큰 양을 시도하세요."
+    }
+  },
   "tier": {
     "aw": "수분 활성도",
     "ph": "pH",

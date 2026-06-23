@@ -1,4 +1,27 @@
 {
+  "dosing": {
+    "title": "Tune an addition",
+    "intro": "Pick an ingredient to add to this recipe and a goal — I'll solve for how much.",
+    "pickIngredient": "Ingredient to add",
+    "pickPlaceholder": "Select an ingredient…",
+    "goal": "Goal",
+    "goalBalance": "Best balance",
+    "goalTarget": "Target a taste",
+    "targetTaste": "Taste",
+    "targetValue": "Target = {{value}}",
+    "empty": "Select an ingredient to see a recommendation.",
+    "recommended": "Add about",
+    "grams": "g",
+    "balanceBeforeAfter": "Taste balance {{before}} → {{after}}",
+    "curveLabel": "balance vs amount added",
+    "ceiling": "Turns overpowering past {{dose}} g",
+    "flag": {
+      "aroma_dominant_addition": "Dosed for its acid/taste only — aroma isn't modeled, so treat this as a floor, not a flavor-pairing verdict.",
+      "no_measurable_effect": "This addition barely moves the measurable taste.",
+      "optimum_at_zero": "For this goal, the best move is to add none.",
+      "optimum_at_max": "It wants more than the range shown — try a larger amount."
+    }
+  },
   "tier": {
     "aw": "Water activity",
     "ph": "pH",

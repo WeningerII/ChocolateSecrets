@@ -1,4 +1,27 @@
 {
+  "dosing": {
+    "title": "Ajustar una adición",
+    "intro": "Elige un ingrediente para añadir a esta receta y un objetivo: calcularé cuánto.",
+    "pickIngredient": "Ingrediente a añadir",
+    "pickPlaceholder": "Selecciona un ingrediente…",
+    "goal": "Objetivo",
+    "goalBalance": "Mejor equilibrio",
+    "goalTarget": "Apuntar a un sabor",
+    "targetTaste": "Sabor",
+    "targetValue": "Objetivo = {{value}}",
+    "empty": "Selecciona un ingrediente para ver una recomendación.",
+    "recommended": "Añade unos",
+    "grams": "g",
+    "balanceBeforeAfter": "Equilibrio de sabor {{before}} → {{after}}",
+    "curveLabel": "equilibrio vs cantidad añadida",
+    "ceiling": "Se vuelve excesivo más allá de {{dose}} g",
+    "flag": {
+      "aroma_dominant_addition": "Dosificado solo por su ácido/sabor: el aroma no se modela, tómalo como un mínimo, no como un veredicto de maridaje.",
+      "no_measurable_effect": "Esta adición apenas cambia el sabor medible.",
+      "optimum_at_zero": "Para este objetivo, lo mejor es no añadir nada.",
+      "optimum_at_max": "Pide más de lo mostrado: prueba una cantidad mayor."
+    }
+  },
   "tier": {
     "aw": "Actividad de agua",
     "ph": "pH",
