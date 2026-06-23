@@ -43,6 +43,8 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   { id: 'initial_freezing_point', category: 'state', predictability: 'first_principles', measurability: { instrument: 'cryoscope / DSC' }, computedBy: 'computeFreezing' },
   { id: 'ice_fraction_at_serving', category: 'state', predictability: 'first_principles', measurability: { instrument: 'DSC / calorimetry' }, computedBy: 'computeFreezing', notes: 'The texture-causal coordinate; ideal colligative model.' },
   { id: 'glass_transition_tg_prime', category: 'state', predictability: 'calibrated', measurability: { instrument: 'DSC' }, computedBy: 'estimateTgPrime', notes: 'Proteins/stabilizers raise Tg′ and are not yet modeled.' },
+  { id: 'boiling_point_elevation', category: 'state', predictability: 'first_principles', measurability: { instrument: 'thermometer' }, computedBy: 'computeBoilingPoint', notes: 'Colligative (van ’t Hoff), the hot-end sibling of the freezing curve.' },
+  { id: 'candy_stage', category: 'state', predictability: 'calibrated', measurability: { instrument: 'candy thermometer' }, computedBy: 'classifyCandyStage', notes: 'Syrup temperature → confectioner stage (thread … hard-crack … caramel).' },
 
   // --- Composition & reaction products ---
   { id: 'macro_composition', category: 'composition', predictability: 'first_principles', measurability: { instrument: 'proximate analysis' }, computedBy: 'resolveComposition' },
