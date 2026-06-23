@@ -40,12 +40,31 @@ describe('computeTasteProfile', () => {
       .toBeLessThan(computeTasteProfile({}, 3).sour);
   });
 
-  test('bitter and umami are null until the inventory carries their agonists', () => {
+  test('bitter and umami are null only when the inventory carries no agonist', () => {
     const r = computeTasteProfile({ sucrose: 10 }, null);
     expect(r.bitter).toBeNull();
     expect(r.umami).toBeNull();
     expect(r.flags).toContainEqual({ kind: 'no_bitter_inventory' });
     expect(r.flags).toContainEqual({ kind: 'no_umami_inventory' });
+  });
+
+  test('bitter rises with caffeine/theobromine and is suppressed by sweetness', () => {
+    const plain = computeTasteProfile({ caffeine: 0.1 }, null);
+    expect(plain.bitter).toBeGreaterThan(50);
+    expect(plain.flags).not.toContainEqual({ kind: 'no_bitter_inventory' });
+    expect(computeTasteProfile({ caffeine: 0.1, sucrose: 30 }, null).bitter!).toBeLessThan(plain.bitter!);
+  });
+
+  test('theobromine is a milder bitter than caffeine at equal mass', () => {
+    expect(computeTasteProfile({ theobromine: 0.2 }, null).bitter!)
+      .toBeLessThan(computeTasteProfile({ caffeine: 0.2 }, null).bitter!);
+  });
+
+  test('umami comes from glutamate and is enhanced by salt', () => {
+    const u = computeTasteProfile({ glutamate: 0.5 }, null);
+    expect(u.umami).toBeGreaterThan(40);
+    expect(u.flags).not.toContainEqual({ kind: 'no_umami_inventory' });
+    expect(computeTasteProfile({ glutamate: 0.5, sodium: 0.4 }, null).umami!).toBeGreaterThan(u.umami!);
   });
 
   test('intensities are clamped to 0..100', () => {

@@ -152,7 +152,10 @@
       "protein": "Protein",
       "ash": "Ash",
       "unsaturatedFat": "Grasa insaturada",
-      "sodium": "Sodio"
+      "sodium": "Sodio",
+      "caffeine": "Cafeína",
+      "theobromine": "Teobromina",
+      "glutamate": "Glutamato (libre)"
     },
     "subFractions": "Subfracciones",
     "subFractionsNote": "Desgloses de los valores anteriores (insaturada ⊆ grasa, sodio ⊆ cenizas) — no se cuentan en la suma %."

@@ -74,8 +74,8 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   { id: 'taste_sweet', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'Perceived sweetness: Beidler dose-response on sucrose-equivalents, after mixture interactions.' },
   { id: 'taste_salty', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'From sodium (Na→NaCl), Beidler saturation.' },
   { id: 'taste_sour', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'pH proxy; titratable acidity is the better predictor (needs an acid inventory).' },
-  { id: 'taste_bitter', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: null, notes: 'Gap: needs a bitter-compound inventory (caffeine, theobromine, polyphenols, other T2R agonists).' },
-  { id: 'taste_umami', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: null, notes: 'Gap: needs glutamate + 5′-nucleotide data (the synergy is multiplicative).' },
+  { id: 'taste_bitter', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'From caffeine + theobromine (chemical inventory), suppressed by sweet/salt. Polyphenol bitterness not yet included.' },
+  { id: 'taste_umami', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'From free glutamate, salt-enhanced. 5′-nucleotide synergy (multiplicative) not yet modeled.' },
 
   // --- Perception: aroma & liking (the relocated frontier) ---
   { id: 'aroma_character', category: 'perceptual', predictability: 'proxy', measurability: 'panel_only', computedBy: null, notes: 'Frontier, not a wall: volatile RELEASE is tractable physics; structure→odor is increasingly ML-tractable (Principal Odor Map, 2023).' },

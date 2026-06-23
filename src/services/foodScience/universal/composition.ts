@@ -12,7 +12,7 @@ import { lookupUsdaSnapshot } from '../../usdaFoodData';
  */
 export const DEFAULT_COMPOSITION_BY_CATEGORY: Partial<Record<string, Composition>> = {
   'Sugars & Sweeteners':       { water: 0.1, sucrose: 99.9 },
-  'Chocolates & Cocoas':       { water: 1, sucrose: 30, fat: 35 },
+  'Chocolates & Cocoas':       { water: 1, sucrose: 30, fat: 35, theobromine: 0.6, caffeine: 0.08 },
   'Nuts & Seeds':              { water: 4, fat: 50, protein: 20, unsaturatedFat: 40 },
   'Fruits & Purees':           { water: 86, sucrose: 5, glucose: 3, fructose: 4 },
   'Dairy & Alternatives':      { water: 70, fat: 18, lactose: 4, protein: 3 },
@@ -33,16 +33,18 @@ export const DEFAULT_COMPOSITION_BY_CATEGORY: Partial<Record<string, Composition
 function chocolateComposition(spec: ChocolateSpec): Composition {
   const cocoa = spec.cocoaPercentage ?? 70;
   if (spec.type === 'milk') {
-    return { water: 1, sucrose: 45, lactose: 7.5, fat: 33 };
+    return { water: 1, sucrose: 45, lactose: 7.5, fat: 33, theobromine: 0.2, caffeine: 0.02 };
   }
   if (spec.type === 'white') {
-    return { water: 1, sucrose: 50, lactose: 11, fat: 32 };
+    return { water: 1, sucrose: 50, lactose: 11, fat: 32 }; // no cocoa solids → no methylxanthines
   }
-  // dark, ruby, gianduja, compound — parametric
+  // dark, ruby, gianduja, compound — parametric (methylxanthines scale with cocoa solids)
   return {
     water: 0.5,
     sucrose: Math.max(0, (100 - cocoa) - 1),
     fat: cocoa * 0.55 + 5,
+    theobromine: cocoa * 0.015,
+    caffeine: cocoa * 0.002,
   };
 }
 
@@ -119,7 +121,7 @@ export const COMPOSITION_SPECIES: readonly (keyof Composition)[] = [
  * mass-balance sum so it still totals ~100 %.
  */
 export const COMPOSITION_DESCRIPTORS: readonly (keyof Composition)[] = [
-  'unsaturatedFat', 'sodium',
+  'unsaturatedFat', 'sodium', 'caffeine', 'theobromine', 'glutamate',
 ] as const;
 
 export function compositionSum(c: Composition): number {

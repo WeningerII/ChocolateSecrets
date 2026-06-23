@@ -657,6 +657,13 @@ export interface Composition {
   unsaturatedFat?: number;
   /** Sodium content (a subset of `ash`), mass %. Electrolyte for freezing-point depression. */
   sodium?: number;
+  // --- flavor-active trace compounds: the chemical inventory the perception layer reads ---
+  /** Caffeine, mass % — bitter (T2R) agonist. */
+  caffeine?: number;
+  /** Theobromine, mass % — cocoa's milder bitter methylxanthine. */
+  theobromine?: number;
+  /** Free glutamate, mass % — umami (T1R1/T1R3) agonist. */
+  glutamate?: number;
 }
 
 export type CompositionSource =

@@ -7,13 +7,13 @@
  * (Keast & Breslin 2003). This maps a composition to PERCEIVED taste intensities
  * (0–100) — the input a palatability/optimization layer ultimately targets.
  *
- * v1 covers the three tastes derivable from the current composition model:
+ * Covers all five basic tastes:
  *   sweet  — sucrose-equivalents from the sugars/polyols (relative sweetness)
  *   salty  — sodium (as NaCl)
- *   sour   — pH proxy (titratable acidity is the better predictor — needs an
- *            acid inventory; flagged)
- * bitter and umami return null until the chemical inventory carries their
- * agonists (caffeine/theobromine/polyphenols; glutamate + 5′-nucleotides).
+ *   sour   — pH proxy (titratable acidity is the better predictor — flagged)
+ *   bitter — caffeine + theobromine (the chemical-inventory descriptors)
+ *   umami  — free glutamate (5′-nucleotide synergy not yet modeled)
+ * bitter/umami return null (flagged) when the inventory carries no agonist.
  *
  * Known simplifications: intensities use product mass % (the aqueous-phase
  * concentration and saliva dilution refine this); interaction coefficients are
@@ -34,6 +34,11 @@ const SODIUM_TO_NACL = 2.54;
 /** pH window for the sourness proxy. */
 const SOUR_PH_FLAT = 4.5;     // at/above this, ~no sourness
 const SOUR_PH_MAX = 2.5;      // at/below this, maximal sourness
+/** Bitter half-maximum (caffeine-equivalent %) and theobromine's relative bitterness. */
+const K_BITTER_PCT = 0.05;
+const THEOBROMINE_REL_BITTER = 0.4;
+/** Umami half-maximum (free-glutamate %). */
+const K_UMAMI_PCT = 0.3;
 
 export type TasteQuality = 'sweet' | 'salty' | 'sour' | 'bitter' | 'umami';
 
@@ -93,7 +98,22 @@ export function computeTasteProfile(composition: Composition, pH: number | null)
   const sour = clamp(sourRaw * (1 - 0.3 * (sweetRaw / 100)));
   const salty = clamp(saltRaw * (1 - 0.2 * (sourRaw / 100)));
 
-  flags.push({ kind: 'no_bitter_inventory' }, { kind: 'no_umami_inventory' });
+  // Bitter — caffeine + (milder) theobromine; sweet and salt both suppress it.
+  let bitter: number | null = null;
+  if (composition.caffeine !== undefined || composition.theobromine !== undefined) {
+    const bitterStimulus = (composition.caffeine ?? 0) + THEOBROMINE_REL_BITTER * (composition.theobromine ?? 0);
+    bitter = clamp(beidler(bitterStimulus, K_BITTER_PCT) * (1 - 0.3 * (sweetRaw / 100)) * (1 - 0.3 * (saltRaw / 100)));
+  } else {
+    flags.push({ kind: 'no_bitter_inventory' });
+  }
 
-  return { sweet, salty, sour, bitter: null, umami: null, flags };
+  // Umami — free glutamate (5′-nucleotide synergy not modeled); salt enhances it.
+  let umami: number | null = null;
+  if (composition.glutamate !== undefined) {
+    umami = clamp(beidler(composition.glutamate, K_UMAMI_PCT) * (1 + 0.2 * (saltRaw / 100)));
+  } else {
+    flags.push({ kind: 'no_umami_inventory' });
+  }
+
+  return { sweet, salty, sour, bitter, umami, flags };
 }
