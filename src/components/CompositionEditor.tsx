@@ -2,13 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import type { Composition } from '../types';
-import { compositionSum, isCompositionComplete, DEFAULT_COMPOSITION_BY_CATEGORY } from '../services/foodScience/universal/composition';
+import { compositionSum, isCompositionComplete, DEFAULT_COMPOSITION_BY_CATEGORY, COMPOSITION_SPECIES } from '../services/foodScience/universal/composition';
 import { lookupUsdaSnapshot } from '../services/usdaFoodData';
-
-const SPECIES: Array<keyof Composition> = [
-  'water', 'sucrose', 'glucose', 'fructose', 'lactose', 'maltose',
-  'sorbitol', 'glycerol', 'ethanol', 'fat', 'protein', 'ash',
-];
 
 interface CompositionEditorProps {
   ingredientName: string;
@@ -77,7 +72,7 @@ export function CompositionEditor({
       {expanded && (
         <div className="p-4 flex flex-col gap-3">
           <div className="grid grid-cols-3 gap-x-4 gap-y-2">
-            {SPECIES.map(species => (
+            {COMPOSITION_SPECIES.map(species => (
               <label key={species} className="flex flex-col gap-0.5">
                 <span className="text-[11px] uppercase tracking-wide text-cocoa-500">
                   {t(`ingredients:composition.species.${species}` as any)}

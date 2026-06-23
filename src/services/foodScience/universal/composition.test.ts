@@ -106,6 +106,16 @@ describe('aggregateComposition', () => {
     expect(mix.lactose).toBeCloseTo(4, 6);
   });
 
+  test('aggregates descriptive sub-fractions (unsaturatedFat, sodium) but excludes them from the sum', () => {
+    const mix = aggregateComposition([
+      { mass: 100, composition: { fat: 50, unsaturatedFat: 40, ash: 2, sodium: 0.5 } },
+    ]);
+    expect(mix.unsaturatedFat).toBeCloseTo(40, 6);
+    expect(mix.sodium).toBeCloseTo(0.5, 6);
+    // compositionSum counts only the 12 mass species (here fat + ash), not sub-fractions.
+    expect(compositionSum(mix)).toBeCloseTo(52, 6);
+  });
+
   test('ignores zero/negative-mass leaves and returns {} for an empty mix', () => {
     expect(aggregateComposition([])).toEqual({});
     expect(aggregateComposition([{ mass: 0, composition: { water: 100 } }])).toEqual({});

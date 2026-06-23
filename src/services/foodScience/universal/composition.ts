@@ -13,7 +13,7 @@ import { lookupUsdaSnapshot } from '../../usdaFoodData';
 export const DEFAULT_COMPOSITION_BY_CATEGORY: Partial<Record<string, Composition>> = {
   'Sugars & Sweeteners':       { water: 0.1, sucrose: 99.9 },
   'Chocolates & Cocoas':       { water: 1, sucrose: 30, fat: 35 },
-  'Nuts & Seeds':              { water: 4, fat: 50, protein: 20 },
+  'Nuts & Seeds':              { water: 4, fat: 50, protein: 20, unsaturatedFat: 40 },
   'Fruits & Purees':           { water: 86, sucrose: 5, glucose: 3, fructose: 4 },
   'Dairy & Alternatives':      { water: 70, fat: 18, lactose: 4, protein: 3 },
   'Flours & Starches':         { water: 12, protein: 10 },
@@ -113,6 +113,15 @@ export const COMPOSITION_SPECIES: readonly (keyof Composition)[] = [
   'sorbitol', 'glycerol', 'ethanol', 'fat', 'protein', 'ash',
 ] as const;
 
+/**
+ * Descriptive sub-fractions that break down a species above (unsaturatedFat ⊆ fat,
+ * sodium ⊆ ash). They are aggregated for the kinetic models but excluded from the
+ * mass-balance sum so it still totals ~100 %.
+ */
+export const COMPOSITION_DESCRIPTORS: readonly (keyof Composition)[] = [
+  'unsaturatedFat', 'sodium',
+] as const;
+
 export function compositionSum(c: Composition): number {
   return COMPOSITION_SPECIES.reduce((sum, sp) => sum + (c[sp] ?? 0), 0);
 }
@@ -121,8 +130,9 @@ export function compositionSum(c: Composition): number {
  * Aggregate resolved leaf ingredients into one mix-level composition in mass %
  * (each species summed by mass, over total mass). Unlike the Norrish `massBy`
  * map — aqueous solutes only, in grams — this spans ALL species, including the
- * fat and protein the aqueous kernel ignores, which the process-layer models
- * (Maillard, …) need. Returns {} for an empty / zero-mass mix.
+ * fat and protein the aqueous kernel ignores plus the descriptive sub-fractions
+ * (unsaturatedFat, sodium), which the process-layer models need. Returns {} for
+ * an empty / zero-mass mix.
  */
 export function aggregateComposition(
   resolved: ReadonlyArray<{ mass: number; composition: Composition }>,
@@ -132,14 +142,14 @@ export function aggregateComposition(
   for (const r of resolved) {
     if (r.mass <= 0) continue;
     total += r.mass;
-    for (const sp of COMPOSITION_SPECIES) {
+    for (const sp of [...COMPOSITION_SPECIES, ...COMPOSITION_DESCRIPTORS]) {
       const pct = r.composition[sp];
       if (pct) grams[sp] = (grams[sp] ?? 0) + (r.mass * pct) / 100;
     }
   }
   if (total <= 0) return {};
   const out: Composition = {};
-  for (const sp of COMPOSITION_SPECIES) {
+  for (const sp of [...COMPOSITION_SPECIES, ...COMPOSITION_DESCRIPTORS]) {
     const g = grams[sp];
     if (g) out[sp] = (g / total) * 100;
   }

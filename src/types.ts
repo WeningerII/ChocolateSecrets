@@ -651,6 +651,12 @@ export interface Composition {
   fat?: number;
   protein?: number;
   ash?: number;
+  // --- descriptive sub-fractions: NOT part of the mass-balance sum (they break
+  // down fields above), so compositionSum/isCompositionComplete ignore them. ---
+  /** Unsaturated portion of `fat` (0 ≤ unsaturatedFat ≤ fat), mass %. Lipid-oxidation substrate. */
+  unsaturatedFat?: number;
+  /** Sodium content (a subset of `ash`), mass %. Electrolyte for freezing-point depression. */
+  sodium?: number;
 }
 
 export type CompositionSource =
