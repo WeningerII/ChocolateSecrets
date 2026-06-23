@@ -5,8 +5,17 @@ import { resolveRecipeLeaves } from '../utils/resolveRecipeLeaves';
 import { aggregateComposition } from '../services/foodScience/universal';
 import {
   computeHeatPenetration, computeMassPenetration, computeThermalProperties,
-  type Geometry, type CookingMethod, type Diffusant,
+  type Geometry, type CookingMethod, type Diffusant, type Medium, type ConvectionRegime,
 } from '../services/foodScience/transport';
+
+/** Methods whose h is derived first-principles (single-phase convection + radiation).
+ *  Phase-change methods (poach/boil/steam) keep their preset h. */
+const SURFACE_BY_METHOD: Partial<Record<CookingMethod, { medium: Medium; regime: ConvectionRegime; velocityMS?: number }>> = {
+  still_air_oven: { medium: 'air', regime: 'natural' },
+  fan_oven: { medium: 'air', regime: 'forced', velocityMS: 3 },
+  sous_vide: { medium: 'water', regime: 'forced', velocityMS: 0.1 },
+  deep_frying: { medium: 'oil', regime: 'natural' },
+};
 
 interface TransportPanelProps {
   recipe: Recipe;
@@ -43,11 +52,14 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
   const L = Math.max(1e-4, sizeCm / 100); // cm → m
   const thermal = useMemo(() => computeThermalProperties(composition, 20), [composition]);
 
+  // h source: first-principles surface spec for single-phase methods, preset h otherwise.
+  const hSource = SURFACE_BY_METHOD[method] ? { surface: SURFACE_BY_METHOD[method] } : { method };
+
   const cook = useMemo(() => {
     if (mode !== 'cook') return null;
     return computeHeatPenetration({
       geometry, characteristicLengthM: L, composition,
-      initialTempC, mediumTempC, method, targetCoreTempC,
+      initialTempC, mediumTempC, targetCoreTempC, ...hSource,
     });
   }, [mode, geometry, L, composition, initialTempC, mediumTempC, method, targetCoreTempC]);
 
@@ -61,7 +73,7 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
       const tt = (horizon * i) / N;
       const r = computeHeatPenetration({
         geometry, characteristicLengthM: L, composition,
-        initialTempC, mediumTempC, method, timeS: tt,
+        initialTempC, mediumTempC, timeS: tt, ...hSource,
       });
       if (r?.atTime) pts.push({ t: tt, core: r.atTime.coreTempC, surf: r.atTime.surfaceTempC });
     }
@@ -145,6 +157,15 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
               <span className="font-serif text-xl text-cocoa-900">{fmtTime(cook?.timeToCoreTargetS)}</span>
               {cook && <span className="text-[11px] text-cocoa-400">Bi {cook.Bi.toFixed(2)}</span>}
             </div>
+            {cook?.surfaceCoefficient && (
+              <p className="text-[11px] text-cocoa-500 mt-1">
+                {t('chemistry:transport.hBreakdown' as any, {
+                  h: cook.h.toFixed(0),
+                  conv: cook.surfaceCoefficient.hConv.toFixed(0),
+                  rad: cook.surfaceCoefficient.hRad.toFixed(0),
+                })}
+              </p>
+            )}
 
             {cookCurve && (
               <div className="mt-3">
