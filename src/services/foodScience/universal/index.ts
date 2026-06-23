@@ -4,6 +4,7 @@ export * from './freezing';
 export * from './boiling';
 export * from './crystallization';
 export * from './protein';
+export * from './osmolality';
 export * from './glassTransition';
 export * from './solidFat';
 export * from './pH';
