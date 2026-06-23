@@ -148,6 +148,7 @@
         "bitter": "Amargo",
         "umami": "Umami"
       },
+      "balance": "Equilibrio de sabor",
       "caveat": "Intensidad percibida 0–100 tras las interacciones de sabor. El ácido usa el pH (la acidez titulable es mejor); amargo y umami requieren un inventario de compuestos."
     },
     "structure": {
@@ -415,7 +416,8 @@
       "warning_count": "Advertencias",
       "composition_completeness": "Datos de composición",
       "ice_fraction_at_serving_distance": "Fracción de hielo al servir",
-      "recrystallization_margin": "Estabilidad en almacenamiento"
+      "recrystallization_margin": "Estabilidad en almacenamiento",
+      "palatability_balance": "Equilibrio de sabor"
     },
     "searchSpace": {
       "title": "Espacio de búsqueda",

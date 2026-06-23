@@ -148,6 +148,7 @@
         "bitter": "Bitter",
         "umami": "Umami"
       },
+      "balance": "Taste balance",
       "caveat": "Perceived intensity 0–100 after taste interactions. Sourness uses pH (titratable acidity is better); bitter & umami await a compound inventory."
     },
     "structure": {
@@ -415,7 +416,8 @@
       "warning_count": "Warnings",
       "composition_completeness": "Composition data",
       "ice_fraction_at_serving_distance": "Ice fraction at serving",
-      "recrystallization_margin": "Storage stability"
+      "recrystallization_margin": "Storage stability",
+      "palatability_balance": "Taste balance"
     },
     "searchSpace": {
       "title": "Search Space",

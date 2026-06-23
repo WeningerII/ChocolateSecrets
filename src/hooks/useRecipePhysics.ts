@@ -23,7 +23,7 @@ import { evaluateConfectionery, type ConfectioneryEvaluation, type Confectionery
 import { evaluateFrozen, type FrozenEvaluation } from '../services/foodScience/frozen';
 import { evaluateBread, type BreadEvaluation } from '../services/foodScience/bread';
 import { buildProcessProfile, profileFromSegments, computeMaillardBrowning, computeDoneness, computeLipidOxidation, computeMoistureMigration, DEFAULT_CHAR_LENGTH_M, type MaillardResult, type DonenessResult, type OxidationResult, type MoistureMigrationResult } from '../services/foodScience/process';
-import { computeTasteProfile, type TasteProfile } from '../services/foodScience/perception';
+import { computeTasteProfile, computePalatability, type TasteProfile, type PalatabilityResult } from '../services/foodScience/perception';
 import { computeEmulsion, computeFoam, computeRheology, computeGelation, resolveFunctionalAgent, type EmulsionResult, type FoamResult, type RheologyResult, type GelationResult, type GellingAgent } from '../services/foodScience/structure';
 import { resolveRecipeLeaves, type UnmassableLeaf } from '../utils/resolveRecipeLeaves';
 
@@ -78,6 +78,8 @@ export interface RecipePhysics {
   moisture: MoistureMigrationResult | null;
   /** Perceived basic-taste intensities (0–100) from composition + pH. */
   taste: TasteProfile;
+  /** Population-level taste balance (0–100) — the optimizer's "delicious" target. */
+  palatability: PalatabilityResult;
   /** Emulsion type & stability (composition-based; emulsifier not yet auto-detected). */
   emulsion: EmulsionResult;
   /** Foam capacity & stability. */
@@ -225,10 +227,13 @@ export function useRecipePhysics(
       moisture = computeMoistureMigration(phaseAws, storageProfile);
     }
 
-    // Perception: receptor-level taste intensities from the mix composition + pH.
+    // Perception: receptor-level taste intensities from the mix composition + pH,
+    // then population-level palatability balance — the number the formulation
+    // optimizer maximizes ("make it delicious").
     const taste = computeTasteProfile(mixComposition, pH?.pH ?? null, {
       titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
     });
+    const palatability = computePalatability(taste);
 
     const nutrition = computeNutrition(mixComposition);
 
@@ -285,6 +290,7 @@ export function useRecipePhysics(
       oxidation,
       moisture,
       taste,
+      palatability,
       emulsion,
       foam,
       rheology,

@@ -5,7 +5,9 @@ import type {
 import {
   calculateNorrishAw, calculateMixedPH, predictShelfLife,
   classifyAwBand, classifyFatRegime,
+  computeTitratableAcidity, aggregateComposition,
 } from '../universal';
+import { computeTasteProfile, computePalatability } from '../perception';
 import { evaluateConfectionery } from '../confectionery';
 import { deriveSearchSpace, totalGeneCount } from './searchSpace';
 import { applyDecisionVector } from './recipeBuilder';
@@ -216,6 +218,17 @@ function scoreCandidate(
     ? evaluateConfectionery({ aw, pH, fatRegime, resolved, ingredientCatalog: catalogById })
     : null;
 
+  // Perception: score "delicious" the same way the recipe pages do — receptor-level
+  // taste from the mix composition + pH (titratable acidity as the sourness driver),
+  // then population-level palatability balance. This is what lets the optimizer
+  // search toward better-tasting ratios, not just safer/cheaper ones.
+  const mixComposition = aggregateComposition(resolved);
+  const titratableAcidity = computeTitratableAcidity(resolved);
+  const taste = computeTasteProfile(mixComposition, pH?.pH ?? null, {
+    titratableAcidityEqPerL: titratableAcidity?.eqPerLitre,
+  });
+  const palatability = computePalatability(taste);
+
   const totalCost = resolved.reduce((sum, r) => {
     const ing = catalogById.get(r.ingredientId);
     if (!ing || typeof ing.costPerUnit !== 'number') return sum;
@@ -252,6 +265,7 @@ function scoreCandidate(
     costPerGram: totalCost / totalMass,
     warningCount,
     compositionCompleteness,
+    palatability,
     hardConstraintViolated,
   }, scoreInput.targets);
 

@@ -834,7 +834,8 @@ export type OptimizerObjective =
   | 'warning_count'
   | 'composition_completeness'
   | 'ice_fraction_at_serving_distance'
-  | 'recrystallization_margin';
+  | 'recrystallization_margin'
+  | 'palatability_balance';
 
 export interface OptimizerTargets {
   awTarget?: number;             // e.g., 0.85 for stabilized

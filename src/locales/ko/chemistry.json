@@ -148,6 +148,7 @@
         "bitter": "쓴맛",
         "umami": "감칠맛"
       },
+      "balance": "맛 균형",
       "caveat": "맛 상호작용을 반영한 0–100 지각 강도입니다. 신맛은 pH를 사용합니다(적정산도가 더 정확). 쓴맛·감칠맛은 화합물 인벤토리가 필요합니다."
     },
     "structure": {
@@ -415,7 +416,8 @@
       "warning_count": "경고",
       "composition_completeness": "조성 데이터",
       "ice_fraction_at_serving_distance": "제공 시 빙결 비율",
-      "recrystallization_margin": "보관 안정성"
+      "recrystallization_margin": "보관 안정성",
+      "palatability_balance": "맛 균형"
     },
     "searchSpace": {
       "title": "탐색 공간",

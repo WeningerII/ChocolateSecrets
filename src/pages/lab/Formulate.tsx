@@ -20,6 +20,7 @@ const DEFAULT_OBJECTIVES: OptimizerObjective[] = [
   'curdle_safety_margin',
   'fat_regime_distance',
   'warning_count',
+  'palatability_balance',
 ];
 
 // Frozen-dessert texture objectives — only shown/active for frozen recipes,

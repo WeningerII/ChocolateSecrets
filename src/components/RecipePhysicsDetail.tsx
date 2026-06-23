@@ -177,6 +177,10 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
               </div>
             ))}
           </div>
+          <div className="mt-2.5 flex items-baseline justify-between text-xs">
+            <span className="text-cocoa-600 font-medium">{t('chemistry:detail.taste.balance')}</span>
+            <span className="font-mono text-cocoa-800">{Math.round(physics.palatability.balance)}<span className="text-cocoa-400">/100</span></span>
+          </div>
           <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.taste.caveat')}</p>
         </>
       )}

@@ -80,6 +80,19 @@ describe('objectives', () => {
     const res = evaluateObjectives({ ...dummyCtx, hardConstraintViolated: true }, {});
     expect(res.ice_fraction_at_serving_distance).toBe(0.05);
     expect(res.recrystallization_margin).toBe(0.05);
+    expect(res.palatability_balance).toBe(0.05);
+  });
+
+  test('palatability_balance: tracks the balance score, neutral when no taste data', () => {
+    // A well-balanced profile scores higher than a poorly-balanced one.
+    const good = evaluateObjectives({ ...dummyCtx, palatability: { balance: 80 } }, {});
+    const poor = evaluateObjectives({ ...dummyCtx, palatability: { balance: 20 } }, {});
+    expect(good.palatability_balance).toBeCloseTo(0.8);
+    expect(poor.palatability_balance).toBeCloseTo(0.2);
+    expect(good.palatability_balance).toBeGreaterThan(poor.palatability_balance);
+
+    // No taste data → neutral 1.0 (never penalizes what we can't taste).
+    expect(evaluateObjectives({ ...dummyCtx, palatability: null }, {}).palatability_balance).toBe(1.0);
   });
 
   test('detectHardConstraintViolation trips on various conditions', () => {
