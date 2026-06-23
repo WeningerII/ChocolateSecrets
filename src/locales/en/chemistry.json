@@ -22,6 +22,51 @@
       "optimum_at_max": "It wants more than the range shown — try a larger amount."
     }
   },
+  "transport": {
+    "title": "Cooking & transport",
+    "intro": "Drive the heat/mass solver from this recipe's composition: shape, size and method give core temperature over time, or brine/cure penetration.",
+    "k": "Conductivity",
+    "cp": "Specific heat",
+    "alpha": "Diffusivity",
+    "geometry": "Shape",
+    "geom": { "slab": "Slab", "cylinder": "Cylinder", "sphere": "Sphere" },
+    "halfThickness": "Half-thickness (cm)",
+    "radius": "Radius (cm)",
+    "mode": "Goal",
+    "cook": "Cook",
+    "brine": "Brine / cure",
+    "method": "Method",
+    "methodOpt": {
+      "still_air_oven": "Still oven",
+      "fan_oven": "Fan oven",
+      "sous_vide": "Sous-vide",
+      "poaching_boiling": "Poach / boil",
+      "steaming": "Steam",
+      "deep_frying": "Deep-fry"
+    },
+    "initialTemp": "Start (°C)",
+    "mediumTemp": "Medium (°C)",
+    "targetCore": "Target core (°C)",
+    "timeToCore": "Time to core target",
+    "coreVsTime": "core °C vs time",
+    "unreachable": "The core can't reach that target in this medium — raise the medium temperature.",
+    "diffusant": "Diffusant",
+    "diffOpt": {
+      "salt_in_meat": "Salt → meat",
+      "salt_in_vegetable": "Salt → vegetable",
+      "sugar_osmotic": "Sugar (osmotic)",
+      "water_drying": "Water (drying)",
+      "fat_bloom": "Fat (bloom)"
+    },
+    "targetSaturation": "Target center uptake = {{value}}%",
+    "timeToSaturation": "Time to penetrate the center",
+    "brineNote": "Penetration to the center scales with size² ÷ diffusivity — which is why curing thick cuts takes days.",
+    "sec": "s",
+    "min": "min",
+    "hr": "h",
+    "day": "days",
+    "caveat": "Transient conduction/diffusion (one-term Heisler). Geometry/size/composition scaling is exact; surface coefficients and diffusivities are representative. Radiation and surface evaporation (crust) are not modeled."
+  },
   "tier": {
     "aw": "Water activity",
     "ph": "pH",

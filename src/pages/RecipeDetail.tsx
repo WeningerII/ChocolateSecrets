@@ -22,6 +22,7 @@ import { RecipeCostDrivers } from '../components/RecipeCostDrivers';
 import { RecipePhysicsTier } from '../components/RecipePhysicsTier';
 import { RecipePhysicsDetail } from '../components/RecipePhysicsDetail';
 import { DosingPanel } from '../components/DosingPanel';
+import { TransportPanel } from '../components/TransportPanel';
 import { RecipeWarningsList } from '../components/RecipeWarningsList';
 import { attachRecipeLocalizedFields, stripUndefined } from '../utils/localized';
 
@@ -323,6 +324,7 @@ export default function RecipeDetail() {
             />
             {physicsDetailOpen && <RecipePhysicsDetail physics={physics} recipe={recipe} />}
             {physicsDetailOpen && <DosingPanel recipe={recipe} ingredients={ingredients} recipes={recipes} />}
+            {physicsDetailOpen && <TransportPanel recipe={recipe} ingredients={ingredients} recipes={recipes} />}
             {physicsDetailOpen && <RecipeCostDrivers physics={physics} ingredients={ingredients} language={language} />}
             {recipe.categories?.includes('frozen') && physics.frozen && <RecipeFrozenTier physics={physics} />}
             {recipe.categories?.includes('bread') && physics.bread && <RecipeBreadTier bread={physics.bread} />}

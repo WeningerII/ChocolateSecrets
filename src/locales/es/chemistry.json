@@ -22,6 +22,51 @@
       "optimum_at_max": "Pide más de lo mostrado: prueba una cantidad mayor."
     }
   },
+  "transport": {
+    "title": "Cocción y transporte",
+    "intro": "Resuelve el calor/masa desde la composición de la receta: forma, tamaño y método dan la temperatura del centro en el tiempo, o la penetración de salmuera/curado.",
+    "k": "Conductividad",
+    "cp": "Calor específico",
+    "alpha": "Difusividad",
+    "geometry": "Forma",
+    "geom": { "slab": "Placa", "cylinder": "Cilindro", "sphere": "Esfera" },
+    "halfThickness": "Semiespesor (cm)",
+    "radius": "Radio (cm)",
+    "mode": "Objetivo",
+    "cook": "Cocinar",
+    "brine": "Salmuera / curado",
+    "method": "Método",
+    "methodOpt": {
+      "still_air_oven": "Horno estático",
+      "fan_oven": "Horno con ventilador",
+      "sous_vide": "Sous-vide",
+      "poaching_boiling": "Escalfar / hervir",
+      "steaming": "Vapor",
+      "deep_frying": "Fritura"
+    },
+    "initialTemp": "Inicio (°C)",
+    "mediumTemp": "Medio (°C)",
+    "targetCore": "Centro objetivo (°C)",
+    "timeToCore": "Tiempo hasta el centro objetivo",
+    "coreVsTime": "°C del centro vs tiempo",
+    "unreachable": "El centro no puede alcanzar ese objetivo en este medio — sube la temperatura del medio.",
+    "diffusant": "Difundente",
+    "diffOpt": {
+      "salt_in_meat": "Sal → carne",
+      "salt_in_vegetable": "Sal → vegetal",
+      "sugar_osmotic": "Azúcar (osmótico)",
+      "water_drying": "Agua (secado)",
+      "fat_bloom": "Grasa (bloom)"
+    },
+    "targetSaturation": "Captación en el centro = {{value}}%",
+    "timeToSaturation": "Tiempo para penetrar el centro",
+    "brineNote": "La penetración al centro escala con tamaño² ÷ difusividad — por eso curar piezas gruesas lleva días.",
+    "sec": "s",
+    "min": "min",
+    "hr": "h",
+    "day": "días",
+    "caveat": "Conducción/difusión transitoria (un término, Heisler). El escalado por geometría/tamaño/composición es exacto; los coeficientes de superficie y las difusividades son representativos. No se modelan la radiación ni la evaporación superficial (costra)."
+  },
   "tier": {
     "aw": "Actividad de agua",
     "ph": "pH",

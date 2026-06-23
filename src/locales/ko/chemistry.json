@@ -22,6 +22,51 @@
       "optimum_at_max": "표시된 범위보다 더 필요합니다 — 더 큰 양을 시도하세요."
     }
   },
+  "transport": {
+    "title": "가열 및 전달",
+    "intro": "레시피 조성으로 열/물질 전달을 계산합니다: 모양·크기·방법으로 시간에 따른 중심 온도, 또는 염지/큐어링 침투를 구합니다.",
+    "k": "열전도도",
+    "cp": "비열",
+    "alpha": "열확산도",
+    "geometry": "모양",
+    "geom": { "slab": "판", "cylinder": "원기둥", "sphere": "구" },
+    "halfThickness": "반두께 (cm)",
+    "radius": "반지름 (cm)",
+    "mode": "목표",
+    "cook": "가열",
+    "brine": "염지 / 큐어링",
+    "method": "방법",
+    "methodOpt": {
+      "still_air_oven": "정적 오븐",
+      "fan_oven": "팬 오븐",
+      "sous_vide": "수비드",
+      "poaching_boiling": "포칭 / 끓이기",
+      "steaming": "찜",
+      "deep_frying": "튀김"
+    },
+    "initialTemp": "시작 (°C)",
+    "mediumTemp": "매질 (°C)",
+    "targetCore": "목표 중심 (°C)",
+    "timeToCore": "중심 목표 도달 시간",
+    "coreVsTime": "중심 °C 대 시간",
+    "unreachable": "이 매질에서는 중심이 목표에 도달할 수 없습니다 — 매질 온도를 높이세요.",
+    "diffusant": "확산 물질",
+    "diffOpt": {
+      "salt_in_meat": "소금 → 고기",
+      "salt_in_vegetable": "소금 → 채소",
+      "sugar_osmotic": "설탕 (삼투)",
+      "water_drying": "수분 (건조)",
+      "fat_bloom": "지방 (블룸)"
+    },
+    "targetSaturation": "중심 흡수 목표 = {{value}}%",
+    "timeToSaturation": "중심 침투 시간",
+    "brineNote": "중심 침투는 크기² ÷ 확산도에 비례합니다 — 두꺼운 부위 큐어링이 며칠 걸리는 이유입니다.",
+    "sec": "초",
+    "min": "분",
+    "hr": "시간",
+    "day": "일",
+    "caveat": "비정상 전도/확산(1항 Heisler). 모양·크기·조성 스케일링은 정확하며, 표면 계수와 확산도는 대표값입니다. 복사와 표면 증발(크러스트)은 모델링되지 않습니다."
+  },
   "tier": {
     "aw": "수분 활성도",
     "ph": "pH",
