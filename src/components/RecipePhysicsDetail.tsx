@@ -205,6 +205,25 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
         </>
       )}
 
+      {/* Aroma release (matrix modulation — fat trapping by volatile polarity) */}
+      {physics.aromaRelease.oilPhaseFraction > 0 && (
+        <>
+          <SectionHeader className="mt-5">{t('chemistry:detail.aroma.title')}</SectionHeader>
+          <div className="mt-2 text-xs space-y-1">
+            {physics.aromaRelease.classes.map(c => (
+              <div key={c.polarity} className="flex justify-between">
+                <span className="text-cocoa-500">
+                  {t(`chemistry:detail.aroma.polarity.${c.polarity}` as any)}
+                  <span className="text-cocoa-400"> · {t(`chemistry:detail.aroma.example.${c.example}` as any)}</span>
+                </span>
+                <span className="font-medium text-cocoa-900">{t(`chemistry:detail.aroma.band.${c.band}` as any)}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-cocoa-500 mt-2 leading-relaxed">{t('chemistry:detail.aroma.caveat')}</p>
+        </>
+      )}
+
       {/* Maillard browning (time·temperature process layer) */}
       {physics.browning && (
         <>
