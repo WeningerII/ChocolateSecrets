@@ -5,8 +5,17 @@ import { resolveRecipeLeaves } from '../utils/resolveRecipeLeaves';
 import { aggregateComposition } from '../services/foodScience/universal';
 import {
   computeHeatPenetration, computeMassPenetration, computeThermalProperties,
+  computePlankTime, computeSurfaceCoefficient,
   type Geometry, type CookingMethod, type Diffusant, type Medium, type ConvectionRegime,
 } from '../services/foodScience/transport';
+
+/** Freezing/thawing environments → surface spec for the Plank h. */
+const FREEZE_ENV: Record<string, { medium: Medium; regime: ConvectionRegime; velocityMS?: number }> = {
+  still_freezer: { medium: 'air', regime: 'natural' },
+  blast_freezer: { medium: 'air', regime: 'forced', velocityMS: 6 },
+  ice_bath: { medium: 'water', regime: 'forced', velocityMS: 0.3 },
+};
+const FREEZE_ENVS = Object.keys(FREEZE_ENV);
 
 /** Methods whose h is derived first-principles (single-phase convection + radiation).
  *  Phase-change methods (poach/boil/steam) keep their preset h. */
@@ -36,13 +45,16 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
   const { t } = useTranslation('chemistry');
   const [geometry, setGeometry] = useState<Geometry>('sphere');
   const [sizeCm, setSizeCm] = useState(2.5);
-  const [mode, setMode] = useState<'cook' | 'brine'>('cook');
+  const [mode, setMode] = useState<'cook' | 'brine' | 'freeze'>('cook');
   const [method, setMethod] = useState<CookingMethod>('fan_oven');
   const [initialTempC, setInitial] = useState(5);
   const [mediumTempC, setMedium] = useState(180);
   const [targetCoreTempC, setTarget] = useState(70);
   const [diffusant, setDiffusant] = useState<Diffusant>('salt_in_meat');
   const [saturation, setSaturation] = useState(50);
+  const [freezeEnv, setFreezeEnv] = useState('blast_freezer');
+  const [freezeDir, setFreezeDir] = useState<'freeze' | 'thaw'>('freeze');
+  const [freezeMediumTempC, setFreezeMedium] = useState(-25);
 
   const composition = useMemo(() => {
     const { resolved } = resolveRecipeLeaves(recipe, ingredients, recipes, 1);
@@ -86,6 +98,21 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
       geometry, characteristicLengthM: L, diffusant, targetCenterSaturation: saturation / 100,
     });
   }, [mode, geometry, L, diffusant, saturation]);
+
+  const phase = useMemo(() => {
+    if (mode !== 'freeze') return null;
+    const env = FREEZE_ENV[freezeEnv];
+    const a = 2 * L; // Plank uses the full thickness/diameter
+    const surf = computeSurfaceCoefficient({
+      medium: env.medium, regime: env.regime, geometry, characteristicLengthM: a,
+      surfaceTempC: 0, mediumTempC: freezeMediumTempC, velocityMS: env.velocityMS, // surface sits ≈0°C at the front
+    });
+    const plank = computePlankTime({
+      geometry, characteristicDimensionM: a, composition,
+      mediumTempC: freezeMediumTempC, surfaceCoeffWm2K: surf.h, mode: freezeDir,
+    });
+    return { plank, h: surf.h };
+  }, [mode, freezeEnv, freezeDir, freezeMediumTempC, geometry, L, composition]);
 
   const fmtTime = (s: number | null | undefined): string => {
     if (s == null || !isFinite(s)) return '—';
@@ -131,11 +158,13 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
               className={`flex-1 px-2 py-1 rounded border ${mode === 'cook' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.cook')}</button>
             <button type="button" onClick={() => setMode('brine')}
               className={`flex-1 px-2 py-1 rounded border ${mode === 'brine' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.brine')}</button>
+            <button type="button" onClick={() => setMode('freeze')}
+              className={`flex-1 px-2 py-1 rounded border ${mode === 'freeze' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.freeze')}</button>
           </div>
         </div>
       </div>
 
-      {mode === 'cook' ? (
+      {mode === 'cook' && (
         <>
           <div className="grid sm:grid-cols-4 gap-3 text-xs mt-3">
             <label className="flex flex-col gap-1 sm:col-span-2">
@@ -188,7 +217,9 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
             )}
           </div>
         </>
-      ) : (
+      )}
+
+      {mode === 'brine' && (
         <>
           <div className="grid sm:grid-cols-2 gap-3 text-xs mt-3">
             <label className="flex flex-col gap-1">
@@ -208,6 +239,40 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
             <span className="font-serif text-xl text-cocoa-900">{fmtTime(brine?.timeToTargetS)}</span>
           </div>
           <p className="text-[11px] text-cocoa-500 mt-2">{t('chemistry:transport.brineNote')}</p>
+        </>
+      )}
+
+      {mode === 'freeze' && (
+        <>
+          <div className="grid sm:grid-cols-3 gap-3 text-xs mt-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-cocoa-600">{t('chemistry:transport.environment')}</span>
+              <select className={sel} value={freezeEnv} onChange={e => setFreezeEnv(e.target.value)}>
+                {FREEZE_ENVS.map(en => <option key={en} value={en}>{t(`chemistry:transport.envOpt.${en}` as any)}</option>)}
+              </select>
+            </label>
+            <div className="flex flex-col gap-1">
+              <span className="text-cocoa-600">{t('chemistry:transport.direction')}</span>
+              <div className="flex gap-1">
+                <button type="button" onClick={() => { setFreezeDir('freeze'); setFreezeMedium(-25); }}
+                  className={`flex-1 px-2 py-1 rounded border ${freezeDir === 'freeze' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.dirFreeze')}</button>
+                <button type="button" onClick={() => { setFreezeDir('thaw'); setFreezeMedium(5); }}
+                  className={`flex-1 px-2 py-1 rounded border ${freezeDir === 'thaw' ? 'bg-cocoa-600 text-white border-cocoa-600' : 'bg-white border-cream-300'}`}>{t('chemistry:transport.dirThaw')}</button>
+              </div>
+            </div>
+            <NumField label={t('chemistry:transport.mediumTemp')} value={freezeMediumTempC} onChange={setFreezeMedium} />
+          </div>
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className="text-cocoa-500 text-xs">{freezeDir === 'freeze' ? t('chemistry:transport.timeToFreeze') : t('chemistry:transport.timeToThaw')}</span>
+            <span className="font-serif text-xl text-cocoa-900">{fmtTime(phase?.plank?.timeS)}</span>
+            {phase?.plank && phase.plank.timeS != null && (
+              <span className="text-[11px] text-cocoa-400">Tf {phase.plank.freezingPointC.toFixed(1)}°C · h {phase.h.toFixed(0)}</span>
+            )}
+          </div>
+          {phase?.plank?.flags.some(f => f.kind === 'medium_not_freezing' || f.kind === 'medium_not_thawing') && (
+            <p className="text-[11px] text-amber-600 mt-2">{t('chemistry:transport.phaseImpossible')}</p>
+          )}
+          <p className="text-[11px] text-cocoa-500 mt-2">{t('chemistry:transport.freezeNote')}</p>
         </>
       )}
 
