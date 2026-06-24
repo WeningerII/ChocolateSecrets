@@ -8,3 +8,6 @@ export * from './caramelize';
 export * from './aerate';
 export * from './chill';
 export * from './add';
+export * from './brine';
+export * from './dehydrate';
+export * from './freeze';
