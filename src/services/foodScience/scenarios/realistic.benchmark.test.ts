@@ -214,3 +214,19 @@ describe('scenario: drying beef into jerky', () => {
     expect(final.composition.water ?? 0).toBe(0); // constant-rate model has no falling-rate residual
   });
 });
+
+describe('scenario: whipping egg whites to meringue', () => {
+  // Egg white is ~11 % foaming protein and no fat — the classic high-overrun foam.
+  // It whips far past whipped cream and lands very light (a stiff meringue is mostly
+  // air), where a fat-stabilized cream foam tops out much lower.
+  test('egg white whips to a large, light foam — well beyond cream', () => {
+    const egg = runPipeline(makeFoodState({ water: 88, protein: 11, ash: 1 }, 200, 20), [aerate({ targetOverrunPct: 400 })]);
+    const cream = runPipeline(makeFoodState({ water: 58, fat: 36, protein: 2, lactose: 3, ash: 1 }, 200, 4), [aerate({ targetOverrunPct: 400 })]);
+
+    expect(egg.final.markers.overrunPct).toBeGreaterThan(200);                 // a real meringue
+    expect(egg.final.markers.densityFactor).toBeLessThan(0.4);                 // mostly air
+    expect(egg.final.markers.overrunPct).toBeGreaterThan(cream.final.markers.overrunPct); // protein foam > fat foam
+    expect(egg.logs[0].detail.flag).toBe('aeration_limited');                  // can't whip past its ceiling
+    expect(egg.final.massG).toBe(200);                                         // air is ~weightless
+  });
+});
