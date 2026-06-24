@@ -17,9 +17,29 @@ describe('enzyme operator (Michaelis-Menten)', () => {
   test('amylase converts starch to maltose', () => {
     const s = makeFoodState({ water: 50, starch: 50 }, 100, 65);
     const { final } = runPipeline(s, [enzyme({ enzyme: 'amylase', durationS: 1000 * 3600 })]);
-    expect(final.composition.starch!).toBeLessThan(50);
+    expect(final.composition.starch ?? 0).toBeLessThan(50); // may fully saccharify (→ 0, omitted)
     expect(final.composition.maltose!).toBeGreaterThan(0);
     expect(final.massG).toBeCloseTo(100, 6);
+  });
+
+  // Regression (hardening sweep): a malt mash at 65 °C saccharifies the bulk of the
+  // starch within ~30–60 min. A too-low Vmax converted only ~1 %/h — off by ~80x.
+  test('amylase saccharifies most starch within an hour at the 65 °C rest', () => {
+    const mash = makeFoodState({ water: 80, starch: 20 }, 1000, 65); // realistic mash dilution
+    const { final } = runPipeline(mash, [enzyme({ enzyme: 'amylase', durationS: 60 * 60 })]);
+    const converted = 20 - (final.composition.starch ?? 0);
+    expect(converted / 20).toBeGreaterThan(0.5); // >50 % of starch gone in 1h, not ~1 %
+  });
+
+  // Regression: dry-aging at 1–4 °C develops umami via slow proteolysis. A 5 °C
+  // cardinal floor zeroed it out and falsely flagged the enzyme denatured.
+  test('protease stays slowly active through the cold dry-aging band (4 °C)', () => {
+    const { final, logs } = runPipeline(makeFoodState({ water: 70, protein: 22, fat: 7, ash: 1 }, 1000, 4), [
+      enzyme({ enzyme: 'protease', durationS: 21 * 24 * 3600, tempC: 4 }),
+    ]);
+    expect(final.composition.glutamate ?? 0).toBeGreaterThan(0); // umami develops, slowly
+    expect(final.markers.proteolysisExtent).toBeGreaterThan(0);
+    expect(logs[0].detail.flag).not.toBe('denatured');           // cold ≠ denatured
   });
 
   test('protease frees umami glutamate without consuming protein mass', () => {

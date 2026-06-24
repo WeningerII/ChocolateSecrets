@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme, setGel, caramelize } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme, setGel, caramelize, heat } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 import { computeTasteProfile } from '../perception';
 
@@ -305,5 +305,56 @@ describe('scenario: caramelizing sugar', () => {
       caramelize({ tempC: 190, durationS: 10 * 60 }),
     ]).final;
     expect(noSugar.markers.caramelEquivMin180 ?? 0).toBe(0);
+  });
+});
+
+// --- Scenarios added from the parallel hardening-sweep workflow (5 confirmed fixes) ---
+
+describe('scenario: fermenting wine from grape must', () => {
+  // A 22 Brix must ferments near-dry. Realized ethanol yield is below the
+  // Gay-Lussac max (carbon to glycerol/biomass), so ABV lands high-but-possible,
+  // not the impossible ~15.6% the theoretical-max yield produced.
+  test('a 22 Brix must reaches a plausible high ABV with glycerol, not an impossible one', () => {
+    const { final } = runPipeline(makeFoodState({ water: 78, glucose: 11, fructose: 11 }, 1000, 25), [
+      ferment({ culture: 'wine_yeast', durationS: 21 * 24 * 3600, tempC: 25 }),
+    ]);
+    const eth = final.composition.ethanol ?? 0;
+    expect(abv(eth)).toBeGreaterThan(11);
+    expect(abv(eth)).toBeLessThan(15.5);                       // not the old impossible 15.6+
+    expect(final.composition.glycerol ?? 0).toBeGreaterThan(0); // glycerol byproduct present
+    expect((final.composition.glucose ?? 0) + (final.composition.fructose ?? 0)).toBeLessThan(2); // near-dry
+  });
+});
+
+describe('scenario: mashing — amylase saccharifies starch', () => {
+  test('a 65 C saccharification rest converts most starch to maltose within the hour', () => {
+    const { final } = runPipeline(makeFoodState({ water: 80, starch: 20 }, 1000, 65), [
+      enzyme({ enzyme: 'amylase', durationS: 60 * 60 }),
+    ]);
+    expect((final.composition.starch ?? 0)).toBeLessThan(8); // >60% of the 20% starch converted
+    expect(final.composition.maltose!).toBeGreaterThan(8);
+    expect(final.massG).toBeCloseTo(1000, 3);                 // hydrolysis conserves mass
+  });
+});
+
+describe('scenario: dry-aging beef (cold proteolysis → umami)', () => {
+  test('proteolysis develops free glutamate slowly at fridge temperature', () => {
+    const { final, logs } = runPipeline(makeFoodState({ water: 70, protein: 22, fat: 7, ash: 1 }, 1000, 2), [
+      enzyme({ enzyme: 'protease', durationS: 28 * 24 * 3600, tempC: 2 }),
+    ]);
+    expect(final.composition.glutamate ?? 0).toBeGreaterThan(0); // umami builds at 2 C
+    expect(final.composition.protein!).toBeCloseTo(22, 4);       // peptides still read as protein
+    expect(logs[0].detail.flag).not.toBe('denatured');          // cold is not denaturation
+  });
+});
+
+describe('scenario: roasting — browning real, sterility math out of domain', () => {
+  test('a 200 C roast browns but does not report astronomical pasteurization lethality', () => {
+    const { final, logs } = runPipeline(makeFoodState({ water: 60, protein: 25, glucose: 5, fat: 10 }, 1000, 200), [
+      heat({ tempC: 200, durationS: 20 * 60 }),
+    ]);
+    expect(final.markers.browningEquivMin180).toBeGreaterThan(0); // Maillard is valid at roasting temps
+    expect(final.markers.lethalityF70Min).toBe(0);               // z-value model not applied past its ceiling
+    expect(logs[0].detail.flag).toBe('lethality_out_of_domain');
   });
 });

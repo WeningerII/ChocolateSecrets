@@ -46,14 +46,19 @@ const ENZYMES: Record<Enzyme, EnzymeProfile> = {
     substrate: 'sucrose', VmaxGperLh: 6, KmGperL: 20, tempMinC: 10, tempOptC: 55, tempMaxC: 65,
     products: { glucose: 0.5263, fructose: 0.5263 }, waterPerG: 0.0526,
   },
-  // starch + H₂O → maltose (Wolfram: 1.0556 maltose, 0.0556 water)
+  // starch + H₂O → maltose (Wolfram: 1.0556 maltose, 0.0556 water). Vmax set for an
+  // active malt-amylase mash: saccharification at the 65 °C rest converts the bulk
+  // of starch in ~30–60 min (a low Vmax modeled weak endogenous flour amylase and
+  // saccharified only ~1 %/h, far slower than a real mash).
   amylase: {
-    substrate: 'starch', VmaxGperLh: 8, KmGperL: 10, tempMinC: 20, tempOptC: 65, tempMaxC: 85,
+    substrate: 'starch', VmaxGperLh: 600, KmGperL: 10, tempMinC: 20, tempOptC: 65, tempMaxC: 85,
     products: { maltose: 1.0556 }, waterPerG: 0.0556,
   },
-  // protein → free amino acids; frees glutamate (umami), protein mass unchanged
+  // protein → free amino acids; frees glutamate (umami), protein mass unchanged.
+  // tempMin 0 °C: proteases (calpains/cathepsins) stay slowly active through the
+  // cold dry-aging band (1–4 °C) — a 5 °C floor zeroed proteolysis there entirely.
   protease: {
-    substrate: 'protein', VmaxGperLh: 2, KmGperL: 30, tempMinC: 5, tempOptC: 50, tempMaxC: 70,
+    substrate: 'protein', VmaxGperLh: 2, KmGperL: 30, tempMinC: 0, tempOptC: 50, tempMaxC: 70,
     liberated: 'glutamate', liberatedYield: 1.0, maxLiberatedFraction: 0.12,
   },
 };

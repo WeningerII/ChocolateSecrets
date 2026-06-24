@@ -46,6 +46,17 @@ describe('heat operator (lethality + Maillard browning)', () => {
       .toBeCloseTo(10, 3);                      // +z (7.5 °C) → 10× lethality
   });
 
+  // Regression (hardening sweep): the z-value model is valid for thermal processing
+  // (~55–130 °C). At 200 °C roasting it extrapolated to F70 ≈ 4e18 equiv-min,
+  // returned silently. Above the ceiling it must flag and NOT accrue lethality
+  // (browning, which IS valid at roasting temps, still accumulates).
+  test('lethality is flagged out-of-domain above the z-value validity ceiling', () => {
+    const { final, logs } = runPipeline(meat(), [heat({ tempC: 200, durationS: 20 * 60 })]);
+    expect(final.markers.lethalityF70Min).toBe(0);          // not 4.3e18
+    expect(logs[0].detail.flag).toBe('lethality_out_of_domain');
+    expect(final.markers.browningEquivMin180).toBeGreaterThan(0); // browning still valid at 200 °C
+  });
+
   test('lethality accumulates across heat steps', () => {
     const { final } = runPipeline(meat(), [heat({ tempC: 70, durationS: 60 }), heat({ tempC: 70, durationS: 60 })]);
     expect(final.markers.lethalityF70Min).toBeCloseTo(2, 4);

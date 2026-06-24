@@ -30,7 +30,11 @@ const TEMPER_TABLE: Array<{ maxCocoa: number; window: [number, number] }> = [
  */
 function classify(cocoaPct: number, declared?: ChocolateClass): ChocolateClass {
   if (declared) return declared;
-  if (cocoaPct < 25) return 'white';
+  // ≤30 % is the white-chocolate band: white is ~28–35 % cocoa BUTTER (no solids),
+  // and the 30 %-row temper window (26.5–28 °C) is the white one. A <25 cutoff left
+  // a 25–30 dead zone that mislabeled white as milk while still handing it the
+  // white window.
+  if (cocoaPct <= 30) return 'white';
   if (cocoaPct < 55) return 'milk';
   return 'dark';
 }

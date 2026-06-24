@@ -27,14 +27,18 @@ describe('rossoGamma cardinal temperature model', () => {
 describe('ferment operator', () => {
   const start = () => makeFoodState({ water: 80, glucose: 20 }, 100, 22);
 
-  test('converts sugar to ethanol + CO₂ by Gay-Lussac, with mass balance', () => {
+  test('converts sugar to ethanol + glycerol + CO₂ at realized (sub-Gay-Lussac) yields, with mass balance', () => {
     const { final, logs } = runPipeline(start(), [ferment({ culture: 'ale_yeast', durationS: 100 * 3600 })]);
     const converted = final.markers.fermentedSugarG;
     const ethanolG = (final.composition.ethanol! / 100) * final.massG;
+    const glycerolG = (final.composition.glycerol! / 100) * final.massG;
     const co2 = final.markers.co2LostG;
-    expect(ethanolG / converted).toBeCloseTo(0.5114, 3);   // ethanol yield
-    expect(co2 / converted).toBeCloseTo(0.4886, 3);          // CO₂ yield
-    expect(100 - final.massG).toBeCloseTo(co2, 6);           // mass lost = CO₂ escaped
+    // Realized yields are below the Gay-Lussac ceiling (0.5114) — carbon diverted to
+    // glycerol + biomass — so the engine doesn't over-predict alcoholic strength.
+    expect(ethanolG / converted).toBeCloseTo(0.475, 3);    // realized ethanol yield
+    expect(glycerolG / converted).toBeCloseTo(0.035, 3);   // glycerol byproduct (stays in solution)
+    expect(co2 / converted).toBeCloseTo(0.490, 3);           // CO₂ yield
+    expect(100 - final.massG).toBeCloseTo(co2, 6);           // only CO₂ leaves; ethanol + glycerol stay
     expect(logs[0].operator).toBe('ferment');
   });
 
