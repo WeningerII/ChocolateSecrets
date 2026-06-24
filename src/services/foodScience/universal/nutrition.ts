@@ -40,7 +40,7 @@ export interface NutritionResult {
 export function computeNutrition(composition: Composition): NutritionResult {
   const sugars =
     (composition.sucrose ?? 0) + (composition.glucose ?? 0) + (composition.fructose ?? 0) +
-    (composition.lactose ?? 0) + (composition.maltose ?? 0);
+    (composition.lactose ?? 0) + (composition.maltose ?? 0) + (composition.starch ?? 0);
   const sorbitol = composition.sorbitol ?? 0;
   const glycerol = composition.glycerol ?? 0;
   const protein = composition.protein ?? 0;

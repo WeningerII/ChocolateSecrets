@@ -645,6 +645,8 @@ export interface Composition {
   fructose?: number;
   lactose?: number;
   maltose?: number;
+  /** Starch / complex glucan, mass % — amylase substrate; the bulk of flour. */
+  starch?: number;
   sorbitol?: number;
   glycerol?: number;
   ethanol?: number;

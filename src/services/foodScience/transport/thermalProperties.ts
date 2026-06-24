@@ -88,7 +88,7 @@ export interface ThermalProperties {
 function componentMasses(c: Composition): Record<Component, number> {
   const carb =
     (c.sucrose ?? 0) + (c.glucose ?? 0) + (c.fructose ?? 0) +
-    (c.lactose ?? 0) + (c.maltose ?? 0) + (c.sorbitol ?? 0) + (c.glycerol ?? 0);
+    (c.lactose ?? 0) + (c.maltose ?? 0) + (c.starch ?? 0) + (c.sorbitol ?? 0) + (c.glycerol ?? 0);
   return {
     water: c.water ?? 0,
     protein: c.protein ?? 0,
