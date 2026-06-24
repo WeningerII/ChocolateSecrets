@@ -2,6 +2,14 @@
   "pipeline": {
     "title": "Recipe as a program",
     "intro": "Chain the unit operators over this recipe's starting composition and watch the state evolve — composition, mass, temperature, and the markers each step records.",
+    "examples": "Examples",
+    "clear": "Clear",
+    "presets": {
+      "caramel": "Caramel sauce",
+      "yogurt": "Yogurt",
+      "icecream": "Ice cream",
+      "candied": "Candied fruit"
+    },
     "startMass": "Starting mass (g)",
     "startTemp": "Starting temp (°C)",
     "startFromRecipe": "Composition is taken from this recipe.",

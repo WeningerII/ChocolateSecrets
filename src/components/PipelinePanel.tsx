@@ -90,6 +90,34 @@ const OP_BY_ID = Object.fromEntries(OPERATORS.map(o => [o.id, o]));
 export const defaultParams = (op: OpDef): Record<string, string | number> =>
   Object.fromEntries(op.fields.map(f => [f.key, f.def]));
 
+/**
+ * Worked example programs — one per operator family — so the builder is
+ * self-demonstrating. Each applies its step sequence to the current recipe's
+ * composition; params override the operator defaults.
+ */
+interface Preset { key: string; startMassG?: number; startTempC?: number; steps: Array<{ opId: string; params?: Record<string, string | number> }>; }
+export const PRESETS: Preset[] = [
+  { key: 'caramel', steps: [
+    { opId: 'reduce', params: { removeWaterPct: 50, tempC: 110 } },
+    { opId: 'caramelize', params: { tempC: 180, durationMin: 8 } },
+    { opId: 'add', params: { addition: 'cream', massG: 300, tempC: 20 } },
+    { opId: 'chill', params: { tempC: 25 } },
+  ] },
+  { key: 'yogurt', steps: [
+    { opId: 'heat', params: { tempC: 85, durationMin: 30 } },
+    { opId: 'ferment', params: { culture: 'yogurt_lactic', durationHr: 6, tempC: 43 } },
+    { opId: 'chill', params: { tempC: 4 } },
+  ] },
+  { key: 'icecream', steps: [
+    { opId: 'aerate', params: { targetOverrunPct: 100 } },
+    { opId: 'freeze', params: { mode: 'freeze', mediumTempC: -25, targetTempC: -15, sizeCm: 4 } },
+  ] },
+  { key: 'candied', steps: [
+    { opId: 'brine', params: { solute: 'sugar', bathConcentrationPct: 60, durationHr: 48, sizeCm: 1 } },
+    { opId: 'dehydrate', params: { airTempC: 50, rhPct: 30, durationHr: 4 } },
+  ] },
+];
+
 interface Step { uid: number; opId: string; params: Record<string, string | number> }
 
 const fmt = (v: number): string => {
@@ -122,6 +150,15 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
     const op = OPERATORS[0];
     setSteps(s => [...s, { uid: uid.current++, opId: op.id, params: defaultParams(op) }]);
   };
+  const loadPreset = (preset: Preset) => {
+    setStartMass(preset.startMassG ?? 1000);
+    setStartTemp(preset.startTempC ?? 20);
+    setSteps(preset.steps.map(s => ({
+      uid: uid.current++, opId: s.opId,
+      params: { ...defaultParams(OP_BY_ID[s.opId]), ...(s.params ?? {}) },
+    })));
+  };
+  const clearSteps = () => setSteps([]);
   const removeStep = (u: number) => setSteps(s => s.filter(x => x.uid !== u));
   const move = (u: number, dir: -1 | 1) => setSteps(s => {
     const i = s.findIndex(x => x.uid === u);
@@ -157,6 +194,23 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
     <div className="rounded-md bg-cream-50 px-5 py-5 mt-2 border border-cream-200 text-sm text-cocoa-700">
       <h4 className="font-serif text-[12px] uppercase tracking-wider text-cocoa-500 font-medium">{t('chemistry:pipeline.title')}</h4>
       <p className="text-[11px] text-cocoa-500 mt-1 mb-3">{t('chemistry:pipeline.intro')}</p>
+
+      {/* Example programs */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-4">
+        <span className="text-[10px] uppercase tracking-wider text-cocoa-400 mr-1">{t('chemistry:pipeline.examples')}</span>
+        {PRESETS.map(p => (
+          <button key={p.key} type="button" onClick={() => loadPreset(p)}
+            className="px-2 py-1 rounded border border-cocoa-200 bg-white text-cocoa-700 text-[11px] hover:bg-cocoa-50">
+            {t(`chemistry:pipeline.presets.${p.key}` as any)}
+          </button>
+        ))}
+        {steps.length > 0 && (
+          <button type="button" onClick={clearSteps}
+            className="px-2 py-1 rounded text-cocoa-400 text-[11px] hover:text-cocoa-700">
+            {t('chemistry:pipeline.clear')}
+          </button>
+        )}
+      </div>
 
       {/* Starting state */}
       <div className="grid sm:grid-cols-3 gap-3 text-xs">

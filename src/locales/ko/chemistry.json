@@ -2,6 +2,14 @@
   "pipeline": {
     "title": "프로그램으로서의 레시피",
     "intro": "이 레시피의 초기 조성에 단위 연산자를 연결하고 상태가 어떻게 변하는지 관찰하세요 — 조성, 질량, 온도, 그리고 각 단계가 기록하는 마커.",
+    "examples": "예시",
+    "clear": "지우기",
+    "presets": {
+      "caramel": "캐러멜 소스",
+      "yogurt": "요거트",
+      "icecream": "아이스크림",
+      "candied": "설탕 절임 과일"
+    },
     "startMass": "초기 질량 (g)",
     "startTemp": "초기 온도 (°C)",
     "startFromRecipe": "조성은 이 레시피에서 가져옵니다.",
