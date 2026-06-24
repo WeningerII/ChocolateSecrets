@@ -77,6 +77,18 @@ describe('ferment operator', () => {
     expect(lacticG).toBeCloseTo(final.markers.fermentedSugarG, 4); // yield 1.0 g/g
   });
 
+  // Regression (realistic-scenario hardening): LAB self-inhibit on acid, so yogurt
+  // converts only ~⅕ of milk lactose → ~0.8–1 % lactic acid. A yeast-like 0.9
+  // attenuation made impossibly sour ~4 % yogurt; the limit must stay realistic
+  // even at long fermentation, leaving most lactose behind.
+  test('milk → yogurt stays at a realistic acidity (not yeast-attenuated)', () => {
+    const milk = makeFoodState({ water: 87.5, lactose: 4.8, fat: 3.5, protein: 3.4, ash: 0.8 }, 1000, 43);
+    const { final } = runPipeline(milk, [ferment({ culture: 'yogurt_lactic', durationS: 200 * 3600 })]);
+    expect(final.composition.lacticAcid!).toBeGreaterThan(0.6);
+    expect(final.composition.lacticAcid!).toBeLessThan(1.3); // not ~4 %
+    expect(final.composition.lactose!).toBeGreaterThan(3);   // most lactose remains (yogurt isn't lactose-free)
+  });
+
   test('sourdough (heterofermentative) makes lactic acid + ethanol + CO₂', () => {
     const s = makeFoodState({ water: 60, maltose: 20, glucose: 20 }, 100, 28);
     const { final } = runPipeline(s, [ferment({ culture: 'sourdough', durationS: 200 * 3600 })]);

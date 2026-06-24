@@ -43,12 +43,16 @@ interface CultureProfile {
 // Yields verified in Wolfram. Yeast: glucose → 2 EtOH + 2 CO₂ (0.511/0.489).
 // Homofermentative: glucose → 2 lactate (1.0). Heterofermentative (sourdough):
 // glucose → lactate + ethanol + CO₂ (0.50 / 0.256 / 0.244).
+// Attenuation note: yeast ferment to near-dryness (0.95–0.98). Lactic acid
+// bacteria SELF-INHIBIT as the pH falls (~pH 4.2–4.5), stalling long before the
+// sugar runs out — yogurt converts only ~⅕ of milk lactose (→ ~0.8–1 % lactic
+// acid), so yogurt_lactic's attenuation limit is ~0.20, not a yeast-like 0.9.
 const CULTURES: Record<Culture, CultureProfile> = {
   ale_yeast:     { muMaxPerH: 0.35, tempMinC: 4,  tempOptC: 22, tempMaxC: 38, maxConversion: 0.95, products: { ethanol: 0.5114, co2: 0.4886 } },
   lager_yeast:   { muMaxPerH: 0.20, tempMinC: 2,  tempOptC: 12, tempMaxC: 30, maxConversion: 0.95, products: { ethanol: 0.5114, co2: 0.4886 } },
   wine_yeast:    { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 25, tempMaxC: 35, maxConversion: 0.98, products: { ethanol: 0.5114, co2: 0.4886 } },
-  yogurt_lactic: { muMaxPerH: 0.50, tempMinC: 15, tempOptC: 42, tempMaxC: 52, maxConversion: 0.90, products: { lacticAcid: 1.0 }, fermentsLactose: true },
-  sourdough:     { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 28, tempMaxC: 40, maxConversion: 0.90, products: { lacticAcid: 0.5, ethanol: 0.256, co2: 0.244 } },
+  yogurt_lactic: { muMaxPerH: 0.50, tempMinC: 15, tempOptC: 42, tempMaxC: 52, maxConversion: 0.20, products: { lacticAcid: 1.0 }, fermentsLactose: true },
+  sourdough:     { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 28, tempMaxC: 40, maxConversion: 0.40, products: { lacticAcid: 0.5, ethanol: 0.256, co2: 0.244 } },
 };
 
 /** Sugars cultures ferment (lactose excluded — needs lactase). */

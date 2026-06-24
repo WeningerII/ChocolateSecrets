@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
+import { computeTasteProfile } from '../perception';
 
 /**
  * Realistic end-to-end scenarios — recipes + processes with KNOWN real-world
@@ -157,5 +158,29 @@ describe('scenario: hardening ice cream to freezer temperature', () => {
 
     const soft = runPipeline(mix(), [freeze({ geometry: 'sphere', characteristicDimensionM: 0.04, mediumTempC: -25, surfaceCoeffWm2K: 20, targetTempC: -6 })]).final;
     expect(soft.markers.iceFractionBeyondIdeal).toBe(0);
+  });
+});
+
+describe('scenario: culturing milk into yogurt', () => {
+  // Whole milk incubated at ~43 °C with thermophilic LAB. Real yogurt finishes at
+  // ~0.7–1 % lactic acid (titratable acidity) and ~pH 4.5 — tangy, not lemon-sour —
+  // and still holds most of its lactose (yogurt is not lactose-free).
+  const milk = () => makeFoodState({ water: 87.5, lactose: 4.8, fat: 3.5, protein: 3.4, ash: 0.8 }, 1000, 43);
+
+  test('develops yogurt-strength acidity, leaving most lactose behind', () => {
+    const { final } = runPipeline(milk(), [ferment({ culture: 'yogurt_lactic', durationS: 6 * 3600, tempC: 43 })]);
+    expect(final.composition.lacticAcid!).toBeGreaterThan(0.5);
+    expect(final.composition.lacticAcid!).toBeLessThan(1.3); // tangy, not ~4 %
+    expect(final.composition.lactose!).toBeGreaterThan(3.5); // most lactose remains
+  });
+
+  test('the sour note rises from milk to yogurt but does not max out', () => {
+    const before = computeTasteProfile(milk().composition, null).sour;
+    const after = computeTasteProfile(
+      runPipeline(milk(), [ferment({ culture: 'yogurt_lactic', durationS: 6 * 3600, tempC: 43 })]).final.composition,
+      null,
+    ).sour;
+    expect(after).toBeGreaterThan(before);  // it soured
+    expect(after).toBeLessThan(65);         // tangy, not battery-acid (the old bug read ~83)
   });
 });
