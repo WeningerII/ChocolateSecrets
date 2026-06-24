@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme, setGel } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme, setGel, caramelize } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 import { computeTasteProfile } from '../perception';
 
@@ -278,5 +278,32 @@ describe('scenario: cooking fruit into pectin-set jam', () => {
       setGel({ agent: 'pectin_lm', concentrationPct: 1, hasCalcium: true }),
     ]);
     expect(final.markers.gelSets).toBe(1); // LM pectin needs calcium, not sugar
+  });
+});
+
+describe('scenario: caramelizing sugar', () => {
+  // Dry sugar taken to caramel temperature. Caramelization is sugar pyrolysis: it
+  // only switches on near sugar's melt (~160 °C), accelerates steeply with heat,
+  // needs a sugar present, and is distinct from Maillard (no amino acids needed).
+  const sugar = () => makeFoodState({ water: 2, sucrose: 98 }, 500, 20);
+
+  test('develops caramel at 180 °C, almost nothing below the ~160 °C threshold', () => {
+    const hot = runPipeline(sugar(), [caramelize({ tempC: 180, durationS: 10 * 60 })]).final;
+    expect(hot.markers.caramelEquivMin180).toBeCloseTo(10, 0); // 180 °C is the reference rate
+    const cool = runPipeline(sugar(), [caramelize({ tempC: 140, durationS: 10 * 60 })]).final;
+    expect(cool.markers.caramelEquivMin180).toBeLessThan(1);   // below the threshold
+  });
+
+  test('hotter caramelizes much faster (steep Arrhenius)', () => {
+    const at200 = runPipeline(sugar(), [caramelize({ tempC: 200, durationS: 5 * 60 })]).final;
+    const at170 = runPipeline(sugar(), [caramelize({ tempC: 170, durationS: 5 * 60 })]).final;
+    expect(at200.markers.caramelEquivMin180).toBeGreaterThan(at170.markers.caramelEquivMin180 * 3);
+  });
+
+  test('no sugar, no caramel (distinct from Maillard browning)', () => {
+    const noSugar = runPipeline(makeFoodState({ water: 60, protein: 40 }, 500, 20), [
+      caramelize({ tempC: 190, durationS: 10 * 60 }),
+    ]).final;
+    expect(noSugar.markers.caramelEquivMin180 ?? 0).toBe(0);
   });
 });
