@@ -648,6 +648,10 @@ export interface Composition {
   sorbitol?: number;
   glycerol?: number;
   ethanol?: number;
+  /** Lactic acid, mass % — LAB fermentation product; titratable-acidity / sour driver. */
+  lacticAcid?: number;
+  /** Acetic acid, mass % — vinegar / heterofermentation; titratable-acidity / sour driver. */
+  aceticAcid?: number;
   fat?: number;
   protein?: number;
   ash?: number;

@@ -112,7 +112,7 @@ export function resolveComposition(ingredient: Ingredient): ResolveCompositionRe
  */
 export const COMPOSITION_SPECIES: readonly (keyof Composition)[] = [
   'water', 'sucrose', 'glucose', 'fructose', 'lactose', 'maltose',
-  'sorbitol', 'glycerol', 'ethanol', 'fat', 'protein', 'ash',
+  'sorbitol', 'glycerol', 'ethanol', 'lacticAcid', 'aceticAcid', 'fat', 'protein', 'ash',
 ] as const;
 
 /**

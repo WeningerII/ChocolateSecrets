@@ -87,6 +87,24 @@ function rawSourness(pH: number | null): number {
   return (100 * (SOUR_PH_FLAT - pH)) / (SOUR_PH_FLAT - SOUR_PH_MAX);
 }
 
+/** Monoprotic organic acids tracked in composition → equivalent weight (= MW). */
+const ORGANIC_ACID_EQ_WEIGHT: Partial<Record<keyof Composition, number>> = {
+  lacticAcid: 90.08,
+  aceticAcid: 60.05,
+};
+
+/** Titratable acidity (eq per L of water) from the composition's organic acids. */
+function titratableAcidityFromComposition(c: Composition): number {
+  const waterPct = c.water ?? 0;
+  if (waterPct <= 0) return 0;
+  let eqPerL = 0;
+  for (const sp of Object.keys(ORGANIC_ACID_EQ_WEIGHT) as (keyof Composition)[]) {
+    const acidPct = c[sp] ?? 0;
+    if (acidPct > 0) eqPerL += ((acidPct / waterPct) * 1000) / ORGANIC_ACID_EQ_WEIGHT[sp]!;
+  }
+  return eqPerL;
+}
+
 /**
  * Perceived taste profile from composition + pH. Returns pre-interaction stimuli
  * run through the documented mixture interactions.
@@ -101,11 +119,15 @@ export function computeTasteProfile(
   const sweetRaw = beidler(sucroseEquivalentPct(composition), K_SWEET_SEQ_PCT);
   const saltRaw = beidler((composition.sodium ?? 0) * SODIUM_TO_NACL, K_SALT_NACL_PCT);
 
-  // Sourness: titratable acidity is the better predictor; fall back to the pH proxy.
+  // Sourness: titratable acidity is the better predictor. Combine the acid
+  // inventory in the composition (lactic/acetic — real acids, e.g. from
+  // fermentation) with any titratable acidity passed in (buffer-model acids like
+  // citrus/vinegar). Fall back to the pH proxy only when no acid is known.
+  const provided = opts.titratableAcidityEqPerL;
+  const totalTA = titratableAcidityFromComposition(composition) + (provided && provided > 0 ? provided : 0);
   let sourRaw: number;
-  const ta = opts.titratableAcidityEqPerL;
-  if (ta !== undefined && ta !== null) {
-    sourRaw = beidler(ta, K_SOUR_TA_EQ_PER_L);
+  if (totalTA > 0) {
+    sourRaw = beidler(totalTA, K_SOUR_TA_EQ_PER_L);
     flags.push({ kind: 'sourness_from_titratable_acidity' });
   } else {
     sourRaw = rawSourness(pH);

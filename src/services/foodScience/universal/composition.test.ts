@@ -78,9 +78,9 @@ describe('compositionSum / isCompositionComplete', () => {
     expect(isCompositionComplete({})).toBe(false);
   });
 
-  test('COMPOSITION_SPECIES covers exactly the 12 tracked species', () => {
+  test('COMPOSITION_SPECIES covers exactly the 14 tracked species', () => {
     expect([...COMPOSITION_SPECIES].sort()).toEqual(
-      ['ash', 'ethanol', 'fat', 'fructose', 'glucose', 'glycerol', 'lactose', 'maltose', 'protein', 'sorbitol', 'sucrose', 'water'],
+      ['aceticAcid', 'ash', 'ethanol', 'fat', 'fructose', 'glucose', 'glycerol', 'lacticAcid', 'lactose', 'maltose', 'protein', 'sorbitol', 'sucrose', 'water'],
     );
   });
 });

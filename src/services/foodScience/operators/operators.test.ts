@@ -66,4 +66,22 @@ describe('ferment operator', () => {
     const lager = runPipeline(start(), [ferment({ culture: 'lager_yeast', durationS: 4 * 3600, tempC: 20 })]);
     expect(ale.final.markers.fermentedSugarG).toBeGreaterThan(lager.final.markers.fermentedSugarG);
   });
+
+  test('yogurt (homofermentative) makes lactic acid from lactose — no gas, mass conserved', () => {
+    const s = makeFoodState({ water: 87, lactose: 5, protein: 3, glucose: 5 }, 100, 42);
+    const { final } = runPipeline(s, [ferment({ culture: 'yogurt_lactic', durationS: 200 * 3600 })]);
+    expect(final.composition.lacticAcid!).toBeGreaterThan(0);
+    expect(final.markers.co2LostG).toBe(0);          // homofermentative → no CO₂
+    expect(final.massG).toBeCloseTo(100, 6);          // mass conserved
+    const lacticG = (final.composition.lacticAcid! / 100) * final.massG;
+    expect(lacticG).toBeCloseTo(final.markers.fermentedSugarG, 4); // yield 1.0 g/g
+  });
+
+  test('sourdough (heterofermentative) makes lactic acid + ethanol + CO₂', () => {
+    const s = makeFoodState({ water: 60, maltose: 20, glucose: 20 }, 100, 28);
+    const { final } = runPipeline(s, [ferment({ culture: 'sourdough', durationS: 200 * 3600 })]);
+    expect(final.composition.lacticAcid!).toBeGreaterThan(0);
+    expect(final.composition.ethanol!).toBeGreaterThan(0);
+    expect(final.markers.co2LostG).toBeGreaterThan(0); // leavening
+  });
 });

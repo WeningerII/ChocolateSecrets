@@ -40,6 +40,20 @@ describe('computeTasteProfile', () => {
     expect(r.flags).not.toContainEqual({ kind: 'sourness_from_ph_proxy' });
   });
 
+  test('organic acids in the composition drive sourness directly (the real-acid upgrade)', () => {
+    // ~0.8 % lactic acid in water → titratable acidity ~0.089 eq/L → clearly sour,
+    // from the acid inventory itself, not a pH proxy.
+    const r = computeTasteProfile({ water: 90, lacticAcid: 0.8 }, null);
+    expect(r.sour).toBeGreaterThan(40);
+    expect(r.flags).toContainEqual({ kind: 'sourness_from_titratable_acidity' });
+  });
+
+  test('more lactic acid tastes more sour', () => {
+    const mild = computeTasteProfile({ water: 90, lacticAcid: 0.3 }, null).sour;
+    const sharp = computeTasteProfile({ water: 90, lacticAcid: 1.2 }, null).sour;
+    expect(sharp).toBeGreaterThan(mild);
+  });
+
   test('sweet and sour mutually suppress (mixture interaction)', () => {
     expect(computeTasteProfile({ sucrose: 10 }, 3).sweet)
       .toBeLessThan(computeTasteProfile({ sucrose: 10 }, null).sweet);
