@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 import { computeTasteProfile } from '../perception';
 
@@ -182,5 +182,35 @@ describe('scenario: culturing milk into yogurt', () => {
     ).sour;
     expect(after).toBeGreaterThan(before);  // it soured
     expect(after).toBeLessThan(65);         // tangy, not battery-acid (the old bug read ~83)
+  });
+});
+
+describe('scenario: drying beef into jerky', () => {
+  // Lean beef strips in a 65 °C / 20 % RH dehydrator. While the surface is wet it
+  // sits at the wet bulb (evaporative cooling, well below the air), losing water at
+  // a steady flux; the meat concentrates as it dries.
+  const beef = () => makeFoodState({ water: 74, protein: 22, fat: 3, ash: 1 }, 1000, 20);
+
+  test('constant-rate drying removes water, cools to the wet bulb, and concentrates the meat', () => {
+    const { final, logs } = runPipeline(beef(), [
+      dehydrate({ airTempC: 65, relativeHumidity: 0.2, surfaceCoeffWm2K: 25, surfaceAreaM2: 0.08, durationS: 4 * 3600 }),
+    ]);
+    expect(final.markers.waterRemovedG).toBeGreaterThan(250);
+    expect(final.massG).toBeLessThan(1000);
+    expect(final.markers.concentrationFactor).toBeGreaterThan(1);
+    expect(final.composition.protein!).toBeGreaterThan(22);     // concentrated
+    // Wet-bulb evaporative cooling: surface well below the 65 °C air.
+    expect(final.tempC).toBeCloseTo(final.markers.dryingWetBulbC, 6);
+    expect(final.tempC).toBeGreaterThan(30);
+    expect(final.tempC).toBeLessThan(50);
+    expect(logs[0].detail.flag).toBeUndefined();                // still in the constant-rate regime
+  });
+
+  test('drying long enough exhausts the free water (constant-rate model caps there)', () => {
+    const { final, logs } = runPipeline(beef(), [
+      dehydrate({ airTempC: 65, relativeHumidity: 0.2, surfaceCoeffWm2K: 25, surfaceAreaM2: 0.08, durationS: 24 * 3600 }),
+    ]);
+    expect(logs[0].detail.flag).toBe('water_limited');
+    expect(final.composition.water ?? 0).toBe(0); // constant-rate model has no falling-rate residual
   });
 });
