@@ -111,7 +111,7 @@ export function resolveComposition(ingredient: Ingredient): ResolveCompositionRe
  * of truth for code that must iterate all species (sum, aggregation, editors).
  */
 export const COMPOSITION_SPECIES: readonly (keyof Composition)[] = [
-  'water', 'sucrose', 'glucose', 'fructose', 'lactose', 'maltose',
+  'water', 'sucrose', 'glucose', 'fructose', 'lactose', 'maltose', 'starch',
   'sorbitol', 'glycerol', 'ethanol', 'lacticAcid', 'aceticAcid', 'fat', 'protein', 'ash',
 ] as const;
 
