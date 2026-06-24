@@ -10,7 +10,7 @@ import {
   type Culture, type Enzyme, type BrineSolute,
 } from '../services/foodScience/operators';
 import type { GellingAgent } from '../services/foodScience/structure';
-import { computeTasteProfile, type TasteQuality } from '../services/foodScience/perception';
+import { computeTasteProfile, chemesthesisFromComposition, computeAromaRelease, type TasteQuality } from '../services/foodScience/perception';
 
 /**
  * "Recipe as a program" — chain the unit operators (ferment → reduce → heat →
@@ -33,6 +33,8 @@ const ADDITIONS: Record<string, Composition> = {
   butter: { fat: 81, water: 16, protein: 1, ash: 2 },
   egg: { water: 76, protein: 12, fat: 10, ash: 2 },
   flour: { starch: 73, protein: 11, water: 13, fat: 2, ash: 1 },
+  chili: { water: 87, capsaicinoids: 0.1, sucrose: 4, ash: 1 },   // TRPV1 heat
+  mint: { water: 85, menthol: 0.02, sucrose: 2, ash: 1 },          // TRPM8 cooling
 };
 
 const CULTURES: Culture[] = ['ale_yeast', 'lager_yeast', 'wine_yeast', 'yogurt_lactic', 'sourdough'];
@@ -186,6 +188,15 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
     { q: 'sweet', v: taste.sweet }, { q: 'salty', v: taste.salty }, { q: 'sour', v: taste.sour },
     { q: 'bitter', v: taste.bitter ?? 0 }, { q: 'umami', v: taste.umami ?? 0 },
   ];
+  // Chemesthesis (trigeminal) — driven by the composition's trace actives; show only
+  // the channels that actually fire. Aroma release — how the matrix re-weights delivery.
+  const chem = chemesthesisFromComposition(finalState.composition);
+  const chemChannels = ([
+    ['pungency', chem.pungency.intensity], ['nasalPungency', chem.nasalPungency.intensity],
+    ['cooling', chem.cooling.intensity], ['astringency', chem.astringency.intensity],
+    ['carbonation', chem.carbonation.intensity], ['tingle', chem.tingle.intensity],
+  ] as Array<[string, number]>).filter(([, v]) => v > 0.5);
+  const aroma = computeAromaRelease(finalState.composition);
   // Temperature trajectory across the program (start, then after each step).
   const temps = result.trajectory.map(s => s.tempC);
   const tMin = Math.min(...temps), tMax = Math.max(...temps);
@@ -344,11 +355,45 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
             <div className="flex flex-col gap-0.5">
               {tasteBars.map(({ q, v }) => (
                 <div key={q} className="flex items-center gap-2">
-                  <span className="text-[10px] text-cocoa-600 w-12">{t(`chemistry:taste.quality.${q}` as any)}</span>
+                  <span className="text-[10px] text-cocoa-600 w-12">{t(`chemistry:detail.taste.quality.${q}` as any)}</span>
                   <div className="flex-1 h-2 bg-cream-100 rounded overflow-hidden">
                     <div className="h-full bg-cocoa-500" style={{ width: `${Math.max(0, Math.min(100, v))}%` }} />
                   </div>
                   <span className="text-[10px] font-mono text-cocoa-900 w-6 text-right">{Math.round(v)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Chemesthesis — only the trigeminal channels that actually fire */}
+          {chemChannels.length > 0 && (
+            <div className="mt-3 sm:max-w-sm">
+              <div className="text-[10px] text-cocoa-500 mb-1">{t('chemistry:detail.chemesthesis.title')}</div>
+              <div className="flex flex-col gap-0.5">
+                {chemChannels.map(([key, v]) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="text-[10px] text-cocoa-600 w-20">{t(`chemistry:detail.chemesthesis.${key}` as any)}</span>
+                    <div className="flex-1 h-2 bg-cream-100 rounded overflow-hidden">
+                      <div className="h-full bg-cocoa-600" style={{ width: `${Math.max(0, Math.min(100, v))}%` }} />
+                    </div>
+                    <span className="text-[10px] font-mono text-cocoa-900 w-6 text-right">{Math.round(v)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Aroma release by volatile polarity (1.0 = projects as freely as water) */}
+          <div className="mt-3 sm:max-w-sm">
+            <div className="text-[10px] text-cocoa-500 mb-1">{t('chemistry:detail.aroma.title')}</div>
+            <div className="flex flex-col gap-0.5">
+              {aroma.classes.map(cls => (
+                <div key={cls.polarity} className="flex items-center gap-2">
+                  <span className="text-[10px] text-cocoa-600 w-20">{t(`chemistry:detail.aroma.polarity.${cls.polarity}` as any)}</span>
+                  <div className="flex-1 h-2 bg-cream-100 rounded overflow-hidden">
+                    <div className="h-full bg-cocoa-400" style={{ width: `${Math.max(0, Math.min(100, cls.releaseFactor * 100))}%` }} />
+                  </div>
+                  <span className="text-[10px] font-mono text-cocoa-900 w-8 text-right">{cls.releaseFactor.toFixed(2)}</span>
                 </div>
               ))}
             </div>

@@ -337,6 +337,15 @@
       "balance": "Equilibrio de sabor",
       "caveat": "Intensidad percibida 0–100 tras las interacciones de sabor. El ácido usa el pH (la acidez titulable es mejor); amargo y umami requieren un inventario de compuestos."
     },
+    "chemesthesis": {
+      "title": "Quimestesia (trigémino)",
+      "pungency": "Picor",
+      "nasalPungency": "Punzada nasal",
+      "cooling": "Frescor",
+      "astringency": "Astringencia",
+      "carbonation": "Carbonatación",
+      "tingle": "Hormigueo"
+    },
     "aroma": {
       "title": "Liberación de aroma",
       "polarity": {

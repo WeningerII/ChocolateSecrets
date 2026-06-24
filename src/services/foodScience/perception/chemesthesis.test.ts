@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { computeChemesthesis } from './chemesthesis';
+import { computeChemesthesis, chemesthesisFromComposition } from './chemesthesis';
 
 describe('chemesthesis', () => {
   test('no agonists → every channel zero, flagged', () => {
@@ -87,5 +87,31 @@ describe('chemesthesis', () => {
     expect(gingerBeer.carbonation.intensity).toBeGreaterThan(0);
     expect(gingerBeer.cooling.intensity).toBe(0);
     expect(gingerBeer.flags).toHaveLength(0);
+  });
+});
+
+describe('chemesthesisFromComposition (composition-driven)', () => {
+  test('an inert composition fires no chemesthetic channel', () => {
+    const r = chemesthesisFromComposition({ water: 80, sucrose: 20 });
+    expect(r.pungency.intensity).toBe(0);
+    expect(r.cooling.intensity).toBe(0);
+    expect(r.flags.some(f => f.kind === 'no_chemesthetic_agonists')).toBe(true);
+  });
+
+  test('capsaicinoids in composition (mass %) bridge to ppm → Scoville', () => {
+    // 0.05 mass % = 500 ppm → ~8 000 SHU (a hot chili), pungency only.
+    const r = chemesthesisFromComposition({ water: 95, capsaicinoids: 0.05 });
+    expect(r.pungency.scovilleSHU).toBeCloseTo(0.05 * 10_000 * 16, 0); // 8000 SHU
+    expect(r.pungency.intensity).toBeGreaterThan(0);
+    expect(r.cooling.intensity).toBe(0);
+  });
+
+  test('tannins/CO₂ use the g·L⁻¹ bridge; menthol cools', () => {
+    const wine = chemesthesisFromComposition({ water: 88, ethanol: 12, tannins: 0.15 }); // 1.5 g/L
+    expect(wine.astringency.intensity).toBeCloseTo(50, 0); // K = 1.5 g/L → mid-scale
+    const soda = chemesthesisFromComposition({ water: 99, dissolvedCO2: 0.5 }); // 5 g/L
+    expect(soda.carbonation.volumes).toBeCloseTo(5 / 1.96, 1);
+    const mint = chemesthesisFromComposition({ water: 99, menthol: 0.01 }); // 100 ppm
+    expect(mint.cooling.intensity).toBeCloseTo(50, 0);
   });
 });

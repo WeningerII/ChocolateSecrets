@@ -337,6 +337,15 @@
       "balance": "맛 균형",
       "caveat": "맛 상호작용을 반영한 0–100 지각 강도입니다. 신맛은 pH를 사용합니다(적정산도가 더 정확). 쓴맛·감칠맛은 화합물 인벤토리가 필요합니다."
     },
+    "chemesthesis": {
+      "title": "화학감각 (삼차신경)",
+      "pungency": "매운맛",
+      "nasalPungency": "코 쏘임",
+      "cooling": "시원함",
+      "astringency": "떫음",
+      "carbonation": "탄산감",
+      "tingle": "얼얼함"
+    },
     "aroma": {
       "title": "향 방출",
       "polarity": {

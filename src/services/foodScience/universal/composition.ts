@@ -122,6 +122,7 @@ export const COMPOSITION_SPECIES: readonly (keyof Composition)[] = [
  */
 export const COMPOSITION_DESCRIPTORS: readonly (keyof Composition)[] = [
   'unsaturatedFat', 'sodium', 'caffeine', 'theobromine', 'glutamate',
+  'capsaicinoids', 'allylIsothiocyanate', 'menthol', 'tannins', 'dissolvedCO2', 'sanshool',
 ] as const;
 
 export function compositionSum(c: Composition): number {
