@@ -4,3 +4,7 @@ export * from './ferment';
 export * from './enzyme';
 export * from './reduce';
 export * from './heat';
+export * from './caramelize';
+export * from './aerate';
+export * from './chill';
+export * from './add';
