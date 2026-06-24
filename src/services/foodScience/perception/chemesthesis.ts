@@ -32,6 +32,8 @@
  * (TRPA1); Green (chemesthesis reviews); ASTA 21.3 (capsaicinoids → SHU).
  */
 
+import type { Composition } from '../../../types';
+
 export type Chemoreceptor = 'TRPV1' | 'TRPA1' | 'TRPM8' | 'ASIC3/TRPA1' | 'mechano-chemical' | 'KCNK';
 
 export type ChemesthesisFlag =
@@ -176,4 +178,23 @@ export function computeChemesthesis(input: ChemesthesisInput = {}): Chemesthesis
     tingle: { intensity: tingleIntensity, band: band0to100(tingleIntensity), receptor: 'KCNK' },
     flags,
   };
+}
+
+/**
+ * Drive chemesthesis from the composition's trace-active descriptors, so a recipe
+ * carrying chili/mustard/mint/tannin/CO₂/Sichuan-pepper produces the sensation
+ * automatically. Composition is uniformly mass %, so bridge to the kernel's units:
+ *   ppm  = mass % × 10 000   (mg·kg⁻¹)
+ *   g·L⁻¹ = mass % × 10       (g per 100 g ≈ g per 100 mL at density ≈ 1)
+ */
+export function chemesthesisFromComposition(c: Composition): ChemesthesisProfile {
+  const v = (x?: number) => x ?? 0;
+  return computeChemesthesis({
+    capsaicinoidsPpm: v(c.capsaicinoids) * 10_000,
+    allylIsothiocyanatePpm: v(c.allylIsothiocyanate) * 10_000,
+    mentholPpm: v(c.menthol) * 10_000,
+    sanshoolPpm: v(c.sanshool) * 10_000,
+    tanninsGPerL: v(c.tannins) * 10,
+    co2GPerL: v(c.dissolvedCO2) * 10,
+  });
 }

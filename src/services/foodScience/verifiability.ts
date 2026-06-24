@@ -105,6 +105,8 @@ export const QUALITY_DIMENSIONS: readonly QualityDimension[] = [
   { id: 'taste_umami', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeTasteProfile', notes: 'From free glutamate, salt-enhanced. 5′-nucleotide synergy (multiplicative) not yet modeled.' },
 
   // --- Perception: chemesthesis (trigeminal/somatosensory — receptor-level, modelable) ---
+  // Driven explicitly via computeChemesthesis, or from a recipe's trace-active descriptors
+  // (capsaicinoids/menthol/tannins/dissolvedCO2/…) via chemesthesisFromComposition.
   { id: 'chemesthesis_pungency', category: 'perceptual', predictability: 'calibrated', measurability: { instrument: 'HPLC capsaicinoids (ASTA 21.3) → Scoville' }, computedBy: 'computeChemesthesis', notes: 'TRPV1 burning: capsaicinoids + piperine + gingerol → capsaicin-equivalent → Scoville (16 SHU·ppm⁻¹, Wolfram-anchored) and a saturating intensity. Relative potencies calibrated.' },
   { id: 'chemesthesis_nasal_pungency', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeChemesthesis', notes: 'TRPA1 sharp/nasal sting: allyl isothiocyanate (mustard/wasabi), allicin, cinnamaldehyde → AITC-equivalent. Distinct receptor and quality from capsaicin burn; no Scoville scale.' },
   { id: 'chemesthesis_cooling', category: 'perceptual', predictability: 'calibrated', measurability: 'panel_only', computedBy: 'computeChemesthesis', notes: 'TRPM8 cooling: menthol (eucalyptol/camphor fold in as menthol-equivalent), Beidler dose-response.' },

@@ -670,6 +670,19 @@ export interface Composition {
   theobromine?: number;
   /** Free glutamate, mass % — umami (T1R1/T1R3) agonist. */
   glutamate?: number;
+  // --- chemesthetic trace actives: the trigeminal inventory the chemesthesis kernel reads ---
+  /** Capsaicinoids, mass % — TRPV1 burning pungency (chili). */
+  capsaicinoids?: number;
+  /** Allyl isothiocyanate, mass % — TRPA1 nasal pungency (mustard/wasabi/horseradish). */
+  allylIsothiocyanate?: number;
+  /** Menthol, mass % — TRPM8 cooling (mint). */
+  menthol?: number;
+  /** Tannins, mass % — astringency (precipitates salivary proteins). */
+  tannins?: number;
+  /** Dissolved CO₂, mass % — carbonation bite (ASIC3/TRPA1 + mechanical). */
+  dissolvedCO2?: number;
+  /** Sanshools, mass % — KCNK tingle/paresthesia (Sichuan pepper). */
+  sanshool?: number;
 }
 
 export type CompositionSource =
