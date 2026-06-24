@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine, aerate } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 
 /**
@@ -122,5 +122,40 @@ describe('scenario: whipping cream', () => {
     ]);
     expect(final.markers.overrunPct).toBe(0);
     expect(logs[0].detail.flag).toBe('cannot_aerate');
+  });
+});
+
+describe('scenario: hardening ice cream to freezer temperature', () => {
+  // A standard ice-cream mix blast-frozen to −18 °C. Real mixes freeze around
+  // −2.5 to −3 °C and reach a high (but not complete) ice fraction at the freezer.
+  const mix = () => makeFoodState({ water: 60, sucrose: 15, glucose: 4, lactose: 6, fat: 10, protein: 4, ash: 1 }, 1000, 4);
+
+  test('freezing point, ice fraction and time are physical', () => {
+    const { final } = runPipeline(mix(), [
+      freeze({ geometry: 'sphere', characteristicDimensionM: 0.04, mediumTempC: -25, surfaceCoeffWm2K: 20, targetTempC: -18 }),
+    ]);
+    expect(final.markers.freezingPointC).toBeGreaterThan(-3.5); // sub-zero, ice-cream range
+    expect(final.markers.freezingPointC).toBeLessThan(-1.5);
+    expect(final.markers.iceFractionAtTarget).toBeGreaterThan(0.6); // mostly frozen at −18
+    expect(final.markers.iceFractionAtTarget).toBeLessThan(0.95);   // never fully frozen (solutes)
+    expect(final.markers.freezingTimeS).toBeGreaterThan(0);
+    expect(final.tempC).toBe(-18);
+  });
+
+  test('colder serving holds more ice (monotone)', () => {
+    const soft = runPipeline(mix(), [freeze({ geometry: 'sphere', characteristicDimensionM: 0.04, mediumTempC: -25, surfaceCoeffWm2K: 20, targetTempC: -11 })]).final;
+    const hard = runPipeline(mix(), [freeze({ geometry: 'sphere', characteristicDimensionM: 0.04, mediumTempC: -25, surfaceCoeffWm2K: 20, targetTempC: -18 })]).final;
+    expect(hard.markers.iceFractionAtTarget).toBeGreaterThan(soft.markers.iceFractionAtTarget);
+  });
+
+  test('the freezer-temp ice fraction is flagged as past the ideal-colligative limit', () => {
+    // At −18 °C the unfrozen serum is ~¾ sugar — far past dilute — so the ideal
+    // curve over-predicts ice. The operator flags this; at soft-serve temp it does not.
+    const hard = runPipeline(mix(), [freeze({ geometry: 'sphere', characteristicDimensionM: 0.04, mediumTempC: -25, surfaceCoeffWm2K: 20, targetTempC: -18 })]).final;
+    expect(hard.markers.iceFractionBeyondIdeal).toBe(1);
+    expect(hard.markers.serumSoluteFractionAtTarget).toBeGreaterThan(0.66);
+
+    const soft = runPipeline(mix(), [freeze({ geometry: 'sphere', characteristicDimensionM: 0.04, mediumTempC: -25, surfaceCoeffWm2K: 20, targetTempC: -6 })]).final;
+    expect(soft.markers.iceFractionBeyondIdeal).toBe(0);
   });
 });
