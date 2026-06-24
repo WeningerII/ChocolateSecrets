@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 
 /**
@@ -92,5 +92,35 @@ describe('scenario: wet-brining a pork loin (6 % brine, 24 h)', () => {
     const short = runPipeline(loin(), [brine({ solute: 'salt', bathConcentrationPct: 6, geometry: 'slab', characteristicLengthM: 0.01, durationS: 12 * 3600 })]).final;
     const long = runPipeline(loin(), [brine({ solute: 'salt', bathConcentrationPct: 6, geometry: 'slab', characteristicLengthM: 0.01, durationS: 48 * 3600 })]).final;
     expect(long.composition.sodium!).toBeGreaterThan(short.composition.sodium!);
+  });
+});
+
+describe('scenario: whipping cream', () => {
+  // Heavy cream (~36 % fat) whips to a fat-stabilized foam. Real whipped cream
+  // reaches ~100 % overrun (doubles in volume) — density roughly halves — and
+  // can't be pushed indefinitely; skim milk barely whips at all.
+  const cream = () => makeFoodState({ water: 58, fat: 36, protein: 2, lactose: 3, ash: 1 }, 500, 4);
+
+  test('whips to a plausible overrun and roughly halves the density', () => {
+    const { final } = runPipeline(cream(), [aerate({ targetOverrunPct: 150 })]);
+    expect(final.markers.overrunPct).toBeGreaterThan(75);   // it whipped
+    expect(final.markers.overrunPct).toBeLessThanOrEqual(150);
+    // density factor is the reciprocal of the volume expansion
+    expect(final.markers.densityFactor).toBeCloseTo(1 / (1 + final.markers.overrunPct / 100), 6);
+    expect(final.markers.densityFactor).toBeLessThan(0.6); // whipped cream floats
+    expect(final.massG).toBe(500);                          // air is ~weightless
+  });
+
+  // NOTE: aerate models overrun CAPABILITY, not foam stability/permanence. Skim
+  // milk actually froths heavily (barista microfoam) — the model rightly gives it
+  // a high overrun; what separates it from cream is that its foam drains fast,
+  // which this operator does not surface. So the clean "won't aerate" control is a
+  // liquid with neither foaming protein nor whippable fat: plain water.
+  test('plain water cannot hold a foam (the true non-aerating control)', () => {
+    const { final, logs } = runPipeline(makeFoodState({ water: 100 }, 500, 4), [
+      aerate({ targetOverrunPct: 100 }),
+    ]);
+    expect(final.markers.overrunPct).toBe(0);
+    expect(logs[0].detail.flag).toBe('cannot_aerate');
   });
 });
