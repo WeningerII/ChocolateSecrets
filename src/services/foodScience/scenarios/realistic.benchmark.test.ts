@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 import { computeTasteProfile } from '../perception';
 
@@ -228,5 +228,27 @@ describe('scenario: whipping egg whites to meringue', () => {
     expect(egg.final.markers.overrunPct).toBeGreaterThan(cream.final.markers.overrunPct); // protein foam > fat foam
     expect(egg.logs[0].detail.flag).toBe('aeration_limited');                  // can't whip past its ceiling
     expect(egg.final.massG).toBe(200);                                         // air is ~weightless
+  });
+});
+
+describe('scenario: invertase inverting a fondant centre', () => {
+  // A sucrose fondant dosed with invertase (cordial cherries, soft centres). At a
+  // confectionery enzyme loading this works over DAYS, not minutes — the centre
+  // liquefies over ~1–2 weeks as sucrose → glucose + fructose (invert sugar).
+  const fondant = () => makeFoodState({ water: 30, sucrose: 70 }, 1000, 55);
+
+  test('inverts sucrose to equal glucose + fructose over a week, conserving mass', () => {
+    const { final } = runPipeline(fondant(), [enzyme({ enzyme: 'invertase', durationS: 7 * 24 * 3600, tempC: 55 })]);
+    expect(final.composition.sucrose!).toBeLessThan(50);        // substantially inverted (was 70 %)
+    expect(final.composition.glucose!).toBeGreaterThan(10);
+    expect(final.composition.fructose!).toBeGreaterThan(10);
+    expect(final.composition.glucose!).toBeCloseTo(final.composition.fructose!, 1); // 1:1 hydrolysis
+    expect(final.massG).toBeCloseTo(1000, 6);                   // hydrolysis pulls water from within
+  });
+
+  test('a hot step denatures the enzyme — boiling the syrup stops inversion', () => {
+    const { final, logs } = runPipeline(fondant(), [enzyme({ enzyme: 'invertase', durationS: 7 * 24 * 3600, tempC: 95 })]);
+    expect(final.composition.sucrose!).toBeCloseTo(70, 1); // untouched
+    expect(logs[0].detail.flag).toBe('denatured');
   });
 });
