@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 
 /**
@@ -67,5 +67,30 @@ describe('scenario: boiling sugar syrup to candy stages', () => {
     expect(classifyCandyStage(114)).toBe('soft_ball');   // fudge/fondant ~112–116 °C
     expect(classifyCandyStage(150)).toBe('hard_crack');  // brittle/lollipop ~146–154 °C
     expect(classifyCandyStage(168)).toBe('caramel');     // browning > 160 °C
+  });
+});
+
+describe('scenario: wet-brining a pork loin (6 % brine, 24 h)', () => {
+  // A 2 cm-thick lean loin (half-thickness 1 cm) in a 6 % salt brine for a day.
+  // Real wet brines at this strength/time leave roughly 0.5–2 % salt (NaCl) in
+  // the meat — seasoned, not cured-salty.
+  const loin = () => makeFoodState({ water: 72, protein: 21, fat: 6, ash: 1 }, 1000, 5);
+
+  test('takes up a plausible amount of salt without over-curing', () => {
+    const { final } = runPipeline(loin(), [
+      brine({ solute: 'salt', bathConcentrationPct: 6, geometry: 'slab', characteristicLengthM: 0.01, durationS: 24 * 3600 }),
+    ]);
+    const naCl = (final.composition.sodium ?? 0) / 0.3934; // back out NaCl from its sodium
+
+    expect(naCl).toBeGreaterThan(0.4);   // it did season
+    expect(naCl).toBeLessThan(3);        // a day's wet brine isn't dry-cure salty
+    expect(final.composition.sodium!).toBeLessThanOrEqual(final.composition.ash! + 1e-9); // Na ⊆ ash invariant
+    expect(final.massG).toBeGreaterThan(1000); // gained the absorbed salt
+  });
+
+  test('longer brining drives more salt in (monotone)', () => {
+    const short = runPipeline(loin(), [brine({ solute: 'salt', bathConcentrationPct: 6, geometry: 'slab', characteristicLengthM: 0.01, durationS: 12 * 3600 })]).final;
+    const long = runPipeline(loin(), [brine({ solute: 'salt', bathConcentrationPct: 6, geometry: 'slab', characteristicLengthM: 0.01, durationS: 48 * 3600 })]).final;
+    expect(long.composition.sodium!).toBeGreaterThan(short.composition.sodium!);
   });
 });
