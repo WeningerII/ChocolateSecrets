@@ -1,54 +1,57 @@
 /**
- * ferment — the flagship operator. Yeast consumes fermentable sugar and produces
- * ethanol + CO₂ (Gay-Lussac), over time, at a rate that depends on temperature.
- * Because ethanol is already a tracked composition species and CO₂ leaves as gas,
- * the transform is honest mass balance and every downstream kernel (a_w via the
- * ethanol Norrish term, taste, colligative) automatically sees the result — and
- * the CO₂ lost is the leavening/carbonation.
+ * ferment — fermentation as a composable operator. A culture consumes fermentable
+ * sugar and produces a spectrum of products (ethanol, CO₂, lactic/acetic acid)
+ * over time, at a temperature-dependent rate. Every product that is a tracked
+ * composition species (ethanol, lactic/acetic acid) flows straight into the
+ * downstream readouts — ethanol into a_w/colligative, the acids into the sour
+ * taste — and CO₂ escapes as the leavening/carbonation.
  *
  * Kinetics: fermentable sugar is consumed first-order toward the culture's
- * maximum conversion, at rate μ_eff = μ_max · γ(T), where γ(T) is the Rosso
- * cardinal-temperature model (1 at the optimum, 0 at the cardinal min/max). The
- * stoichiometry (0.511 g ethanol + 0.489 g CO₂ per g sugar) is first-principles;
- * the rate constants and cardinal temperatures are representative published values
- * per culture (calibrated), and the first-order form is a deliberate
- * simplification of the real lag/exponential/stationary curve.
+ * attenuation limit at rate μ_eff = μ_max · γ(T), with γ the Rosso cardinal
+ * temperature model (1 at the optimum, 0 at the cardinal min/max). Product
+ * stoichiometry is first-principles (Gay-Lussac for yeast; homo-/hetero-
+ * fermentative pathways for LAB), verified in Wolfram. Rate constants and
+ * cardinal temperatures are representative published values (calibrated). An
+ * inert-floor marker makes the attenuation limit composable across steps.
  *
- * Lactic/heterofermentative cultures need an organic-acid composition species
- * (and feed the pH/sour layer); those land in a follow-up.
- *
- * Sources: Gay-Lussac fermentation stoichiometry; Rosso et al. cardinal
- * temperature model (CTMI); representative S. cerevisiae / S. pastorianus growth
- * parameters. Stoichiometry verified in Wolfram.
+ * Sources: Gay-Lussac & lactic-fermentation stoichiometry; Rosso et al. CTMI;
+ * representative S. cerevisiae / S. pastorianus / LAB growth parameters.
  */
 import type { Composition } from '../../../types';
 import type { Operator } from './pipeline';
 import { speciesMassesG, massesToComposition } from './state';
 
-export type Culture = 'ale_yeast' | 'lager_yeast' | 'wine_yeast';
+export type Culture =
+  | 'ale_yeast' | 'lager_yeast' | 'wine_yeast'   // ethanol fermentation
+  | 'yogurt_lactic'                               // homofermentative LAB
+  | 'sourdough';                                  // heterofermentative LAB + yeast
+
+/** Product species a culture yields (g per g sugar consumed). 'co2' escapes. */
+type ProductSpecies = 'ethanol' | 'lacticAcid' | 'aceticAcid' | 'co2';
 
 interface CultureProfile {
-  /** First-order sugar-consumption rate at the optimum (h⁻¹). */
   muMaxPerH: number;
   tempMinC: number;
   tempOptC: number;
   tempMaxC: number;
-  /** Fraction of fermentable sugar the culture can convert (attenuation limit). */
   maxConversion: number;
+  products: Partial<Record<ProductSpecies, number>>;
+  /** LAB carry lactase and ferment lactose; yeast do not. */
+  fermentsLactose?: boolean;
 }
 
-/** Representative published growth parameters (calibrated). */
+// Yields verified in Wolfram. Yeast: glucose → 2 EtOH + 2 CO₂ (0.511/0.489).
+// Homofermentative: glucose → 2 lactate (1.0). Heterofermentative (sourdough):
+// glucose → lactate + ethanol + CO₂ (0.50 / 0.256 / 0.244).
 const CULTURES: Record<Culture, CultureProfile> = {
-  ale_yeast:   { muMaxPerH: 0.35, tempMinC: 4, tempOptC: 22, tempMaxC: 38, maxConversion: 0.95 },
-  lager_yeast: { muMaxPerH: 0.20, tempMinC: 2, tempOptC: 12, tempMaxC: 30, maxConversion: 0.95 },
-  wine_yeast:  { muMaxPerH: 0.30, tempMinC: 8, tempOptC: 25, tempMaxC: 35, maxConversion: 0.98 },
+  ale_yeast:     { muMaxPerH: 0.35, tempMinC: 4,  tempOptC: 22, tempMaxC: 38, maxConversion: 0.95, products: { ethanol: 0.5114, co2: 0.4886 } },
+  lager_yeast:   { muMaxPerH: 0.20, tempMinC: 2,  tempOptC: 12, tempMaxC: 30, maxConversion: 0.95, products: { ethanol: 0.5114, co2: 0.4886 } },
+  wine_yeast:    { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 25, tempMaxC: 35, maxConversion: 0.98, products: { ethanol: 0.5114, co2: 0.4886 } },
+  yogurt_lactic: { muMaxPerH: 0.50, tempMinC: 15, tempOptC: 42, tempMaxC: 52, maxConversion: 0.90, products: { lacticAcid: 1.0 }, fermentsLactose: true },
+  sourdough:     { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 28, tempMaxC: 40, maxConversion: 0.90, products: { lacticAcid: 0.5, ethanol: 0.256, co2: 0.244 } },
 };
 
-// Gay-Lussac: C₆H₁₂O₆ → 2 C₂H₅OH + 2 CO₂ (g per g sugar). Verified in Wolfram.
-const ETHANOL_YIELD = 0.5114;
-const CO2_YIELD = 0.4886;
-
-/** Sugars yeast ferments (lactose excluded — needs lactase). */
+/** Sugars cultures ferment (lactose excluded — needs lactase). */
 const FERMENTABLE: (keyof Composition)[] = ['glucose', 'fructose', 'sucrose', 'maltose'];
 
 /** Rosso cardinal-temperature model γ(T) ∈ [0,1]; 1 at T_opt, 0 outside [min,max]. */
@@ -75,23 +78,25 @@ export function ferment(params: FermentParams): Operator {
     const hours = params.durationS / 3600;
 
     const masses = speciesMassesG(state);
-    const fermentableG = FERMENTABLE.reduce((s, sp) => s + (masses[sp] ?? 0), 0);
+    const fermentable = prof.fermentsLactose ? [...FERMENTABLE, 'lactose' as const] : FERMENTABLE;
+    const fermentableG = fermentable.reduce((s, sp) => s + (masses[sp] ?? 0), 0);
 
-    // The attenuation limit is an INERT floor of sugar the culture can't touch,
-    // fixed when fermentation starts and persisted — so splitting one ferment into
+    // Attenuation as a fixed inert floor, persisted so splitting a ferment into
     // several steps converges to the same total conversion (composability).
     const inertFloorG = state.markers.fermentInertFloorG ?? (1 - prof.maxConversion) * fermentableG;
     const consumableG = Math.max(0, fermentableG - inertFloorG);
-    const stepFraction = 1 - Math.exp(-muEff * hours);
-    const convertedG = consumableG * stepFraction;
+    const convertedG = consumableG * (1 - Math.exp(-muEff * hours));
     const reduceFrac = fermentableG > 0 ? convertedG / fermentableG : 0;
 
-    // Consume fermentable sugars proportionally.
-    for (const sp of FERMENTABLE) if (masses[sp]) masses[sp]! *= 1 - reduceFrac;
+    for (const sp of fermentable) if (masses[sp]) masses[sp]! *= 1 - reduceFrac;
 
-    // Produce ethanol (stays) and CO₂ (escapes → mass loss).
-    masses.ethanol = (masses.ethanol ?? 0) + ETHANOL_YIELD * convertedG;
-    const co2G = CO2_YIELD * convertedG;
+    // Lay down products; CO₂ leaves as gas (mass loss), the rest stay in solution.
+    let co2G = 0;
+    for (const [product, yieldGperG] of Object.entries(prof.products) as [ProductSpecies, number][]) {
+      const producedG = yieldGperG * convertedG;
+      if (product === 'co2') co2G += producedG;
+      else masses[product] = (masses[product] ?? 0) + producedG;
+    }
     const newMass = Math.max(0, state.massG - co2G);
 
     const markers = { ...state.markers };
@@ -100,7 +105,6 @@ export function ferment(params: FermentParams): Operator {
     markers.fermentedSugarG = (markers.fermentedSugarG ?? 0) + convertedG;
 
     const composition = massesToComposition(masses, newMass);
-    markers.ethanolPct = composition.ethanol ?? 0;
 
     return {
       state: { composition, massG: newMass, tempC: T, timeS: state.timeS + params.durationS, markers },
@@ -111,6 +115,7 @@ export function ferment(params: FermentParams): Operator {
           gamma: Math.round(gamma * 100) / 100,
           sugarConvertedG: Math.round(convertedG * 10) / 10,
           ethanolPct: Math.round((composition.ethanol ?? 0) * 100) / 100,
+          lacticAcidPct: Math.round((composition.lacticAcid ?? 0) * 100) / 100,
           co2LostG: Math.round(co2G * 10) / 10,
         },
       },
