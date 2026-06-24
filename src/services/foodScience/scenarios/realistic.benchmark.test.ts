@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme } from '../operators';
+import { makeFoodState, runPipeline, ferment, reduce, brine, aerate, freeze, dehydrate, enzyme, setGel } from '../operators';
 import { computeBoilingPoint, classifyCandyStage } from '../universal';
 import { computeTasteProfile } from '../perception';
 
@@ -250,5 +250,33 @@ describe('scenario: invertase inverting a fondant centre', () => {
     const { final, logs } = runPipeline(fondant(), [enzyme({ enzyme: 'invertase', durationS: 7 * 24 * 3600, tempC: 95 })]);
     expect(final.composition.sucrose!).toBeCloseTo(70, 1); // untouched
     expect(logs[0].detail.flag).toBe('denatured');
+  });
+});
+
+describe('scenario: cooking fruit into pectin-set jam', () => {
+  // Fruit + sugar boiled down, then HM pectin sets it on cooling. HM pectin gels
+  // ONLY at jam sugar levels (≥ 55 °Brix) — the reason classic jam is so sweet.
+  test('boiling to jam concentration lets HM pectin set; fresh fruit will not', () => {
+    const jam = runPipeline(makeFoodState({ water: 50, sucrose: 45, fructose: 3, glucose: 2 }, 1000, 104), [
+      reduce({ removeWaterFraction: 0.45, tempC: 104 }),
+      setGel({ agent: 'pectin_hm', concentrationPct: 1 }),
+    ]);
+    expect(jam.final.composition.sucrose!).toBeGreaterThan(55); // concentrated past the cofactor threshold
+    expect(jam.final.markers.gelSets).toBe(1);
+    expect(jam.final.markers.gelStrength).toBeGreaterThan(0);
+    expect(jam.logs[1].detail.character).toBe('soft'); // HM-pectin gel character
+
+    const fresh = runPipeline(makeFoodState({ water: 88, sucrose: 8, fructose: 2, glucose: 1 }, 1000, 20), [
+      setGel({ agent: 'pectin_hm', concentrationPct: 1 }),
+    ]);
+    expect(fresh.final.markers.gelSets).toBe(0);
+    expect(fresh.logs[0].detail.flag).toBe('cofactor_required'); // not enough sugar
+  });
+
+  test('a low-sugar "no added sugar" jam sets with LM pectin + calcium instead', () => {
+    const { final } = runPipeline(makeFoodState({ water: 88, sucrose: 8, fructose: 2, glucose: 1 }, 1000, 20), [
+      setGel({ agent: 'pectin_lm', concentrationPct: 1, hasCalcium: true }),
+    ]);
+    expect(final.markers.gelSets).toBe(1); // LM pectin needs calcium, not sugar
   });
 });
