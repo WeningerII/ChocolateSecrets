@@ -25,6 +25,18 @@ const VAN_T_HOFF_NACL = 2;
 
 const BOILING_SOLUTES = NORRISH_SPECIES.filter((s) => s !== 'water');
 
+/**
+ * Above this solute mass fraction the ideal van 't Hoff elevation (ΔTb = Kb·m)
+ * is no longer trustworthy: molality diverges as water → 0, so the law over-
+ * predicts wildly (e.g. ~248 °C at 99 % sugar — hotter than sucrose decomposes).
+ * In the candy regime read the empirical stage table (classifyCandyStage) from a
+ * thermometer instead. Chosen at the point ideal elevation starts deviating
+ * materially from real syrup boiling points (~⅔ solute by mass).
+ */
+const DILUTE_LIMIT_SOLUTE_FRACTION = 0.66;
+
+export type BoilingFlag = { kind: 'beyond_dilute_limit'; soluteMassFraction: number };
+
 export interface BoilingResult {
   /** Boiling point of the current mix at 1 atm, °C (≥ 100). null when there is no water. */
   boilingPointC: number | null;
@@ -34,6 +46,8 @@ export interface BoilingResult {
   osmoticMoles: number;
   /** Grams of water. */
   waterMass: number;
+  /** Validity: ideal colligative is unreliable past the dilute limit (candy regime). */
+  flags: BoilingFlag[];
 }
 
 /**
@@ -47,21 +61,32 @@ export function computeBoilingPoint(
   const waterMass = massBy.water ?? 0;
 
   let osmoticMoles = 0;
+  let soluteMass = 0;
   for (const sp of BOILING_SOLUTES) {
     const m = massBy[sp] ?? 0;
+    if (m <= 0) continue;
+    soluteMass += m;
     const mw = MOLECULAR_WEIGHTS[sp];
-    if (m > 0 && mw) osmoticMoles += m / mw;
+    if (mw) osmoticMoles += m / mw;
   }
   const sodiumMass = opts.sodiumMass ?? 0;
-  if (sodiumMass > 0) osmoticMoles += (VAN_T_HOFF_NACL * sodiumMass) / SODIUM_MOLAR_MASS;
+  if (sodiumMass > 0) {
+    soluteMass += sodiumMass;
+    osmoticMoles += (VAN_T_HOFF_NACL * sodiumMass) / SODIUM_MOLAR_MASS;
+  }
+
+  const condensed = soluteMass + waterMass;
+  const soluteMassFraction = condensed > 0 ? soluteMass / condensed : 0;
+  const flags: BoilingFlag[] =
+    soluteMassFraction > DILUTE_LIMIT_SOLUTE_FRACTION ? [{ kind: 'beyond_dilute_limit', soluteMassFraction }] : [];
 
   if (waterMass <= 0) {
-    return { boilingPointC: null, elevationC: 0, osmoticMoles, waterMass: 0 };
+    return { boilingPointC: null, elevationC: 0, osmoticMoles, waterMass: 0, flags };
   }
 
   const molality = osmoticMoles / (waterMass / 1000);
   const elevationC = KB_WATER * molality;
-  return { boilingPointC: 100 + elevationC, elevationC, osmoticMoles, waterMass };
+  return { boilingPointC: 100 + elevationC, elevationC, osmoticMoles, waterMass, flags };
 }
 
 export type CandyStage =
