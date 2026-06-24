@@ -13,6 +13,9 @@
     "finalState": "최종 상태",
     "composition": "조성",
     "markers": "마커",
+    "trajectory": "온도 경로",
+    "startLabel": "시작",
+    "tasteProfile": "예상 맛",
     "caveat": "각 연산자는 순수한 상태→상태 변환입니다. 각 연산자의 근거 수준은 검증 가능성 지도를 참조하세요. 이송 단계는 대표적인 크기/계수 기본값을 사용합니다.",
     "op": {
       "add": "추가",

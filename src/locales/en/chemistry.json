@@ -13,6 +13,9 @@
     "finalState": "Final state",
     "composition": "Composition",
     "markers": "Markers",
+    "trajectory": "Temperature path",
+    "startLabel": "start",
+    "tasteProfile": "Predicted taste",
     "caveat": "Each operator is a pure state→state transform; see the verifiability map for how grounded each one is. Transport steps use representative size/coefficient defaults.",
     "op": {
       "add": "Add",

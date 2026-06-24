@@ -10,6 +10,7 @@ import {
   type Culture, type Enzyme, type BrineSolute,
 } from '../services/foodScience/operators';
 import type { GellingAgent } from '../services/foodScience/structure';
+import { computeTasteProfile, type TasteQuality } from '../services/foodScience/perception';
 
 /**
  * "Recipe as a program" — chain the unit operators (ferment → reduce → heat →
@@ -141,6 +142,17 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
     .filter(([, v]) => v >= 0.05).sort((a, b) => b[1] - a[1]);
   const markers = Object.entries(finalState.markers).filter(([, v]) => isFinite(v));
 
+  // Predicted taste of the resulting composition — closes the composition→perception
+  // loop right in the builder (sourness from the acid inventory; pH unknown here).
+  const taste = computeTasteProfile(finalState.composition, null);
+  const tasteBars: Array<{ q: TasteQuality; v: number }> = [
+    { q: 'sweet', v: taste.sweet }, { q: 'salty', v: taste.salty }, { q: 'sour', v: taste.sour },
+    { q: 'bitter', v: taste.bitter ?? 0 }, { q: 'umami', v: taste.umami ?? 0 },
+  ];
+  // Temperature trajectory across the program (start, then after each step).
+  const temps = result.trajectory.map(s => s.tempC);
+  const tMin = Math.min(...temps), tMax = Math.max(...temps);
+
   return (
     <div className="rounded-md bg-cream-50 px-5 py-5 mt-2 border border-cream-200 text-sm text-cocoa-700">
       <h4 className="font-serif text-[12px] uppercase tracking-wider text-cocoa-500 font-medium">{t('chemistry:pipeline.title')}</h4>
@@ -224,7 +236,30 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
             <span className="text-[12px] uppercase tracking-wider text-cocoa-500">{t('chemistry:pipeline.finalState')}</span>
             <span className="font-mono text-cocoa-900 text-sm">{fmt(finalState.massG)} g · {fmt(finalState.tempC)} °C</span>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4 mt-2">
+
+          {/* Temperature trajectory across the program */}
+          {result.trajectory.length > 1 && (
+            <div className="mt-3">
+              <div className="text-[10px] text-cocoa-500 mb-1">{t('chemistry:pipeline.trajectory')}</div>
+              <div className="flex items-end gap-px h-12">
+                {result.trajectory.map((st, i) => {
+                  const frac = (st.tempC - tMin) / ((tMax - tMin) || 1);
+                  const label = i === 0 ? t('chemistry:pipeline.startLabel') : t(`chemistry:pipeline.op.${steps[i - 1].opId}` as any);
+                  return (
+                    <div key={i} className="flex-1 rounded-t bg-cocoa-400 hover:bg-cocoa-600"
+                      style={{ height: `${Math.max(4, frac * 100)}%` }}
+                      title={`${label}: ${fmt(st.tempC)}°C · ${fmt(st.massG)}g`} />
+                  );
+                })}
+              </div>
+              <div className="flex justify-between text-[10px] text-cocoa-400 mt-1">
+                <span className="font-mono">{fmt(tMin)} … {fmt(tMax)} °C</span>
+                <span>{t('chemistry:pipeline.startLabel')} → {t('chemistry:pipeline.finalState')}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-2 gap-4 mt-3">
             <div>
               <div className="text-[10px] text-cocoa-500 mb-1">{t('chemistry:pipeline.composition')}</div>
               <div className="flex flex-wrap gap-1">
@@ -247,6 +282,22 @@ export function PipelinePanel({ recipe, ingredients, recipes }: PipelinePanelPro
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Predicted taste of the result */}
+          <div className="mt-3 sm:max-w-sm">
+            <div className="text-[10px] text-cocoa-500 mb-1">{t('chemistry:pipeline.tasteProfile')}</div>
+            <div className="flex flex-col gap-0.5">
+              {tasteBars.map(({ q, v }) => (
+                <div key={q} className="flex items-center gap-2">
+                  <span className="text-[10px] text-cocoa-600 w-12">{t(`chemistry:taste.quality.${q}` as any)}</span>
+                  <div className="flex-1 h-2 bg-cream-100 rounded overflow-hidden">
+                    <div className="h-full bg-cocoa-500" style={{ width: `${Math.max(0, Math.min(100, v))}%` }} />
+                  </div>
+                  <span className="text-[10px] font-mono text-cocoa-900 w-6 text-right">{Math.round(v)}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

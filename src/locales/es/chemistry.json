@@ -13,6 +13,9 @@
     "finalState": "Estado final",
     "composition": "Composición",
     "markers": "Marcadores",
+    "trajectory": "Trayectoria de temperatura",
+    "startLabel": "inicio",
+    "tasteProfile": "Sabor previsto",
     "caveat": "Cada operador es una transformación pura estado→estado; consulta el mapa de verificabilidad para ver qué tan fundamentado está cada uno. Los pasos de transporte usan tamaños/coeficientes representativos.",
     "op": {
       "add": "Añadir",
