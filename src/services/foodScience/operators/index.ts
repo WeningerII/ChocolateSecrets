@@ -11,3 +11,6 @@ export * from './add';
 export * from './brine';
 export * from './dehydrate';
 export * from './freeze';
+export * from './emulsify';
+export * from './setGel';
+export * from './temper';

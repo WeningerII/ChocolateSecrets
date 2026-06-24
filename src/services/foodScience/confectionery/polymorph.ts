@@ -43,6 +43,21 @@ function lookupWindow(cocoaPct: number): [number, number] {
 }
 
 /**
+ * Pure cocoa-% → Form-V window. The composition-free core of the polymorph
+ * model, so callers that know only a cocoa percentage (e.g. the temper operator)
+ * can get the window without assembling resolved ingredients.
+ */
+export function polymorphWindowForCocoa(cocoaPct: number, declaredClass?: ChocolateClass): PolymorphWindow {
+  const window = lookupWindow(cocoaPct);
+  return {
+    chocolateClass: classify(cocoaPct, declaredClass),
+    cocoaPercentage: cocoaPct,
+    tempWindowC: window,
+    workingPointC: (window[0] + window[1]) / 2,
+  };
+}
+
+/**
  * Returns the polymorph window for the dominant chocolate in a confectionery recipe.
  * "Dominant" = the chocolate ingredient with the largest mass. If there is no
  * chocolate ingredient, returns null.
@@ -63,16 +78,7 @@ export function computePolymorphWindow(resolved: ResolvedIngredient[]): Polymorp
   if (chocolates.length === 0) return null;
 
   const dominant = chocolates.reduce((max, c) => c.mass > max.mass ? c : max, chocolates[0]);
-  const cocoaPct = dominant.chocolateCocoaPercentage!;
-  const window = lookupWindow(cocoaPct);
-  const cls = classify(cocoaPct, dominant.chocolateClass);
-
-  return {
-    chocolateClass: cls,
-    cocoaPercentage: cocoaPct,
-    tempWindowC: window,
-    workingPointC: (window[0] + window[1]) / 2,
-  };
+  return polymorphWindowForCocoa(dominant.chocolateCocoaPercentage!, dominant.chocolateClass);
 }
 
 const SNAP_EATING_TEMP_C = 20;
