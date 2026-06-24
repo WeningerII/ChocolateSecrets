@@ -2,6 +2,14 @@
   "pipeline": {
     "title": "La receta como programa",
     "intro": "Encadena los operadores unitarios sobre la composición inicial de esta receta y observa cómo evoluciona el estado: composición, masa, temperatura y los marcadores que registra cada paso.",
+    "examples": "Ejemplos",
+    "clear": "Borrar",
+    "presets": {
+      "caramel": "Salsa de caramelo",
+      "yogurt": "Yogur",
+      "icecream": "Helado",
+      "candied": "Fruta confitada"
+    },
     "startMass": "Masa inicial (g)",
     "startTemp": "Temp. inicial (°C)",
     "startFromRecipe": "La composición se toma de esta receta.",
