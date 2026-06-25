@@ -27,14 +27,18 @@ describe('rossoGamma cardinal temperature model', () => {
 describe('ferment operator', () => {
   const start = () => makeFoodState({ water: 80, glucose: 20 }, 100, 22);
 
-  test('converts sugar to ethanol + CO₂ by Gay-Lussac, with mass balance', () => {
+  test('converts sugar to ethanol + glycerol + CO₂ at realized (sub-Gay-Lussac) yields, with mass balance', () => {
     const { final, logs } = runPipeline(start(), [ferment({ culture: 'ale_yeast', durationS: 100 * 3600 })]);
     const converted = final.markers.fermentedSugarG;
     const ethanolG = (final.composition.ethanol! / 100) * final.massG;
+    const glycerolG = (final.composition.glycerol! / 100) * final.massG;
     const co2 = final.markers.co2LostG;
-    expect(ethanolG / converted).toBeCloseTo(0.5114, 3);   // ethanol yield
-    expect(co2 / converted).toBeCloseTo(0.4886, 3);          // CO₂ yield
-    expect(100 - final.massG).toBeCloseTo(co2, 6);           // mass lost = CO₂ escaped
+    // Realized yields are below the Gay-Lussac ceiling (0.5114) — carbon diverted to
+    // glycerol + biomass — so the engine doesn't over-predict alcoholic strength.
+    expect(ethanolG / converted).toBeCloseTo(0.475, 3);    // realized ethanol yield
+    expect(glycerolG / converted).toBeCloseTo(0.035, 3);   // glycerol byproduct (stays in solution)
+    expect(co2 / converted).toBeCloseTo(0.490, 3);           // CO₂ yield
+    expect(100 - final.massG).toBeCloseTo(co2, 6);           // only CO₂ leaves; ethanol + glycerol stay
     expect(logs[0].operator).toBe('ferment');
   });
 
@@ -75,6 +79,18 @@ describe('ferment operator', () => {
     expect(final.massG).toBeCloseTo(100, 6);          // mass conserved
     const lacticG = (final.composition.lacticAcid! / 100) * final.massG;
     expect(lacticG).toBeCloseTo(final.markers.fermentedSugarG, 4); // yield 1.0 g/g
+  });
+
+  // Regression (realistic-scenario hardening): LAB self-inhibit on acid, so yogurt
+  // converts only ~⅕ of milk lactose → ~0.8–1 % lactic acid. A yeast-like 0.9
+  // attenuation made impossibly sour ~4 % yogurt; the limit must stay realistic
+  // even at long fermentation, leaving most lactose behind.
+  test('milk → yogurt stays at a realistic acidity (not yeast-attenuated)', () => {
+    const milk = makeFoodState({ water: 87.5, lactose: 4.8, fat: 3.5, protein: 3.4, ash: 0.8 }, 1000, 43);
+    const { final } = runPipeline(milk, [ferment({ culture: 'yogurt_lactic', durationS: 200 * 3600 })]);
+    expect(final.composition.lacticAcid!).toBeGreaterThan(0.6);
+    expect(final.composition.lacticAcid!).toBeLessThan(1.3); // not ~4 %
+    expect(final.composition.lactose!).toBeGreaterThan(3);   // most lactose remains (yogurt isn't lactose-free)
   });
 
   test('sourdough (heterofermentative) makes lactic acid + ethanol + CO₂', () => {

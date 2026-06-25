@@ -22,6 +22,18 @@ describe('computePolymorphWindow', () => {
   test('no chocolate → null', () => {
     expect(computePolymorphWindow([])).toBeNull();
   });
+
+  // Regression (hardening sweep): 30 % cocoa-butter white chocolate must classify
+  // as WHITE (not milk) — it already received the white 26.5–28 °C window, so the
+  // label was self-contradictory before the <25 → ≤30 cutoff fix.
+  test('30 % cocoa-butter chocolate is white and gets the white temper window', () => {
+    const w = computePolymorphWindow([choc(100, 30)])!;
+    expect(w.chocolateClass).toBe('white');
+    expect(w.tempWindowC).toEqual([26.5, 28.0]);
+    expect(computeChocolateSnap([choc(100, 30)])!.chocolateClass).toBe('white');
+    // 35 % stays milk (the cutoff is ≤30) — guards the existing boundary.
+    expect(computePolymorphWindow([choc(100, 35)])!.chocolateClass).toBe('milk');
+  });
 });
 
 describe('computeChocolateSnap', () => {

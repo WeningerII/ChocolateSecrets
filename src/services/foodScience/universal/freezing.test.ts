@@ -71,4 +71,28 @@ describe('computeFreezing (ideal colligative freezing curve)', () => {
     const dextrose = computeFreezing({ water: 100, glucose: 20 }); // ~half the MW → ~2× moles
     expect(dextrose.initialFreezingPointC!).toBeLessThan(sucrose.initialFreezingPointC!);
   });
+
+  // Regression (realistic-scenario hardening): the ideal frozen-fraction curve
+  // over-predicts at low temperature because the unfrozen serum concentrates past
+  // the dilute limit. serumSoluteMassFractionAt exposes that so callers can flag it.
+  describe('serum concentration / ideal-validity', () => {
+    const mix = () => computeFreezing({ water: 60, sucrose: 19, lactose: 6, glucose: 4 });
+
+    test('the serum concentrates as more water freezes (colder → more concentrated)', () => {
+      const r = mix();
+      const warm = r.serumSoluteMassFractionAt(-5);
+      const cold = r.serumSoluteMassFractionAt(-18);
+      expect(cold).toBeGreaterThan(warm);
+      expect(cold).toBeGreaterThan(0.66); // past the ideal-dilute limit at freezer temp
+    });
+
+    test('a dilute solution stays within the ideal regime', () => {
+      const r = computeFreezing({ water: 95, sucrose: 5 });
+      expect(r.serumSoluteMassFractionAt(-2)).toBeLessThan(0.66);
+    });
+
+    test('soluteMass sums the dissolved colligative solutes', () => {
+      expect(mix().soluteMass).toBeCloseTo(19 + 6 + 4, 6);
+    });
+  });
 });

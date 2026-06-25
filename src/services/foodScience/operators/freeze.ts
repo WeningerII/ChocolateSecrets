@@ -58,12 +58,19 @@ export function freeze(params: FreezeParams): Operator {
       sodiumMass: state.composition.sodium,
     });
     const iceFraction = frz.frozenFractionAt(targetTempC);
+    // At low serving temperature the unfrozen serum becomes very concentrated; past
+    // the dilute limit the ideal van 't Hoff curve over-predicts the ice fraction
+    // (the real concentrated serum depresses its freezing point far more). Flag it.
+    const serumSoluteFraction = frz.serumSoluteMassFractionAt(targetTempC);
+    const iceFractionBeyondIdeal = serumSoluteFraction > 0.66;
 
     const timeS = plank?.timeS ?? null;
     const markers = { ...state.markers };
     if (timeS != null) markers.freezingTimeS = timeS;
     if (plank) markers.freezingPointC = plank.freezingPointC;
     markers.iceFractionAtTarget = iceFraction;
+    markers.serumSoluteFractionAtTarget = serumSoluteFraction;
+    markers.iceFractionBeyondIdeal = iceFractionBeyondIdeal ? 1 : 0;
 
     const flag = plank?.flags.find(
       (f) => f.kind === 'medium_not_freezing' || f.kind === 'medium_not_thawing' || f.kind === 'no_freezing_point',
@@ -79,6 +86,7 @@ export function freeze(params: FreezeParams): Operator {
           targetTempC: Math.round(targetTempC),
           freezingPointC: plank ? Math.round(plank.freezingPointC * 10) / 10 : 0,
           iceFractionAtTarget: Math.round(iceFraction * 100) / 100,
+          iceFractionBeyondIdeal: iceFractionBeyondIdeal ? 1 : 0,
           ...(timeS != null ? { timeMin: Math.round(timeS / 60) } : {}),
           ...(flag ? { flag: flag.kind } : {}),
         },

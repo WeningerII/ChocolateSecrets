@@ -49,6 +49,15 @@ export interface FreezingResult {
   frozenFractionAt: (tempC: number) => number;
   /** Inverse: temperature (°C) yielding a target frozen fraction. null if unattainable. */
   tempForFrozenFraction: (frac: number) => number | null;
+  /** Dissolved-solute mass (g) — the colligative solutes that concentrate in the serum. */
+  soluteMass: number;
+  /**
+   * Mass fraction of dissolved solute in the UNFROZEN serum at a given temperature.
+   * As ice forms the serum concentrates (→ 1 as T falls); past the dilute limit
+   * (~⅔) the ideal van 't Hoff curve over-predicts the frozen fraction, because the
+   * real concentrated serum depresses its freezing point far more than ideal.
+   */
+  serumSoluteMassFractionAt: (tempC: number) => number;
   flags: FreezingFlag[];
 }
 
@@ -66,15 +75,21 @@ export function computeFreezing(
   const flags: FreezingFlag[] = [];
 
   let osmoticMoles = 0;
+  let soluteMass = 0;
   for (const sp of FREEZING_SOLUTES) {
     const m = massBy[sp] ?? 0;
+    if (m <= 0) continue;
+    soluteMass += m;
     const mw = MOLECULAR_WEIGHTS[sp];
-    if (m > 0 && mw) osmoticMoles += m / mw; // van 't Hoff i = 1 for sugars/polyols/ethanol
+    if (mw) osmoticMoles += m / mw; // van 't Hoff i = 1 for sugars/polyols/ethanol
   }
   // Electrolyte term: sodium (treated as NaCl) dissociates into two ions, so it
   // contributes 2 osmotic moles per mole Na (van 't Hoff i = 2).
   const sodiumMass = opts.sodiumMass ?? 0;
-  if (sodiumMass > 0) osmoticMoles += (VAN_T_HOFF_NACL * sodiumMass) / SODIUM_MOLAR_MASS;
+  if (sodiumMass > 0) {
+    soluteMass += sodiumMass;
+    osmoticMoles += (VAN_T_HOFF_NACL * sodiumMass) / SODIUM_MOLAR_MASS;
+  }
 
   if (waterMass <= 0) {
     return {
@@ -83,6 +98,8 @@ export function computeFreezing(
       waterMass: 0,
       frozenFractionAt: () => 0,
       tempForFrozenFraction: () => null,
+      soluteMass,
+      serumSoluteMassFractionAt: () => 0,
       flags: [{ kind: 'no_water' }],
     };
   }
@@ -108,12 +125,21 @@ export function computeFreezing(
     return tf0 / (1 - frac);
   };
 
+  const serumSoluteMassFractionAt = (tempC: number): number => {
+    const phi = frozenFractionAt(tempC);
+    const serumWater = waterMass * (1 - phi);
+    const denom = soluteMass + serumWater;
+    return denom > 0 ? soluteMass / denom : 0;
+  };
+
   return {
     initialFreezingPointC: tf0,
     osmoticMoles,
     waterMass,
     frozenFractionAt,
     tempForFrozenFraction,
+    soluteMass,
+    serumSoluteMassFractionAt,
     flags,
   };
 }
