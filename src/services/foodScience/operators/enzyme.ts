@@ -124,8 +124,12 @@ export function enzyme(params: EnzymeParams): Operator {
         masses[sp] = (masses[sp] ?? 0) + yieldGperG * turnedOverG;
       }
     } else if (prof.liberated) {
-      // Liberation: free the product (e.g. glutamate); substrate mass unchanged.
-      masses[prof.liberated] = (masses[prof.liberated] ?? 0) + (prof.liberatedYield ?? 1) * turnedOverG;
+      // Liberation: free amino acids from the substrate (e.g. glutamate from protein).
+      // Subtract the freed mass from the substrate so the composition total stays at
+      // 100 % — glutamate was always part of the protein; it is now separated out.
+      const freed = (prof.liberatedYield ?? 1) * turnedOverG;
+      masses[prof.substrate] = Math.max(0, (masses[prof.substrate] ?? 0) - freed);
+      masses[prof.liberated] = (masses[prof.liberated] ?? 0) + freed;
       markers.proteolysisExtent = substrateG0 > 0 ? turnedOverG / (prof.maxLiberatedFraction! * substrateG0) : 0;
     }
 

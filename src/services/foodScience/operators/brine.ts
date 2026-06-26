@@ -31,7 +31,8 @@ export type BrineSolute = 'salt' | 'sugar';
 
 export type BrineFlag =
   | { kind: 'short_time_one_term' }
-  | { kind: 'no_diffusion' }; // geometry/diffusivity unusable
+  | { kind: 'no_diffusion' }  // geometry/diffusivity unusable
+  | { kind: 'no_water' };     // food has no aqueous phase — absorption impossible
 
 export interface BrineParams {
   /** What the bath delivers: salt (→ ash + sodium) or sugar (→ sucrose). */
@@ -73,6 +74,21 @@ export function brine(params: BrineParams): Operator {
     const mEq = rBath * W;                 // equilibrium solute grams in the food's water
 
     const markers = { ...state.markers };
+    const flags: BrineFlag[] = [];
+
+    if (W === 0) {
+      // No aqueous phase — the diffusant has nowhere to go.
+      flags.push({ kind: 'no_water' });
+      markers.brineCenterSaturation = 0;
+      return {
+        state: { ...state, tempC: T, timeS: state.timeS + params.durationS, markers },
+        log: {
+          operator: 'brine',
+          detail: { solute: params.solute, bathPct: Math.round(c), centerSaturation: 0, absorbedG: 0, flag: 'no_water' },
+        },
+      };
+    }
+
     let added = 0;
     if (params.solute === 'salt') {
       const naClNow = (masses.sodium ?? 0) * NACL_PER_NA;
@@ -91,7 +107,6 @@ export function brine(params: BrineParams): Operator {
     const newMass = state.massG + added;
     const composition = massesToComposition(masses, newMass);
 
-    const flags: BrineFlag[] = [];
     if (!pen) flags.push({ kind: 'no_diffusion' });
     else if (pen.flags.some((f) => f.kind === 'short_time_one_term')) flags.push({ kind: 'short_time_one_term' });
 

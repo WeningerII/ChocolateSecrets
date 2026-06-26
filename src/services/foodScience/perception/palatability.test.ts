@@ -38,4 +38,13 @@ describe('computePalatability', () => {
   test('acceptability peaks at the bliss point', () => {
     expect(computePalatability(profile({ sweet: 55 })).acceptability.sweet).toBeCloseTo(1, 5);
   });
+
+  // Regression (hardening sweep): BLISS.umami.width = 40 was too wide. At umami=100
+  // the acceptability was ~53 % — less penalty than sweet=100 (44 %). Half-acceptability
+  // threshold landed at ~102, outside the valid 0-100 scale. Width must be 25 so
+  // umami=100 is distinctly penalized (≈7–8 % acceptance, not 53 %).
+  test('umami=100 is strongly penalized — width 25 gives acceptability well below 50 %', () => {
+    const r = computePalatability(profile({ umami: 100 }));
+    expect(r.acceptability.umami!).toBeLessThan(0.25); // very over-intense
+  });
 });

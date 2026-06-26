@@ -23,6 +23,15 @@ describe('caramelize', () => {
     const noSugar = runPipeline(makeFoodState({ water: 50, protein: 50 }, 100), [caramelize({ tempC: 190, durationS: 600 })]).final;
     expect(noSugar.markers.caramelEquivMin180).toBe(0);
   });
+
+  // Regression (hardening sweep): fructose caramelizes at ~110 °C, well below the
+  // old single THRESHOLD_C = 160. At 130 °C only fructose-bearing sugars should fire.
+  test('fructose caramelizes at 130 °C; sucrose does not', () => {
+    const fructoseOnly = runPipeline(makeFoodState({ water: 10, fructose: 90 }, 100, 20), [caramelize({ tempC: 130, durationS: 600 })]).final;
+    const sucroseOnly  = runPipeline(makeFoodState({ water: 10, sucrose: 90 }, 100, 20), [caramelize({ tempC: 130, durationS: 600 })]).final;
+    expect(fructoseOnly.markers.caramelEquivMin180).toBeGreaterThan(0); // fructose is above its 110 °C onset
+    expect(sucroseOnly.markers.caramelEquivMin180).toBe(0);             // sucrose onset is 170 °C
+  });
 });
 
 describe('aerate (overrun)', () => {
@@ -44,6 +53,19 @@ describe('aerate (overrun)', () => {
     const r = runPipeline(makeFoodState({ water: 60, fat: 35 }, 100), [aerate({ targetOverrunPct: 500 })]);
     expect(r.final.markers.overrunPct).toBeLessThan(500);
     expect(r.logs[0].detail.flag).toBe('aeration_limited');
+  });
+
+  // Regression (hardening sweep): butter (fat=80, protein=2) must NOT achieve a
+  // high overrun through the protein-foam path because fat antagonises protein film.
+  // With the old code the fat penalty was missing from proteinCap → butter reached
+  // a physically-impossible 140 % overrun. Now fat penalty clamps it to near-zero.
+  test('butter (fat=80) achieves near-zero overrun — fat kills the protein foam', () => {
+    const butter = runPipeline(makeFoodState({ water: 16, fat: 80, protein: 2, ash: 2 }, 100), [aerate({ targetOverrunPct: 150 })]);
+    // Fat-foam window is 20–55 %; butter at 80 % is above it → fatCap = 0.
+    // Fat penalty on proteinCap is (1 - min(0.8, 80/25)) = 1 - 0.8 = 0.2;
+    // proteinCap = 0.4 * 0.2 * 350 = 28 → achievable, but low.
+    // The key regression: before the fix, proteinCap ≈ 140 (impossible for butter).
+    expect(butter.final.markers.overrunPct).toBeLessThan(50);
   });
 });
 

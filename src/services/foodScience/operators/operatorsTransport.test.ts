@@ -41,6 +41,20 @@ describe('brine / cure (solute uptake by diffusion)', () => {
     expect(final.massG).toBeGreaterThan(150);
     expect(final.markers.sugarAbsorbedG).toBeGreaterThan(0);
   });
+
+  // Regression (hardening sweep): BrineFlag had no 'no_water' variant. When the
+  // food has zero water the absorb path was still entered and brineCenterSaturation
+  // was set to a meaningful-looking diffusion number despite zero absorption.
+  test('brining a waterless food flags no_water and absorbs nothing', () => {
+    const dry = makeFoodState({ sucrose: 100 }, 100, 20); // zero water
+    const { final, logs } = runPipeline(dry, [
+      brine({ solute: 'salt', bathConcentrationPct: 10, geometry: 'slab', characteristicLengthM: 0.01, durationS: 3 * 24 * 3600 }),
+    ]);
+    expect(logs[0].detail.flag).toBe('no_water');
+    expect(final.markers.saltAbsorbedG ?? 0).toBe(0);
+    expect(final.markers.brineCenterSaturation).toBe(0);
+    expect(final.massG).toBeCloseTo(100, 6); // mass unchanged
+  });
 });
 
 describe('dehydrate (convective drying)', () => {

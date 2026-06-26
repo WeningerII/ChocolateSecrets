@@ -25,17 +25,17 @@ export function calculateHardeningFactor(
  *
  * Boundaries:
  *   index < -10  → brick
- *   -10 to -2    → firm
- *   -2 to 5      → standard (the operational sweet spot)
- *   5 to 12      → soft
- *   > 12         → too_soft
+ *   -10 to 2     → firm
+ *   2 to 20      → standard (the operational sweet spot; PAC=30 gelato sweet-spot ≈ 12)
+ *   20 to 28     → soft
+ *   > 28         → too_soft
  */
 export function classifyScoopability(pac: number, hardeningFactor: number): ScoopabilityLevel {
   const idx = pac - hardeningFactor * 0.6;
   if (idx < -10) return 'brick';
-  if (idx < -2)  return 'firm';
-  if (idx < 5)   return 'standard';
-  if (idx < 12)  return 'soft';
+  if (idx < 2)   return 'firm';
+  if (idx < 20)  return 'standard';
+  if (idx < 28)  return 'soft';
   return 'too_soft';
 }
 

@@ -20,7 +20,7 @@ import type { Composition } from '../../../types';
 /** Protein (% of mix) at which foaming capacity half-saturates. */
 const PROTEIN_HALF_SAT = 3;
 /** Fat (% of mix) giving a strong defoaming penalty. */
-const FAT_PENALTY_SCALE = 25;
+const FAT_PENALTY_SCALE = 75;
 
 export type FoamBand = 'none' | 'poor' | 'fair' | 'good';
 

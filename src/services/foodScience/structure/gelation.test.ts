@@ -35,4 +35,23 @@ describe('computeGelation', () => {
   test('methylcellulose is the inverse gel — sets on heating', () => {
     expect(computeGelation('methylcellulose', 2).character).toBe('thermo_inverse');
   });
+
+  // Regression (hardening sweep): locust_bean_gum and xanthan were missing from
+  // both the GellingAgent union and GEL_PROFILES table.
+  test('locust bean gum gels above its 0.3 % minimum (cold-set, thermoirreversible)', () => {
+    const r = computeGelation('locust_bean_gum', 0.5);
+    expect(r.gels).toBe(true);
+    expect(r.thermoreversible).toBe(false);
+    expect(r.setTempC).toBeNull(); // sets without temperature trigger
+  });
+
+  test('xanthan gels above its 0.05 % minimum (thermoreversible)', () => {
+    const r = computeGelation('xanthan', 0.1);
+    expect(r.gels).toBe(true);
+    expect(r.thermoreversible).toBe(true);
+  });
+
+  test('locust bean gum below 0.3 % does not gel', () => {
+    expect(computeGelation('locust_bean_gum', 0.2).gels).toBe(false);
+  });
 });

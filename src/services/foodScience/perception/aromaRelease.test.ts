@@ -49,4 +49,25 @@ describe('computeAromaRelease', () => {
     expect(r.flags.map(f => f.kind)).toContain('no_matrix');
     expect(r.oilPhaseFraction).toBe(0);
   });
+
+  // Regression (hardening sweep): the 'muted' band previously spanned a 650×
+  // range (releaseFactor ~0.003 % to ~19 %) with no sub-classification. In a
+  // near-pure fat matrix (e.g. ganache, cocoa butter), the nonpolar terpenes are
+  // effectively fully trapped (releaseFactor < 1 %), yet they were quietly labeled
+  // 'muted' — indistinguishable from a moderately fat matrix.
+  test('near-total fat trapping (fat=99, water=1) fires near_total_trapping for nonpolar class', () => {
+    const r = computeAromaRelease({ fat: 99, water: 1 });
+    const trappingFlags = r.flags.filter(f => f.kind === 'near_total_trapping');
+    expect(trappingFlags.length).toBeGreaterThan(0);
+    // Specifically the nonpolar class (limonene) must be near-totally trapped
+    expect(trappingFlags.some(f => f.kind === 'near_total_trapping' && (f as any).polarity === 'nonpolar')).toBe(true);
+  });
+
+  // At moderate fat the polar class (Kow≈5.4) is NOT near-totally trapped, even
+  // though the nonpolar terpene (Kow≈37000) always is in any fat-containing matrix.
+  test('moderate fat (fat=40, water=60) does NOT fire near_total_trapping for polar class', () => {
+    const r = computeAromaRelease({ fat: 40, water: 60 });
+    const trappingFlags = r.flags.filter(f => f.kind === 'near_total_trapping');
+    expect(trappingFlags.some(f => (f as any).polarity === 'polar')).toBe(false);
+  });
 });

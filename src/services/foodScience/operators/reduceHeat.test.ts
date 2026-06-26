@@ -34,6 +34,19 @@ describe('reduce operator (evaporative concentration)', () => {
     expect(final.massG).toBeCloseTo(25, 4);
     expect(final.composition.sucrose!).toBeCloseTo(80, 3); // 20 g in 25 g
   });
+
+  // Regression (hardening sweep): ethanol co-evaporates with water (bp 78 °C).
+  // Reducing a wine/beer by 50 % must LOWER the ABV, not double it.
+  test('reducing a wine/beer co-evaporates ethanol (ABV does not double)', () => {
+    const wine = makeFoodState({ water: 87, ethanol: 12, ash: 1 }, 500, 100);
+    const { final } = runPipeline(wine, [reduce({ toMassFraction: 0.5 })]);
+    // Mass dropped by more than just the water removed (ethanol also left)
+    expect(final.massG).toBeLessThan(250 - 0.1); // extra loss beyond 50 % water
+    // Ethanol % in the reduced sauce is less than double the starting 12 % (if it simply
+    // concentrated like sucrose it would become ~24 %; it should be well under that)
+    expect(final.composition.ethanol!).toBeLessThan(20);
+    expect(final.markers.ethanolLostG).toBeGreaterThan(0);
+  });
 });
 
 describe('heat operator (lethality + Maillard browning)', () => {

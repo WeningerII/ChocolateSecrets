@@ -51,9 +51,10 @@ const POLARITY_ANCHORS: Record<VolatilePolarity, { logP: number; example: string
 export type AromaBand = 'muted' | 'moderate' | 'free';
 
 export type AromaReleaseFlag =
-  | { kind: 'no_fat' }            // nothing to trap aroma — every class releases freely
-  | { kind: 'no_matrix' }         // no oil or water phase — model degenerate
-  | { kind: 'fat_reservoir' };    // enough fat to hold lipophilic aroma in reserve
+  | { kind: 'no_fat' }                                            // nothing to trap aroma — every class releases freely
+  | { kind: 'no_matrix' }                                         // no oil or water phase — model degenerate
+  | { kind: 'fat_reservoir' }                                     // enough fat to hold lipophilic aroma in reserve
+  | { kind: 'near_total_trapping'; polarity: VolatilePolarity };  // releaseFactor < 1 % — effectively zero headspace
 
 export interface AromaReleaseClass {
   polarity: VolatilePolarity;
@@ -100,6 +101,7 @@ export function computeAromaRelease(composition: Composition): AromaReleaseResul
     const { logP, example } = POLARITY_ANCHORS[polarity];
     const kOw = Math.pow(10, logP);
     const releaseFactor = 1 / (1 + phiOil * (kOw - 1));
+    if (releaseFactor < 0.01) flags.push({ kind: 'near_total_trapping', polarity });
     return { polarity, example, logP, releaseFactor, band: classifyBand(releaseFactor) };
   });
 

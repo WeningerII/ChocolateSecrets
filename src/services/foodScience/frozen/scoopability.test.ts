@@ -25,20 +25,29 @@ describe('frozen scoopability', () => {
 
   test('boundaries', () => {
     // hand-pick
-    // idx < -10 -> brick
-    expect(classifyScoopability(20, 52)).toBe('brick'); // 20 - 31.2 = -11.2
-    
-    // < -2 -> firm
-    expect(classifyScoopability(20, 38)).toBe('firm'); // 20 - 22.8 = -2.8
+    // idx < -10 → brick
+    expect(classifyScoopability(20, 52)).toBe('brick');    // 20 - 31.2 = -11.2
 
-    // < 5 -> standard
+    // -10 to 2 → firm
+    expect(classifyScoopability(20, 38)).toBe('firm');     // 20 - 22.8 = -2.8
+
+    // 2 to 20 → standard (includes the PAC=30 sweet-spot at idx≈12)
     expect(classifyScoopability(20, 28)).toBe('standard'); // 20 - 16.8 = 3.2
+    expect(classifyScoopability(20, 15)).toBe('standard'); // 20 - 9.0  = 11.0
 
-    // < 12 -> soft
-    expect(classifyScoopability(20, 15)).toBe('soft'); // 20 - 9.0 = 11.0
+    // 20 to 28 → soft
+    expect(classifyScoopability(25, 3)).toBe('soft');      // 25 - 1.8  = 23.2
 
-    // > 12 -> too_soft
-    expect(classifyScoopability(20, 10)).toBe('too_soft'); // 20 - 6.0 = 14
+    // > 28 → too_soft
+    expect(classifyScoopability(32, 3)).toBe('too_soft');  // 32 - 1.8  = 30.2
+  });
+
+  // Regression (hardening sweep): PAC=30 is the gelato sweet-spot. With the old
+  // thresholds, the standard gelato formula (TS=38, fat=8, MSNF=10) gave idx≈12.24
+  // and was falsely classified as 'too_soft'. It must land in 'standard'.
+  test('PAC=30 gelato sweet-spot classifies as standard', () => {
+    const hardening = calculateHardeningFactor(38, 8, 10, 30); // idx = 30 - hardening * 0.6
+    expect(classifyScoopability(30, hardening)).toBe('standard');
   });
 });
 

@@ -58,7 +58,8 @@ export type DosingFlag =
   | { kind: 'aroma_dominant_addition' }  // dosed for measurable taste only; aroma unmodeled
   | { kind: 'no_measurable_effect' }     // moving the dose barely changes the goal
   | { kind: 'optimum_at_zero' }          // best for the goal is to add nothing
-  | { kind: 'optimum_at_max' };          // wants more than the search range allows
+  | { kind: 'optimum_at_max' }           // wants more than the search range allows
+  | { kind: 'target_unreachable' };      // target taste cannot be reached with this addition
 
 export interface DosingResult {
   /** Recommended amount to add (g) — the smallest dose that meets the goal best. */
@@ -167,6 +168,13 @@ export function solveDose(
   if (spread < NEGLIGIBLE_SPREAD) flags.push({ kind: 'no_measurable_effect' });
   if (best.doseG <= stepG / 2) flags.push({ kind: 'optimum_at_zero' });
   else if (best.doseG >= maxDoseG - stepG / 2) flags.push({ kind: 'optimum_at_max' });
+
+  // When the goal is to reach a specific taste intensity and the best dose falls
+  // far short (>20 units), the target is structurally unreachable with this addition.
+  if (goal.kind === 'target_taste') {
+    const achievedIntensity = best.taste[goal.quality];
+    if (Math.abs(achievedIntensity - goal.target) > 20) flags.push({ kind: 'target_unreachable' });
+  }
 
   return { recommendedDoseG: best.doseG, achieved: best, baseline, curve, flavorCeilingG, flags };
 }

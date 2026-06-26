@@ -62,4 +62,23 @@ describe('solveDose', () => {
     expect(r.curve[r.curve.length - 1].doseG).toBeCloseTo(30, 6);
     expect(r.baseline).toEqual(r.curve[0]);
   });
+
+  // Regression (hardening sweep): 'target_unreachable' flag was missing from DosingFlag.
+  // When the target taste is structurally impossible with the chosen addition (e.g.
+  // adding water to reach bitterness=60), the solver silently returned a near-zero
+  // dose. Now it must emit the flag when the best achieved intensity is >20 away.
+  test('target_unreachable is emitted when the taste goal cannot be reached', () => {
+    const base = [leaf('Water', 100, { water: 100 })];
+    const water: DosingAddition = { name: 'Water', composition: { water: 100 } };
+    // Water cannot raise bitterness to 60 — structurally impossible.
+    const r = solveDose(base, water, { kind: 'target_taste', quality: 'bitter', target: 60 }, { maxDoseG: 500 });
+    expect(r.flags.map(f => f.kind)).toContain('target_unreachable');
+  });
+
+  test('target_unreachable is NOT emitted when target is achievable', () => {
+    const base = [leaf('Water', 100, { water: 100 })];
+    // Sugar can bring sweetness to 30 — achievable.
+    const r = solveDose(base, SUGAR, { kind: 'target_taste', quality: 'sweet', target: 30 });
+    expect(r.flags.map(f => f.kind)).not.toContain('target_unreachable');
+  });
 });

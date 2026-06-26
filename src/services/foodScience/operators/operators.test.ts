@@ -100,4 +100,27 @@ describe('ferment operator', () => {
     expect(final.composition.ethanol!).toBeGreaterThan(0);
     expect(final.markers.co2LostG).toBeGreaterThan(0); // leavening
   });
+
+  // Regression (hardening sweep): acetobacter culture was missing; ProductSpecies
+  // included aceticAcid but no culture produced it. Vinegar production must work.
+  test('acetobacter oxidises ethanol to acetic acid (vinegar)', () => {
+    const wine = makeFoodState({ water: 87, ethanol: 12, ash: 1 }, 1000, 28);
+    const { final } = runPipeline(wine, [ferment({ culture: 'acetobacter', durationS: 30 * 24 * 3600 })]);
+    expect(final.composition.aceticAcid!).toBeGreaterThan(0); // vinegar acidity built up
+    expect(final.composition.ethanol!).toBeLessThan(12);       // ethanol consumed
+  });
+
+  // Regression (hardening sweep): no osmotic inhibition meant a 60 Brix jam
+  // fermented at full speed — physically impossible. Above BRIX_MAX=60 fermentation
+  // must halt entirely.
+  test('osmotic inhibition: 60 Brix sugar syrup does not ferment', () => {
+    const jam = makeFoodState({ water: 40, sucrose: 60 }, 100, 25); // ~60 Brix
+    const normal = makeFoodState({ water: 90, glucose: 10 }, 100, 25); // ~10 Brix
+    const jamConverted  = runPipeline(jam,    [ferment({ culture: 'ale_yeast', durationS: 48 * 3600 })]).final.markers.fermentedSugarG;
+    const normConverted = runPipeline(normal, [ferment({ culture: 'ale_yeast', durationS: 48 * 3600 })]).final.markers.fermentedSugarG;
+    // 60 Brix is at the osmotic maximum → zero activity
+    expect(jamConverted).toBe(0);
+    // Dilute solution ferments freely
+    expect(normConverted).toBeGreaterThan(0);
+  });
 });

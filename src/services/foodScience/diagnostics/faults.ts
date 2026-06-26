@@ -66,6 +66,8 @@ export interface DiagnosticsInput {
   pH?: number | null;
   /** Declared shelf life (days); used to infer shelf-stable/ambient intent. */
   declaredShelfLifeDays?: number | null;
+  /** Potere Anti-Congelante (PAC) for frozen desserts; high PAC → too soft at cabinet temp. */
+  pac?: number | null;
 }
 
 export interface DiagnosticsResult {
@@ -203,11 +205,22 @@ const flavorFaults: Source = ({ taste, palatability }) => {
   return out;
 };
 
+/** Frozen-texture fault: a PAC well above the gelato sweet-spot (~260) → too soft at cabinet. */
+const PAC_TOO_SOFT = 260;
+const frozenTextureFaults: Source = ({ pac }) => {
+  if (pac == null) return [];
+  if (pac > PAC_TOO_SOFT) {
+    return [{ code: 'ice_cream_too_soft', domain: 'structure', severity: 'warn',
+              detail: { value: pac, threshold: PAC_TOO_SOFT } }];
+  }
+  return [];
+};
+
 /** Registry. Append a source to extend the pass to a new fault. */
 const SOURCES: Source[] = [
   safetyFaults, shelfLifeFaults,
   formulaFaults, emulsionFaults, gelationFaults, donenessFaults, browningFaults,
-  grainingFaults, chocolateFaults, stabilityFaults, flavorFaults,
+  grainingFaults, chocolateFaults, stabilityFaults, flavorFaults, frozenTextureFaults,
 ];
 
 const SEVERITY_RANK: Record<FaultSeverity, number> = { high: 0, warn: 1, info: 2 };

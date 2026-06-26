@@ -112,4 +112,19 @@ describe('collectFaults (universal diagnostics)', () => {
     expect(collectFaults({ shelfLife }).faults[0]).toMatchObject({ code: 'shelf_life_short', severity: 'high', domain: 'stability' });
     expect(collectFaults({ shelfLife: { flags: [] } as any }).faults).toHaveLength(0);
   });
+
+  // Regression (hardening sweep): pac field was missing from DiagnosticsInput and
+  // FrozenEvaluation warnings were never fed into collectFaults. A PAC well above
+  // the sweet-spot (>260) must fire the 'ice_cream_too_soft' warn fault.
+  test('ice cream with PAC > 260 raises ice_cream_too_soft warn', () => {
+    const r = collectFaults({ pac: 300 });
+    expect(r.faults[0]).toMatchObject({ code: 'ice_cream_too_soft', domain: 'structure', severity: 'warn' });
+    expect(r.faults[0].detail).toMatchObject({ value: 300, threshold: 260 });
+  });
+
+  test('PAC at or below 260 raises no frozen-texture fault', () => {
+    expect(collectFaults({ pac: 260 }).faults).toHaveLength(0);
+    expect(collectFaults({ pac: 180 }).faults).toHaveLength(0);
+    expect(collectFaults({}).faults).toHaveLength(0); // no pac at all → silent
+  });
 });
