@@ -4,7 +4,7 @@ import type { Recipe, Ingredient } from '../types';
 import { resolveRecipeLeaves } from '../utils/resolveRecipeLeaves';
 import { aggregateComposition } from '../services/foodScience/universal';
 import {
-  computeHeatPenetration, computeMassPenetration, computeThermalProperties,
+  computeHeatPenetration, temperatureAtDepth, computeMassPenetration, computeThermalProperties,
   computePlankTime, computeSurfaceCoefficient, computeDryingRate,
   type Geometry, type CookingMethod, type Diffusant, type Medium, type ConvectionRegime,
 } from '../services/foodScience/transport';
@@ -94,6 +94,24 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
     }
     return { horizon, pts };
   }, [cook, geometry, L, composition, initialTempC, mediumTempC, method]);
+
+  // Temperature gradient across the depth (center → surface) at the moment the
+  // core reaches its target — the doneness/over-cook gradient inside the piece.
+  const depthProfile = useMemo(() => {
+    if (mode !== 'cook' || !cook || cook.timeToCoreTargetS == null || !isFinite(cook.timeToCoreTargetS)) return null;
+    const tAt = cook.timeToCoreTargetS;
+    const pts: { xi: number; temp: number }[] = [];
+    const N = 12;
+    for (let i = 0; i <= N; i++) {
+      const xi = i / N;
+      const temp = temperatureAtDepth({
+        geometry, characteristicLengthM: L, composition,
+        initialTempC, mediumTempC, timeS: tAt, depthFraction: xi, ...hSource,
+      });
+      if (temp !== null) pts.push({ xi, temp });
+    }
+    return pts.length ? pts : null;
+  }, [mode, cook, geometry, L, composition, initialTempC, mediumTempC, method]);
 
   const brine = useMemo(() => {
     if (mode !== 'brine') return null;
@@ -220,6 +238,23 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
                 </div>
                 <div className="flex justify-between text-[10px] text-cocoa-400 mt-1">
                   <span>0</span><span>{t('chemistry:transport.coreVsTime')}</span><span>{fmtTime(cookCurve.horizon)}</span>
+                </div>
+              </div>
+            )}
+            {depthProfile && (
+              <div className="mt-3">
+                <div className="flex items-end gap-px h-16">
+                  {depthProfile.map((p, i) => {
+                    const frac = (p.temp - initialTempC) / (mediumTempC - initialTempC || 1);
+                    return <div key={i} className="flex-1 rounded-t bg-cocoa-500"
+                      style={{ height: `${Math.max(2, Math.min(100, frac * 100))}%` }}
+                      title={`${Math.round(p.xi * 100)}% · ${Math.round(p.temp)}°C`} />;
+                  })}
+                </div>
+                <div className="flex justify-between text-[10px] text-cocoa-400 mt-1">
+                  <span>{t('chemistry:transport.center')}</span>
+                  <span>{t('chemistry:transport.depthProfile')}</span>
+                  <span>{t('chemistry:transport.surface')}</span>
                 </div>
               </div>
             )}

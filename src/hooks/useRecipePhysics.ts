@@ -10,6 +10,10 @@ import {
   classifyAwBand,
   classifyFatRegime,
   aggregateComposition,
+  computeBoilingPoint,
+  classifyCandyStage,
+  computeOsmolality,
+  computeProteinSet,
   type ResolvedIngredient,
   type TitratableAcidityResult,
   type AwResult,
@@ -18,6 +22,10 @@ import {
   type AwBand,
   type FatRegime,
   type NutritionResult,
+  type BoilingResult,
+  type CandyStage,
+  type OsmolalityResult,
+  type ProteinSetResult,
 } from '../services/foodScience/universal';
 
 import { evaluateConfectionery, type ConfectioneryEvaluation, type ConfectioneryWarning } from '../services/foodScience/confectionery';
@@ -98,6 +106,14 @@ export interface RecipePhysics {
   diagnostics: DiagnosticsResult;
   /** Atwater energy + macronutrients (per 100 g). */
   nutrition: NutritionResult;
+  /** Boiling-point elevation of the aqueous phase (colligative); boilingPointC is null when there is no water. */
+  boiling: BoilingResult;
+  /** Confectioner candy stage read at the syrup's boiling point; null when there is no water. */
+  candyStage: CandyStage | null;
+  /** Osmolality + osmotic pressure — the osmotic-preservation hurdle alongside a_w. */
+  osmolality: OsmolalityResult;
+  /** Protein coagulation/set reached at the bake's peak core temperature; null without a thermal step or protein. */
+  proteinSet: ProteinSetResult | null;
 }
 
 function deriveWarnings(
@@ -248,6 +264,21 @@ export function useRecipePhysics(
 
     const nutrition = computeNutrition(mixComposition);
 
+    // Colligative siblings of a_w. Boiling-point elevation + candy stage read the
+    // sugar-cookery concentration regime; osmolality is the osmotic-preservation
+    // hurdle. Colligative properties depend only on solute/water ratios, so the
+    // mass-% composition vector is a valid per-100 g basis. Protein set is the
+    // coagulation reached at the bake's peak core temperature (egg/custard/dairy).
+    const colligativeMassBy = mixComposition as Record<string, number>;
+    const colligativeSodium = colligativeMassBy.sodium ?? 0;
+    const boiling = computeBoilingPoint(colligativeMassBy, { sodiumMass: colligativeSodium });
+    const candyStage = boiling.boilingPointC !== null ? classifyCandyStage(boiling.boilingPointC) : null;
+    const osmolality = computeOsmolality(colligativeMassBy, { sodiumMass: colligativeSodium, tempC: STORAGE_TEMP_C });
+    const proteinSet: ProteinSetResult | null =
+      doneness && (mixComposition.protein ?? 0) > 0
+        ? computeProteinSet(doneness.peakCoreTempC)
+        : null;
+
     // Structure & texture. Detect functional agents by ingredient name so the
     // emulsion (emulsifier HLB) and gelation (which agent + dose) are data-driven.
     let emulsifierHlbMass = 0;
@@ -330,6 +361,10 @@ export function useRecipePhysics(
       formulaBalance,
       diagnostics,
       nutrition,
+      boiling,
+      candyStage,
+      osmolality,
+      proteinSet,
     };
   }, [recipe, ingredients, allRecipes, scale]);
 }

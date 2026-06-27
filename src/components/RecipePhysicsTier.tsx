@@ -60,6 +60,41 @@ export function RecipePhysicsTier({ physics, expanded, onToggle }: RecipePhysics
         caption={t(`chemistry:${physics.fatRegime.labelKey}` as any)}
       />
 
+      {physics.confectionery?.derived.snap && (
+        <PhysicsTile
+          label={t('chemistry:tier.snap')}
+          value={t(`chemistry:tier.snapClass.${physics.confectionery.derived.snap.snapClass}` as any)}
+          caption={t('chemistry:tier.snapSfc' as any, {
+            pct: Math.round(physics.confectionery.derived.snap.sfcAtEatingTempPct),
+            temp: Math.round(physics.confectionery.derived.snap.eatingTempC),
+          })}
+        />
+      )}
+
+      {physics.boiling.boilingPointC !== null && physics.boiling.elevationC >= 1 && (
+        <PhysicsTile
+          label={t('chemistry:tier.boilingPoint')}
+          value={`${physics.boiling.boilingPointC.toFixed(1)}°C`}
+          caption={physics.candyStage ? t(`chemistry:tier.candyStageVal.${physics.candyStage}` as any) : undefined}
+        />
+      )}
+
+      {physics.osmolality.osmolalityOsmPerKg >= 1 && (
+        <PhysicsTile
+          label={t('chemistry:tier.osmolality')}
+          value={physics.osmolality.osmolalityOsmPerKg.toFixed(1)}
+          caption={t('chemistry:tier.osmPressure' as any, { atm: Math.round(physics.osmolality.osmoticPressureAtm) })}
+        />
+      )}
+
+      {physics.proteinSet && (
+        <PhysicsTile
+          label={t('chemistry:tier.proteinSet')}
+          value={`${Math.round(physics.proteinSet.setFraction * 100)}%`}
+          caption={t(`chemistry:tier.proteinBand.${physics.proteinSet.band}` as any)}
+        />
+      )}
+
       <span className="ml-auto inline-flex items-center gap-1 text-xs text-cocoa-500">
         {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         {expanded ? t('chemistry:tier.hideCalculation') : t('chemistry:tier.showCalculation')}

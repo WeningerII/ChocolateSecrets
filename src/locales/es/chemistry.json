@@ -127,7 +127,11 @@
     "cp": "Calor específico",
     "alpha": "Difusividad",
     "geometry": "Forma",
-    "geom": { "slab": "Placa", "cylinder": "Cilindro", "sphere": "Esfera" },
+    "geom": {
+      "slab": "Placa",
+      "cylinder": "Cilindro",
+      "sphere": "Esfera"
+    },
     "halfThickness": "Semiespesor (cm)",
     "radius": "Radio (cm)",
     "mode": "Objetivo",
@@ -162,7 +166,11 @@
     "brineNote": "La penetración al centro escala con tamaño² ÷ difusividad — por eso curar piezas gruesas lleva días.",
     "freeze": "Congelar / descongelar",
     "environment": "Entorno",
-    "envOpt": { "still_freezer": "Congelador estático", "blast_freezer": "Abatidor", "ice_bath": "Baño de hielo / salmuera" },
+    "envOpt": {
+      "still_freezer": "Congelador estático",
+      "blast_freezer": "Abatidor",
+      "ice_bath": "Baño de hielo / salmuera"
+    },
     "direction": "Dirección",
     "dirFreeze": "Congelar",
     "dirThaw": "Descongelar",
@@ -183,7 +191,10 @@
     "min": "min",
     "hr": "h",
     "day": "días",
-    "caveat": "Conducción/difusión transitoria (un término, Heisler). El escalado por geometría/tamaño/composición es exacto; los coeficientes de superficie y las difusividades son representativos. No se modelan la radiación ni la evaporación superficial (costra)."
+    "caveat": "Conducción/difusión transitoria (un término, Heisler). El escalado por geometría/tamaño/composición es exacto; los coeficientes de superficie y las difusividades son representativos. No se modelan la radiación ni la evaporación superficial (costra).",
+    "center": "Centro",
+    "surface": "Superficie",
+    "depthProfile": "Temp. según profundidad"
   },
   "tier": {
     "aw": "Actividad de agua",
@@ -192,7 +203,35 @@
     "freeWater": "Agua libre",
     "totalFat": "Grasa total",
     "showCalculation": "Mostrar cálculo",
-    "hideCalculation": "Ocultar cálculo"
+    "hideCalculation": "Ocultar cálculo",
+    "snap": "Quiebre",
+    "boilingPoint": "Punto de ebullición",
+    "osmolality": "Osmolalidad",
+    "proteinSet": "Coagulación proteica",
+    "snapSfc": "{{pct}}% SFC a {{temp}}°C",
+    "osmPressure": "{{atm}} atm",
+    "snapClass": {
+      "hard_snap": "Quiebre firme",
+      "firm": "Firme",
+      "soft": "Blando"
+    },
+    "candyStageVal": {
+      "syrup": "Jarabe",
+      "thread": "Hebra",
+      "soft_ball": "Bola blanda",
+      "firm_ball": "Bola firme",
+      "hard_ball": "Bola dura",
+      "soft_crack": "Quiebre blando",
+      "hard_crack": "Quiebre duro",
+      "caramel": "Caramelo"
+    },
+    "proteinBand": {
+      "raw": "Crudo",
+      "setting": "Cuajando",
+      "set": "Cuajado",
+      "firm": "Firme",
+      "overset": "Sobrecuajado"
+    }
   },
   "bands": {
     "aw": {

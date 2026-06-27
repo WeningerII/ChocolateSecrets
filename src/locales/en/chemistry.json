@@ -127,7 +127,11 @@
     "cp": "Specific heat",
     "alpha": "Diffusivity",
     "geometry": "Shape",
-    "geom": { "slab": "Slab", "cylinder": "Cylinder", "sphere": "Sphere" },
+    "geom": {
+      "slab": "Slab",
+      "cylinder": "Cylinder",
+      "sphere": "Sphere"
+    },
     "halfThickness": "Half-thickness (cm)",
     "radius": "Radius (cm)",
     "mode": "Goal",
@@ -162,7 +166,11 @@
     "brineNote": "Penetration to the center scales with size² ÷ diffusivity — which is why curing thick cuts takes days.",
     "freeze": "Freeze / thaw",
     "environment": "Environment",
-    "envOpt": { "still_freezer": "Still freezer", "blast_freezer": "Blast freezer", "ice_bath": "Ice / brine bath" },
+    "envOpt": {
+      "still_freezer": "Still freezer",
+      "blast_freezer": "Blast freezer",
+      "ice_bath": "Ice / brine bath"
+    },
     "direction": "Direction",
     "dirFreeze": "Freeze",
     "dirThaw": "Thaw",
@@ -183,7 +191,10 @@
     "min": "min",
     "hr": "h",
     "day": "days",
-    "caveat": "Transient conduction/diffusion (one-term Heisler). Geometry/size/composition scaling is exact; surface coefficients and diffusivities are representative. Radiation and surface evaporation (crust) are not modeled."
+    "caveat": "Transient conduction/diffusion (one-term Heisler). Geometry/size/composition scaling is exact; surface coefficients and diffusivities are representative. Radiation and surface evaporation (crust) are not modeled.",
+    "center": "Center",
+    "surface": "Surface",
+    "depthProfile": "Temp across depth"
   },
   "tier": {
     "aw": "Water activity",
@@ -192,7 +203,35 @@
     "freeWater": "Free water",
     "totalFat": "Total fat",
     "showCalculation": "Show calculation",
-    "hideCalculation": "Hide calculation"
+    "hideCalculation": "Hide calculation",
+    "snap": "Snap",
+    "boilingPoint": "Boiling point",
+    "osmolality": "Osmolality",
+    "proteinSet": "Protein set",
+    "snapSfc": "{{pct}}% SFC @ {{temp}}°C",
+    "osmPressure": "{{atm}} atm",
+    "snapClass": {
+      "hard_snap": "Hard snap",
+      "firm": "Firm",
+      "soft": "Soft"
+    },
+    "candyStageVal": {
+      "syrup": "Syrup",
+      "thread": "Thread",
+      "soft_ball": "Soft ball",
+      "firm_ball": "Firm ball",
+      "hard_ball": "Hard ball",
+      "soft_crack": "Soft crack",
+      "hard_crack": "Hard crack",
+      "caramel": "Caramel"
+    },
+    "proteinBand": {
+      "raw": "Raw",
+      "setting": "Setting",
+      "set": "Set",
+      "firm": "Firm",
+      "overset": "Overset"
+    }
   },
   "bands": {
     "aw": {

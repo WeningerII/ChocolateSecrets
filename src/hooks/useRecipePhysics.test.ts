@@ -360,3 +360,59 @@ describe('useRecipePhysics — production-aware physics (buffers / molds / volum
     expect(p.warnings.find(w => w.kind === 'missing_density')).toBeUndefined();
   });
 });
+
+// Wiring (engine → UI): colligative siblings of a_w (boiling point, candy stage,
+// osmolality) and protein set are now surfaced on RecipePhysics for the universal
+// physics tier. These kernels were previously built+tested but never reachable.
+describe('useRecipePhysics — colligative + protein-set surfacing', () => {
+  test('boiling point and osmolality are computed for an aqueous recipe', () => {
+    const { result } = renderHook(() =>
+      useRecipePhysics(CLASSIC_GANACHE, [DARK_70, HEAVY_CREAM], [CLASSIC_GANACHE], 1)
+    );
+    const p = result.current!;
+    expect(p.boiling.boilingPointC).not.toBeNull();
+    expect(p.boiling.boilingPointC!).toBeGreaterThanOrEqual(100); // elevated by dissolved sugars
+    expect(p.boiling.elevationC).toBeGreaterThan(0);
+    expect(p.osmolality.osmolalityOsmPerKg).toBeGreaterThan(0);
+    expect(p.osmolality.osmoticPressureAtm).toBeGreaterThan(0);
+    expect(p.candyStage).not.toBeNull(); // a stage is read off the boiling point
+  });
+
+  test('protein set is null without a thermal step', () => {
+    const { result } = renderHook(() =>
+      useRecipePhysics(CLASSIC_GANACHE, [DARK_70, HEAVY_CREAM], [CLASSIC_GANACHE], 1)
+    );
+    expect(result.current!.proteinSet).toBeNull(); // ganache has no bake/cook step
+  });
+
+  test('protein set is computed at the bake peak core temperature when a thermal step + protein exist', () => {
+    const bakedCustard: Recipe = {
+      id: 'custard-1', name: 'Baked Custard',
+      components: [{
+        id: 'main', name: 'Custard',
+        ingredients: [{ ingredientId: 'heavy-cream', quantity: 200 }],
+        steps: [{
+          order: 1, title: 'Bake', actionType: 'bake', equipment: [], instruction: 'Bake until set',
+          parameters: { temperatureTarget: 160, durationSeconds: 2400 },
+        }],
+      }],
+    } as Recipe;
+    const { result } = renderHook(() =>
+      useRecipePhysics(bakedCustard, [HEAVY_CREAM], [bakedCustard], 1)
+    );
+    const ps = result.current!.proteinSet;
+    expect(ps).not.toBeNull();
+    expect(ps!.setFraction).toBeGreaterThanOrEqual(0);
+    expect(ps!.setFraction).toBeLessThanOrEqual(1);
+    expect(['raw', 'setting', 'set', 'firm', 'overset']).toContain(ps!.band);
+  });
+
+  test('chocolate snap is available on confectionery derived output (rendered by the physics tier)', () => {
+    const recipe: Recipe = { ...CLASSIC_GANACHE, categories: ['confectionery'] } as Recipe;
+    const { result } = renderHook(() =>
+      useRecipePhysics(recipe, [DARK_70, HEAVY_CREAM], [recipe], 1)
+    );
+    expect(result.current!.confectionery!.derived.snap).not.toBeNull();
+    expect(['hard_snap', 'firm', 'soft']).toContain(result.current!.confectionery!.derived.snap!.snapClass);
+  });
+});
