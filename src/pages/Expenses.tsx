@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BillsList from '../components/BillsList';
 import VendorsList from '../components/VendorsList';
@@ -10,7 +11,8 @@ import VendorForm from '../components/VendorForm';
 import PaymentForm from '../components/PaymentForm';
 import RecurringExpectationForm from '../components/RecurringExpectationForm';
 import { Bill, Vendor, RecurringExpectation } from '../types';
-import { ExtractedBillResult } from '../services/billsService';
+import { ExtractedBillResult, getBill } from '../services/billsService';
+import { getRecurringExpectation } from '../services/recurringExpectationsService';
 import { UploadCloud, Store, Wallet, CalendarDays } from 'lucide-react';
 
 export default function Expenses() {
@@ -30,6 +32,45 @@ export default function Expenses() {
   const [editingRecurring, setEditingRecurring] = useState<RecurringExpectation | undefined>();
 
   const [paymentFormOpen, setPaymentFormOpen] = useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const handledDeepLink = useRef<string | null>(null);
+
+  // Consume alert deep-links. AlertsBell navigates to /expenses?reviewBill=<id>
+  // (due-soon + anomaly alerts) or /expenses?recurringExpectation=<id> (missing-bill
+  // alerts). Open the referenced record once, switch to its tab, then strip the
+  // query param so it does not re-open on re-render or after the modal is closed.
+  useEffect(() => {
+    const billId = searchParams.get('reviewBill');
+    const expectationId = searchParams.get('recurringExpectation');
+    const token = billId ? `bill:${billId}` : expectationId ? `exp:${expectationId}` : null;
+    if (!token || handledDeepLink.current === token) return;
+    handledDeepLink.current = token;
+
+    if (billId) {
+      setActiveTab('bills');
+      getBill(billId).then((bill) => {
+        if (!bill) return;
+        setExtractedResult(undefined);
+        setExistingBill(bill);
+        setReviewOpen(true);
+      });
+    } else if (expectationId) {
+      setActiveTab('recurring');
+      getRecurringExpectation(expectationId).then((exp) => {
+        if (!exp) return;
+        setEditingRecurring(exp);
+        setRecurringFormOpen(true);
+      });
+    }
+
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('reviewBill');
+      next.delete('recurringExpectation');
+      return next;
+    }, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const handleExtracted = (result: ExtractedBillResult) => {
     setUploadOpen(false);

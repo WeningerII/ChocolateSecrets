@@ -593,7 +593,7 @@ export default function BillReview({ isOpen, onClose, extractedResult, existingB
         <VendorForm
           isOpen={vendorFormOpen}
           onClose={() => setVendorFormOpen(false)}
-          prefilledFromExtraction={{ name: rawExtractedVendorName, accountIdentifier: accountNumber }}
+          prefilledFromExtraction={{ name: rawExtractedVendorName, address: extractedResult?.extraction.vendorAddress ?? undefined, accountIdentifier: accountNumber }}
           onSaved={(vendor) => {
             setVendorId(vendor.id);
             const m = new Map(vendorsCache);
