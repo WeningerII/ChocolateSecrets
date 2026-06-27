@@ -42,12 +42,13 @@ describe('enzyme operator (Michaelis-Menten)', () => {
     expect(logs[0].detail.flag).not.toBe('denatured');           // cold ≠ denatured
   });
 
-  test('protease frees umami glutamate without consuming protein mass', () => {
+  test('protease frees umami glutamate with mass conserved (protein→glutamate transfer)', () => {
     const s = makeFoodState({ water: 70, protein: 20 }, 100, 50);
     const { final } = runPipeline(s, [enzyme({ enzyme: 'protease', durationS: 5000 * 3600 })]);
-    expect(final.composition.protein!).toBeCloseTo(20, 4);   // peptides still read as protein
     expect(final.composition.glutamate!).toBeGreaterThan(0); // umami liberated
     expect(final.composition.glutamate!).toBeLessThanOrEqual(0.12 * 20 + 1e-6); // capped at 12 %
+    // Freed glutamate was subtracted from protein — together they equal the original protein mass.
+    expect(final.composition.protein! + final.composition.glutamate!).toBeCloseTo(20, 4);
     expect(final.markers.proteolysisExtent).toBeGreaterThan(0.9);
   });
 

@@ -15,12 +15,18 @@
 import type { Composition } from '../../../types';
 import type { Operator } from './pipeline';
 
-const THRESHOLD_C = 160;
 const EA_CARAMEL = 150_000; // J·mol⁻¹ (steep)
 const R = 8.314;
 const TREF_K = 453.15;      // 180 °C reference
 
-const SUGARS: (keyof Composition)[] = ['sucrose', 'glucose', 'fructose', 'maltose'];
+// Per-species caramelization onset temperatures. Fructose caramelizes near its
+// melting point (~110 °C), well below the 160–170 °C onset of sucrose/glucose.
+const SUGAR_ONSET: Partial<Record<keyof Composition, number>> = {
+  fructose: 110,
+  maltose:  150,
+  glucose:  160,
+  sucrose:  170,
+} as const;
 
 export interface CaramelizeParams {
   tempC: number;
@@ -31,10 +37,15 @@ export function caramelize(params: CaramelizeParams): Operator {
   return (state) => {
     const { tempC: T, durationS } = params;
     const minutes = durationS / 60;
-    const sugar = SUGARS.reduce((s, sp) => s + (state.composition[sp] ?? 0), 0);
+
+    // Sum only the sugars whose per-species onset the current temperature exceeds.
+    let activeSugar = 0;
+    for (const [sp, onset] of Object.entries(SUGAR_ONSET) as [keyof Composition, number][]) {
+      if (T >= onset) activeSugar += state.composition[sp] ?? 0;
+    }
 
     let extentThisStep = 0;
-    if (T >= THRESHOLD_C && sugar > 0) {
+    if (activeSugar > 0) {
       const k = Math.exp(-(EA_CARAMEL / R) * (1 / (T + 273.15) - 1 / TREF_K)); // 1 at 180 °C
       extentThisStep = minutes * k;
     }
@@ -48,7 +59,7 @@ export function caramelize(params: CaramelizeParams): Operator {
         operator: 'caramelize',
         detail: {
           tempC: Math.round(T), minutes: Math.round(minutes * 10) / 10,
-          belowThreshold: T < THRESHOLD_C ? 1 : 0,
+          activeSugarPct: Math.round(activeSugar * 10) / 10,
           caramelEquivMin180: Math.round(markers.caramelEquivMin180 * 100) / 100,
         },
       },

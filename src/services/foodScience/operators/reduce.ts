@@ -44,12 +44,24 @@ export function reduce(params: ReduceParams): Operator {
     let removeG = targetRemoveG;
     if (removeG > waterG) { removeG = waterG; flags.push({ kind: 'water_limited' }); }
 
+    const waterFractionRemoved = waterG > 0 ? removeG / waterG : 0;
     masses.water = waterG - removeG;
-    const newMass = Math.max(0, state.massG - removeG);
+
+    // Ethanol co-evaporates with water (bp 78 °C): when simmering wine or beer,
+    // ethanol is always present in the vapour phase. Retention ≈ 0.55 means
+    // ~45 % of the ethanol in each "fraction" of water evaporated escapes too.
+    const ethanolG = masses.ethanol ?? 0;
+    const ETHANOL_RETENTION = 0.55;
+    const ethanolLostG = ethanolG * (1 - ETHANOL_RETENTION) * waterFractionRemoved;
+    masses.ethanol = Math.max(0, ethanolG - ethanolLostG);
+
+    const totalRemovedG = removeG + ethanolLostG;
+    const newMass = Math.max(0, state.massG - totalRemovedG);
     const composition = massesToComposition(masses, newMass);
 
     const markers = { ...state.markers };
     markers.waterRemovedG = (markers.waterRemovedG ?? 0) + removeG;
+    markers.ethanolLostG = (markers.ethanolLostG ?? 0) + ethanolLostG;
     markers.concentrationFactor = state.massG > 0 ? state.massG / Math.max(1e-9, newMass) : 1;
 
     return {

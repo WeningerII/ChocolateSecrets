@@ -74,14 +74,20 @@ export function computePsychrometrics(input: PsychrometricInput): PsychrometricS
     dewPointC = (MAGNUS_B * g) / (MAGNUS_A - g);
   }
 
-  // Wet bulb: root of p_sat(T_wb) − A·P·(T_air − T_wb) − p_v in (dewPoint, airTemp).
+  // Wet bulb: root of p_sat(T_wb) − A·P·(T_air − T_wb) − p_v, bracketed between a
+  // lower temperature and the dry bulb. The cooling vanishes only when the air is
+  // SATURATED (rh = 1 ⇒ p_v = p_sat ⇒ dew point = air temp); gate the short-circuit
+  // on saturation directly. The lower bracket is normally the dew point, but for
+  // BONE-DRY air (p_v = 0) the dew point is undefined (−∞ in the limit), so fall
+  // back to a deep-cold floor where f is guaranteed negative. Bone-dry air is the
+  // FASTEST-drying regime (maximum wet-bulb depression), not the saturated one the
+  // old dew-point-based bracket collapsed it into.
   let wetBulbC: number;
-  const lo0 = dewPointC ?? airTempC;
-  if (lo0 >= airTempC - 1e-9) {
+  if (rh >= 1 - 1e-9) {
     wetBulbC = airTempC; // saturated air: no evaporative cooling
   } else {
     const f = (twb: number) => saturationVaporPressure(twb) - PSYCHROMETER_A * P * (airTempC - twb) - pVapor;
-    let lo = lo0, hi = airTempC;
+    let lo = dewPointC ?? -100, hi = airTempC;
     for (let i = 0; i < 80; i++) {
       const mid = 0.5 * (lo + hi);
       if (f(lo) * f(mid) <= 0) hi = mid; else lo = mid;

@@ -15,7 +15,8 @@
 export type GellingAgent =
   | 'gelatin' | 'agar' | 'pectin_hm' | 'pectin_lm'
   | 'kappa_carrageenan' | 'iota_carrageenan' | 'starch'
-  | 'methylcellulose' | 'sodium_alginate';
+  | 'methylcellulose' | 'sodium_alginate'
+  | 'locust_bean_gum' | 'xanthan';
 
 export type GelCharacter = 'elastic' | 'brittle' | 'soft' | 'firm' | 'thermo_inverse';
 type CoFactor = 'high_sugar' | 'calcium' | 'potassium';
@@ -41,6 +42,8 @@ const GEL_PROFILES: Record<GellingAgent, GelProfile> = {
   starch: { minConcentrationPct: 3, setTempC: 40, meltTempC: null, thermoreversible: false, character: 'soft' },
   methylcellulose: { minConcentrationPct: 1, setTempC: null, meltTempC: 50, thermoreversible: true, character: 'thermo_inverse' },
   sodium_alginate: { minConcentrationPct: 0.5, setTempC: null, meltTempC: null, thermoreversible: false, character: 'firm', requires: 'calcium' },
+  locust_bean_gum: { minConcentrationPct: 0.3, setTempC: null, meltTempC: null, thermoreversible: false, character: 'soft' },
+  xanthan:         { minConcentrationPct: 0.05, setTempC: null, meltTempC: null, thermoreversible: true, character: 'soft' },
 };
 
 export type GelationFlag =

@@ -26,7 +26,7 @@ const BLISS = {
   salty: { peak: 40, width: 28 },
   sour: { peak: 18, width: 22 },
   bitter: { peak: 12, width: 20 },
-  umami: { peak: 55, width: 40 },
+  umami: { peak: 55, width: 25 },
 } as const;
 
 type BlissTaste = keyof typeof BLISS;

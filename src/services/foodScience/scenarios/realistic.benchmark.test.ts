@@ -343,7 +343,8 @@ describe('scenario: dry-aging beef (cold proteolysis → umami)', () => {
       enzyme({ enzyme: 'protease', durationS: 28 * 24 * 3600, tempC: 2 }),
     ]);
     expect(final.composition.glutamate ?? 0).toBeGreaterThan(0); // umami builds at 2 C
-    expect(final.composition.protein!).toBeCloseTo(22, 4);       // peptides still read as protein
+    // Freed glutamate was part of the protein mass; together they equal the original 22 %.
+    expect(final.composition.protein! + (final.composition.glutamate ?? 0)).toBeCloseTo(22, 4);
     expect(logs[0].detail.flag).not.toBe('denatured');          // cold is not denaturation
   });
 });

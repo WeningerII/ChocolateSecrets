@@ -24,7 +24,8 @@ import { speciesMassesG, massesToComposition } from './state';
 export type Culture =
   | 'ale_yeast' | 'lager_yeast' | 'wine_yeast'   // ethanol fermentation
   | 'yogurt_lactic'                               // homofermentative LAB
-  | 'sourdough';                                  // heterofermentative LAB + yeast
+  | 'sourdough'                                   // heterofermentative LAB + yeast
+  | 'acetobacter';                                // acetic acid bacteria (vinegar)
 
 /** Product species a culture yields (g per g sugar consumed). 'co2' escapes. */
 type ProductSpecies = 'ethanol' | 'glycerol' | 'lacticAcid' | 'aceticAcid' | 'co2';
@@ -38,6 +39,8 @@ interface CultureProfile {
   products: Partial<Record<ProductSpecies, number>>;
   /** LAB carry lactase and ferment lactose; yeast do not. */
   fermentsLactose?: boolean;
+  /** Override the default fermentable-sugar substrate list (e.g. ethanol for acetobacter). */
+  substrates?: (keyof Composition)[];
 }
 
 // Stoichiometry verified in Wolfram. Yeast CEILING: glucose → 2 EtOH + 2 CO₂
@@ -58,6 +61,10 @@ const CULTURES: Record<Culture, CultureProfile> = {
   wine_yeast:    { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 25, tempMaxC: 35, maxConversion: 0.98, products: { ethanol: 0.475, glycerol: 0.035, co2: 0.490 } },
   yogurt_lactic: { muMaxPerH: 0.50, tempMinC: 15, tempOptC: 42, tempMaxC: 52, maxConversion: 0.20, products: { lacticAcid: 1.0 }, fermentsLactose: true },
   sourdough:     { muMaxPerH: 0.30, tempMinC: 8,  tempOptC: 28, tempMaxC: 40, maxConversion: 0.40, products: { lacticAcid: 0.5, ethanol: 0.256, co2: 0.244 } },
+  // Acetobacter oxidises ethanol to acetic acid (vinegar). Uses ethanol, not sugar.
+  // ethanol + O₂ → acetic acid + H₂O; simplified stoichiometry (CO₂ as O₂ proxy in
+  // the closed-system model): 0.667 g acetic acid + 0.333 g CO₂ per g ethanol.
+  acetobacter:   { muMaxPerH: 0.07, tempMinC: 10, tempOptC: 30, tempMaxC: 40, maxConversion: 0.90, products: { aceticAcid: 0.667, co2: 0.333 }, substrates: ['ethanol'] },
 };
 
 /** Sugars cultures ferment (lactose excluded — needs lactase). */
@@ -83,12 +90,23 @@ export function ferment(params: FermentParams): Operator {
     const prof = CULTURES[params.culture];
     const T = params.tempC ?? state.tempC;
     const gamma = rossoGamma(T, prof.tempMinC, prof.tempOptC, prof.tempMaxC);
-    const muEff = prof.muMaxPerH * gamma;
     const hours = params.durationS / 3600;
 
     const masses = speciesMassesG(state);
-    const fermentable = prof.fermentsLactose ? [...FERMENTABLE, 'lactose' as const] : FERMENTABLE;
+    const fermentable: (keyof Composition)[] =
+      prof.substrates ?? (prof.fermentsLactose ? [...FERMENTABLE, 'lactose' as const] : FERMENTABLE);
     const fermentableG = fermentable.reduce((s, sp) => s + (masses[sp] ?? 0), 0);
+
+    // Osmotic inhibition: high dissolved-sugar concentration slows or halts fermentation.
+    // Linear ramp from full activity at BRIX_ONSET to zero at BRIX_MAX.
+    const BRIX_ONSET = 30;
+    const BRIX_MAX = 60;
+    const sugarG = (masses.sucrose ?? 0) + (masses.glucose ?? 0) + (masses.fructose ?? 0) + (masses.maltose ?? 0);
+    const totalSolidsG = Object.values(masses as Record<string, number>).reduce((s, v) => s + (v ?? 0), 0);
+    const brix = totalSolidsG > 0 ? (sugarG / totalSolidsG) * 100 : 0;
+    const osmoticGamma = brix >= BRIX_MAX ? 0 : brix <= BRIX_ONSET ? 1 : 1 - (brix - BRIX_ONSET) / (BRIX_MAX - BRIX_ONSET);
+
+    const muEff = prof.muMaxPerH * gamma * osmoticGamma;
 
     // Attenuation as a fixed inert floor, persisted so splitting a ferment into
     // several steps converges to the same total conversion (composability).

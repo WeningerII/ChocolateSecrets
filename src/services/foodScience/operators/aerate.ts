@@ -27,7 +27,9 @@ export function aerate(params: AerateParams): Operator {
   return (state) => {
     const foam = computeFoam(state.composition);
     const fat = state.composition.fat ?? 0;
-    const proteinCap = foam.foamability * 350;                 // strong protein foam
+    // Fat antagonizes protein foams (same scale as computeFoam's FAT_PENALTY_SCALE).
+    const fatPenalty = 1 - Math.min(0.8, fat / 25);
+    const proteinCap = foam.foamability * fatPenalty * 350;    // protein foam, fat-penalised
     const fatCap = fat >= 20 && fat <= 55 ? 120 : 0;            // whippable fat foam
     const capability = Math.max(proteinCap, fatCap);
 

@@ -23,10 +23,11 @@ import type { Composition } from '../../../types';
 const SUCROSE_SOLUBILITY: ReadonlyArray<readonly [number, number]> = [
   [0, 179], [10, 191], [20, 204], [30, 219], [40, 238], [50, 260],
   [60, 287], [70, 320], [80, 362], [90, 415], [100, 487],
+  [110, 556], [120, 653], [130, 800], [140, 1000], [150, 1333],
 ];
 
 /** How strongly interfering sugars suppress graining (0..1 of the drive). */
-const DOCTOR_SUPPRESSION = 0.7;
+const DOCTOR_SUPPRESSION = 0.9;
 
 export type GrainingRisk = 'none' | 'low' | 'moderate' | 'high';
 

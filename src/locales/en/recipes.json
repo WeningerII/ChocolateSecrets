@@ -98,7 +98,8 @@
     "crossContactRiskLine": "{{allergen}} present in shared {{station}}",
     "crossContactRiskGenericWorkspace": "workspace",
     "unitConversionSubRecipe": "Cannot convert {{fromUnit}} to {{toUnit}} for sub-recipe {{name}}",
-    "unitConversionIngredient": "Cannot convert {{fromUnit}} to {{toUnit}} for ingredient {{name}}"
+    "unitConversionIngredient": "Cannot convert {{fromUnit}} to {{toUnit}} for ingredient {{name}}",
+    "optimize": "Optimize"
   },
   "successTitle": "Import Successful",
   "editor": {
@@ -247,7 +248,8 @@
     "fieldsFlagged_other": "{{count}} flagged",
     "flaggedBanner_one": "AI flagged {{count}} field as uncertain — show raw text",
     "flaggedBanner_other": "AI flagged {{count}} fields as uncertain — show raw text",
-    "flaggedFieldsList": "Flagged fields: {{fields}}"
+    "flaggedFieldsList": "Flagged fields: {{fields}}",
+    "newComponent": "New Component"
   },
   "suggestEquipment": "Suggest equipment",
   "equipmentFilled": "Equipment filled ✓",
@@ -352,5 +354,6 @@
       "low_lactose": "Low lactose",
       "lactose_present": "Contains lactose"
     }
-  }
+  },
+  "auditRecipe": "Audit Recipe"
 }

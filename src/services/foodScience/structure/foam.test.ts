@@ -26,4 +26,12 @@ describe('computeFoam', () => {
     expect(fatty.stability).toBeLessThan(lean);
     expect(fatty.flags).toContainEqual({ kind: 'fat_destabilizing' });
   });
+
+  // Regression (hardening sweep): FAT_PENALTY_SCALE = 25 was too aggressive.
+  // Chocolate mousse (fat=35, protein=4, sucrose=20) scored stability≈13.7 ('poor').
+  // With scale=50 the penalty is lighter: stability should reach 'fair' or above.
+  test('chocolate mousse (fat=35, protein=4) reaches at least fair foam stability', () => {
+    const mousse = computeFoam({ water: 41, fat: 35, protein: 4, sucrose: 20 });
+    expect(mousse.band === 'fair' || mousse.band === 'good').toBe(true);
+  });
 });

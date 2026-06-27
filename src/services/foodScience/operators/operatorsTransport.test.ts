@@ -41,6 +41,20 @@ describe('brine / cure (solute uptake by diffusion)', () => {
     expect(final.massG).toBeGreaterThan(150);
     expect(final.markers.sugarAbsorbedG).toBeGreaterThan(0);
   });
+
+  // Regression (hardening sweep): BrineFlag had no 'no_water' variant. When the
+  // food has zero water the absorb path was still entered and brineCenterSaturation
+  // was set to a meaningful-looking diffusion number despite zero absorption.
+  test('brining a waterless food flags no_water and absorbs nothing', () => {
+    const dry = makeFoodState({ sucrose: 100 }, 100, 20); // zero water
+    const { final, logs } = runPipeline(dry, [
+      brine({ solute: 'salt', bathConcentrationPct: 10, geometry: 'slab', characteristicLengthM: 0.01, durationS: 3 * 24 * 3600 }),
+    ]);
+    expect(logs[0].detail.flag).toBe('no_water');
+    expect(final.markers.saltAbsorbedG ?? 0).toBe(0);
+    expect(final.markers.brineCenterSaturation).toBe(0);
+    expect(final.massG).toBeCloseTo(100, 6); // mass unchanged
+  });
 });
 
 describe('dehydrate (convective drying)', () => {
@@ -73,6 +87,23 @@ describe('dehydrate (convective drying)', () => {
     ]);
     expect(final.composition.water ?? 0).toBe(0);
     expect(logs[0].detail.flag).toBe('water_limited');
+  });
+
+  // Regression (hardening sweep): bone-dry air (RH=0, e.g. a desiccant dryer) dries
+  // FASTEST. The RH=0 wet-bulb bug made dehydrate remove zero water and pin the
+  // surface to the air temperature — the driest air behaving like saturated air.
+  test('bone-dry air (RH=0) removes more water than humid air, with evaporative cooling', () => {
+    const leather = () => makeFoodState({ water: 80, sucrose: 20 }, 100, 20);
+    const boneDry = runPipeline(leather(), [
+      dehydrate({ airTempC: 60, relativeHumidity: 0, surfaceCoeffWm2K: 25, surfaceAreaM2: 0.01, durationS: 3600 }),
+    ]).final;
+    const humid = runPipeline(leather(), [
+      dehydrate({ airTempC: 60, relativeHumidity: 0.5, surfaceCoeffWm2K: 25, surfaceAreaM2: 0.01, durationS: 3600 }),
+    ]).final;
+    expect(boneDry.markers.waterRemovedG).toBeGreaterThan(0);
+    expect(boneDry.markers.waterRemovedG).toBeGreaterThan(humid.markers.waterRemovedG);
+    expect(boneDry.tempC).toBeLessThan(60);   // evaporative cooling to the wet bulb
+    expect(boneDry.tempC).toBeGreaterThan(0);
   });
 });
 
