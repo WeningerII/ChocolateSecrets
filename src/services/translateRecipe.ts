@@ -18,7 +18,7 @@ interface TranslationTask {
 /**
  * Result of translating one field into one target language.
  */
-export interface TranslationFill {
+interface TranslationFill {
   path: string;
   targetLanguage: SupportedLanguage;
   text: string;

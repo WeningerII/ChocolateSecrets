@@ -11,7 +11,7 @@ export type AllergenKey =
   // EU Top 14 additions
   | 'celery' | 'mustard' | 'sulphites' | 'lupin' | 'molluscs';
 
-export type AllergenCertainty = 'contains' | 'may_contain' | 'cross_contact_risk';
+type AllergenCertainty = 'contains' | 'may_contain' | 'cross_contact_risk';
 
 export interface AllergenFlag {
   allergen: AllergenKey;
@@ -920,7 +920,7 @@ export function estimateYield(
 // card doesn't state (whipping behavior, cultured status, origin, etc.).
 // =============================================================================
 
-export type DairyCategory =
+type DairyCategory =
   | 'half_and_half' | 'light_cream' | 'whipping_cream' | 'heavy_cream'
   | 'double_cream' | 'clotted_cream'
   | 'butter_sweet' | 'butter_cultured' | 'butter_european'

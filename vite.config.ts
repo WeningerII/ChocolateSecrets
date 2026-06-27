@@ -1,6 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
 import { defineConfig } from 'vite';
 
 // The Gemini API key is no longer injected into the client bundle. All Gemini
@@ -12,11 +11,6 @@ export default defineConfig(() => {
     // BASE_PATH=/ChocolateSecrets/; local dev and Firebase Hosting stay at root.
     base: process.env.BASE_PATH || '/',
     plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
-    },
     build: {
       rollupOptions: {
         output: {

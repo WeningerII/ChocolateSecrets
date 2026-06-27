@@ -28,7 +28,7 @@ export interface OptimizerProgressMessage {
   paretoFrontSize: number;
 }
 
-export type ProgressCallback = (m: OptimizerProgressMessage) => void;
+type ProgressCallback = (m: OptimizerProgressMessage) => void;
 
 /**
  * Top-level orchestrator. Pure; can run on the main thread or in a worker.

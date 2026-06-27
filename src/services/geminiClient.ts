@@ -1,13 +1,13 @@
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase';
 
-export interface GeminiGenerateRequest {
+interface GeminiGenerateRequest {
   model?: string;
   contents: unknown;
   config?: unknown;
 }
 
-export interface GeminiGenerateResponse {
+interface GeminiGenerateResponse {
   text: string;
   candidates?: any[];
 }
@@ -33,9 +33,4 @@ export function getGeminiClient() {
       },
     },
   };
-}
-
-/** Retained as a no-op for backward compatibility with older test imports. */
-export function __resetGeminiClient() {
-  /* no in-browser client to reset now that calls are proxied server-side */
 }

@@ -1,6 +1,6 @@
 import type { Composition, CompositionSpecies } from '../types';
 
-export interface UsdaFdcEntry {
+interface UsdaFdcEntry {
   fdcId: number;
   description: string;
   dataType: 'Foundation' | 'SR Legacy' | 'Branded' | 'Survey (FNDDS)';

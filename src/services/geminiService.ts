@@ -10,7 +10,7 @@ import { classifyStation, deriveAllergens, inferEquipment, parseChocolateSpec, i
 import { inferRoleTag } from './foodScience/roles';
 import { GEMINI_MODEL } from '../constants/gemini';
 
-export const RECIPE_EXTRACTION_SCHEMA = {
+const RECIPE_EXTRACTION_SCHEMA = {
   type: Type.OBJECT,
   properties: {
     name: { type: Type.STRING, description: "The name of the recipe or flavor" },
@@ -277,7 +277,7 @@ export interface ExtractedRecipeIngredient {
   role?: RoleTag;
 }
 
-export interface ExtractedRecipeStep {
+interface ExtractedRecipeStep {
   title: string;
   actionType: string;
   equipment: string[];
@@ -303,7 +303,7 @@ export interface ExtractedRecipeStep {
   provenance?: Record<string, Provenance>;
 }
 
-export interface ExtractedRecipeComponent {
+interface ExtractedRecipeComponent {
   name: string;
   type?: typeof COMPONENT_TYPES[number] | (string & {});
   percentageOfTotalWeight?: number;
@@ -312,7 +312,7 @@ export interface ExtractedRecipeComponent {
   steps?: ExtractedRecipeStep[];
 }
 
-export interface ExtractedYieldEquation {
+interface ExtractedYieldEquation {
   totalYieldAmount: number;
   totalYieldUnit: string;
   portionAmount: number;
@@ -584,7 +584,7 @@ export async function estimateStockFromImage(
  * This pass is explicitly conservative — it transcribes only what is literally visible.
  * It does NOT infer, derive, or fill in missing information. That happens in Pass 2.
  */
-export async function extractRecipe_parsePass(
+async function extractRecipe_parsePass(
   images: { base64: string; mimeType: string }[],
   existingIngredients: string[],
   userHint?: string
@@ -646,7 +646,7 @@ Begin.`;
  * Takes the verbatim parse output and enriches it with inferred fields via tool calls.
  * Tool calls produce structured records that are incorporated with 'inferred_high' provenance.
  */
-export async function extractRecipe_reasonPass(
+async function extractRecipe_reasonPass(
   parsedRecipes: ExtractedRecipe[]
 ): Promise<ExtractedRecipe[]> {
   const enriched: ExtractedRecipe[] = [];
