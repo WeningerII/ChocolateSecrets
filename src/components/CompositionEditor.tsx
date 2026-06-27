@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import type { Composition } from '../types';
 import { compositionSum, isCompositionComplete, DEFAULT_COMPOSITION_BY_CATEGORY, COMPOSITION_SPECIES, COMPOSITION_DESCRIPTORS } from '../services/foodScience/universal/composition';
-import { lookupUsdaSnapshot } from '../services/usdaFoodData';
+import { lookupUsdaComposition } from '../services/usdaFoodData';
 
 interface CompositionEditorProps {
   ingredientName: string;
@@ -39,9 +39,9 @@ export function CompositionEditor({
     if (def && Object.keys(def).length > 0) onChange({ ...def });
   };
 
-  const handleUsdaLookup = () => {
+  const handleUsdaLookup = async () => {
     setUsdaResultMessage(null);
-    const match = lookupUsdaSnapshot(ingredientName);
+    const match = await lookupUsdaComposition(ingredientName);
     if (match) {
       onChange({ ...match.composition });
       onUsdaMatch?.(match.fdcId);

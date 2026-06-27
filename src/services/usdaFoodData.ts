@@ -304,3 +304,65 @@ export function lookupUsdaSnapshot(
   return best.entry;
 }
 
+/** FoodData Central nutrient number → our composition species (values are per 100 g). */
+const FDC_NUTRIENT_MAP: Record<string, CompositionSpecies> = {
+  '255': 'water',
+  '203': 'protein',
+  '204': 'fat',
+  '207': 'ash',
+  '210': 'sucrose',
+  '211': 'glucose',
+  '212': 'fructose',
+  '213': 'lactose',
+  '214': 'maltose',
+};
+
+/** Map an FDC food's nutrient list to a Composition (per 100 g, rounded to 1 dp). */
+export function mapFdcNutrientsToComposition(
+  foodNutrients: Array<{ nutrientNumber?: string; value?: number }>,
+): Composition {
+  const comp: Composition = {};
+  for (const n of foodNutrients ?? []) {
+    const species = n.nutrientNumber ? FDC_NUTRIENT_MAP[n.nutrientNumber] : undefined;
+    if (species && typeof n.value === 'number') comp[species] = Math.round(n.value * 10) / 10;
+  }
+  return comp;
+}
+
+const FDC_SEARCH_URL = 'https://api.nal.usda.gov/fdc/v1/foods/search';
+
+/**
+ * Look up an ingredient's composition, preferring the LIVE FoodData Central API
+ * when VITE_USDA_FDC_API_KEY is configured, and falling back to the bundled
+ * snapshot otherwise — or on any network / parse / empty-result error. This
+ * implements the behaviour documented in .env.example / README ("live USDA queries,
+ * snapshot fallback"). The engine's synchronous lookupUsdaSnapshot is unchanged.
+ */
+export async function lookupUsdaComposition(ingredientName: string): Promise<UsdaFdcEntry | null> {
+  const apiKey = import.meta.env.VITE_USDA_FDC_API_KEY;
+  if (!apiKey) return lookupUsdaSnapshot(ingredientName);
+
+  try {
+    const url =
+      `${FDC_SEARCH_URL}?api_key=${encodeURIComponent(apiKey)}` +
+      `&query=${encodeURIComponent(ingredientName)}` +
+      `&dataType=${encodeURIComponent('Foundation,SR Legacy')}&pageSize=1`;
+    const res = await fetch(url);
+    if (!res.ok) return lookupUsdaSnapshot(ingredientName);
+    const data = await res.json();
+    const food = data?.foods?.[0];
+    if (!food) return lookupUsdaSnapshot(ingredientName);
+    const composition = mapFdcNutrientsToComposition(food.foodNutrients ?? []);
+    if (Object.keys(composition).length === 0) return lookupUsdaSnapshot(ingredientName);
+    return {
+      fdcId: food.fdcId,
+      description: food.description ?? ingredientName,
+      dataType: food.dataType ?? 'SR Legacy',
+      composition,
+      matchKeywords: [],
+    };
+  } catch {
+    return lookupUsdaSnapshot(ingredientName);
+  }
+}
+

@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'vitest';
-import { lookupUsdaSnapshot, USDA_FDC_SNAPSHOT, dehydrate } from './usdaFoodData';
+import { describe, test, expect, vi, afterEach } from 'vitest';
+import { lookupUsdaSnapshot, lookupUsdaComposition, mapFdcNutrientsToComposition, USDA_FDC_SNAPSHOT, dehydrate } from './usdaFoodData';
 
 describe('USDA_FDC_SNAPSHOT', () => {
   test('every entry has match keywords', () => {
@@ -96,5 +96,64 @@ describe('non-bovine milk snapshot entries', () => {
     expect(lookupUsdaSnapshot('sheep milk powder')?.description).toMatch(/sheep/i);
     expect(lookupUsdaSnapshot('water buffalo milk')?.description).toMatch(/buffalo/i);
     expect(lookupUsdaSnapshot('reindeer milk powder')?.description).toMatch(/reindeer/i);
+  });
+});
+
+describe('mapFdcNutrientsToComposition', () => {
+  test('maps known FDC nutrient numbers to composition species (per 100 g, 1 dp)', () => {
+    const comp = mapFdcNutrientsToComposition([
+      { nutrientNumber: '255', value: 63.12 }, // water
+      { nutrientNumber: '204', value: 30 },    // fat
+      { nutrientNumber: '203', value: 2.84 },  // protein
+      { nutrientNumber: '213', value: 3.2 },   // lactose
+      { nutrientNumber: '999', value: 1 },     // unknown → ignored
+    ]);
+    expect(comp.water).toBe(63.1);
+    expect(comp.fat).toBe(30);
+    expect(comp.protein).toBe(2.8);
+    expect(comp.lactose).toBe(3.2);
+    expect(Object.keys(comp)).toEqual(['water', 'fat', 'protein', 'lactose']);
+  });
+});
+
+describe('lookupUsdaComposition (live FDC with snapshot fallback)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  test('falls back to the bundled snapshot when no API key is configured', async () => {
+    const r = await lookupUsdaComposition('Heavy Cream');
+    expect(r?.description).toMatch(/heavy/i);
+  });
+
+  test('queries the live FDC API when a key is set and maps nutrients to composition', async () => {
+    vi.stubEnv('VITE_USDA_FDC_API_KEY', 'test-key');
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        foods: [{
+          fdcId: 12345, description: 'Butter, salted', dataType: 'SR Legacy',
+          foodNutrients: [
+            { nutrientNumber: '255', value: 16.2 },
+            { nutrientNumber: '204', value: 81.1 },
+          ],
+        }],
+      }),
+    }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const r = await lookupUsdaComposition('butter');
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(r?.fdcId).toBe(12345);
+    expect(r?.composition.fat).toBe(81.1);
+    expect(r?.composition.water).toBe(16.2);
+  });
+
+  test('falls back to the snapshot when the live call throws', async () => {
+    vi.stubEnv('VITE_USDA_FDC_API_KEY', 'test-key');
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('network down'); }));
+    const r = await lookupUsdaComposition('Heavy Cream');
+    expect(r?.description).toMatch(/heavy/i);
   });
 });
