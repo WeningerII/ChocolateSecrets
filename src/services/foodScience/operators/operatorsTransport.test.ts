@@ -88,6 +88,23 @@ describe('dehydrate (convective drying)', () => {
     expect(final.composition.water ?? 0).toBe(0);
     expect(logs[0].detail.flag).toBe('water_limited');
   });
+
+  // Regression (hardening sweep): bone-dry air (RH=0, e.g. a desiccant dryer) dries
+  // FASTEST. The RH=0 wet-bulb bug made dehydrate remove zero water and pin the
+  // surface to the air temperature — the driest air behaving like saturated air.
+  test('bone-dry air (RH=0) removes more water than humid air, with evaporative cooling', () => {
+    const leather = () => makeFoodState({ water: 80, sucrose: 20 }, 100, 20);
+    const boneDry = runPipeline(leather(), [
+      dehydrate({ airTempC: 60, relativeHumidity: 0, surfaceCoeffWm2K: 25, surfaceAreaM2: 0.01, durationS: 3600 }),
+    ]).final;
+    const humid = runPipeline(leather(), [
+      dehydrate({ airTempC: 60, relativeHumidity: 0.5, surfaceCoeffWm2K: 25, surfaceAreaM2: 0.01, durationS: 3600 }),
+    ]).final;
+    expect(boneDry.markers.waterRemovedG).toBeGreaterThan(0);
+    expect(boneDry.markers.waterRemovedG).toBeGreaterThan(humid.markers.waterRemovedG);
+    expect(boneDry.tempC).toBeLessThan(60);   // evaporative cooling to the wet bulb
+    expect(boneDry.tempC).toBeGreaterThan(0);
+  });
 });
 
 describe('freeze / thaw (Plank time + ice fraction)', () => {
