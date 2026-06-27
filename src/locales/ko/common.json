@@ -8,7 +8,6 @@
     "hasContent": "번역 있음",
     "translationHint": "번역. {{sourceLanguage}} 탭의 내용이 원본 버전입니다."
   },
-  "search": "검색",
   "add": "추가",
   "edit": "수정",
   "delete": "삭제",
@@ -19,11 +18,8 @@
   "status": "상태",
   "unknown": "알 수 없음",
   "actions": "작업",
-  "print": "인쇄",
   "notes": "메모",
-  "optional": "선택 사항",
   "update": "업데이트",
-  "apply": "적용",
   "allCategories": "모든 카테고리",
   "loading": "로딩 중...",
   "success": "성공",
@@ -34,7 +30,6 @@
   "databaseErrorHint": "{{path}}을(를) {{operation}}하는 데 실패했습니다.",
   "errorSupportHint": "이 문제가 계속 발생하면, 발생한 시간과 함께 지원팀에 문의하세요.",
   "reload": "애플리케이션 다시 로드",
-  "unknownError": "알 수 없는 오류가 발생했습니다",
   "databaseError": "{{path}}에서 데이터를 {{operation}}하는 동안 데이터베이스 오류가 발생했습니다.",
   "companyName": "Chocolate Secrets",
   "companyAddress1": "123 Cacao Lane",
@@ -43,11 +38,7 @@
     "title": {
       "chocolate": "초콜릿",
       "secrets": "시크릿"
-    },
-    "subtitle": "재고 및 레시피 관리"
-  },
-  "user": {
-    "signOut": "로그아웃"
+    }
   },
   "language": {
     "english": "영어",

@@ -28,8 +28,6 @@
   "unitPrice": "Precio Unitario",
   "qty": "Cant",
   "unit": "Unidad",
-  "totalLabel": "Monto Total",
-  "notesTerms": "Notas y Términos",
   "printTitle": "ORDEN DE COMPRA",
   "printNumber": "OC #:",
   "printDate": "Fecha:",

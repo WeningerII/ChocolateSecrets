@@ -8,7 +8,6 @@
     "hasContent": "Tiene traducción",
     "translationHint": "Traducción. El texto en {{sourceLanguage}} de la primera pestaña es la versión canónica."
   },
-  "search": "Buscar",
   "add": "Añadir",
   "edit": "Editar",
   "delete": "Eliminar",
@@ -19,11 +18,8 @@
   "status": "Estado",
   "unknown": "Desconocido",
   "actions": "Acciones",
-  "print": "Imprimir",
   "notes": "Notas",
-  "optional": "Opcional",
   "update": "Actualizar",
-  "apply": "Aplicar",
   "allCategories": "Todas las Categorías",
   "loading": "Cargando...",
   "success": "Éxito",
@@ -34,7 +30,6 @@
   "databaseErrorHint": "Error al {{operation}} {{path}}",
   "errorSupportHint": "Si esto sigue ocurriendo, contacta con soporte indicando la hora en que ocurrió.",
   "reload": "Recargar Aplicación",
-  "unknownError": "Ocurrió un error desconocido",
   "databaseError": "Ocurrió un error en la base de datos al intentar {{operation}} datos en {{path}}.",
   "companyName": "Chocolate Secrets",
   "companyAddress1": "123 Cacao Lane",
@@ -43,11 +38,7 @@
     "title": {
       "chocolate": "Chocolate",
       "secrets": "Secretos"
-    },
-    "subtitle": "Gestión de Inventario y Recetas"
-  },
-  "user": {
-    "signOut": "Cerrar sesión"
+    }
   },
   "language": {
     "english": "Inglés",

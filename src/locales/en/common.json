@@ -8,7 +8,6 @@
     "hasContent": "Has translation",
     "translationHint": "Translation. The {{sourceLanguage}} text in the first tab is the canonical version."
   },
-  "search": "Search",
   "add": "Add",
   "edit": "Edit",
   "delete": "Delete",
@@ -19,11 +18,8 @@
   "status": "Status",
   "unknown": "Unknown",
   "actions": "Actions",
-  "print": "Print",
   "notes": "Notes",
-  "optional": "Optional",
   "update": "Update",
-  "apply": "Apply",
   "allCategories": "All Categories",
   "loading": "Loading...",
   "success": "Success",
@@ -34,7 +30,6 @@
   "databaseErrorHint": "Failed to {{operation}} {{path}}",
   "errorSupportHint": "If this keeps happening, contact support with the time this occurred.",
   "reload": "Reload Application",
-  "unknownError": "An unknown error occurred",
   "databaseError": "A database error occurred while trying to {{operation}} data at {{path}}.",
   "companyName": "Chocolate Secrets",
   "companyAddress1": "123 Cacao Lane",
@@ -43,11 +38,7 @@
     "title": {
       "chocolate": "Chocolate",
       "secrets": "Secrets"
-    },
-    "subtitle": "Inventory & Recipe Management"
-  },
-  "user": {
-    "signOut": "Sign out"
+    }
   },
   "language": {
     "english": "English",

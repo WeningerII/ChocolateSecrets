@@ -28,8 +28,6 @@
   "unitPrice": "단가",
   "qty": "수량",
   "unit": "단위",
-  "totalLabel": "총 금액",
-  "notesTerms": "메모 및 조건",
   "printTitle": "구매 주문서",
   "printNumber": "발주서 #:",
   "printDate": "날짜:",
