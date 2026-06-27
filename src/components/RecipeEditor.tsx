@@ -204,9 +204,9 @@ function recipeReducer(state: Partial<Recipe>, action: Action): Partial<Recipe> 
     case 'ADD_DESIGN_LAYER':
       const newLayer: DesignLayer = {
         order: (state.design || []).length + 1,
-        technique: action.t('recipes:editor.defaultTechnique'),
+        technique: '',
         colors: ['#ffffff'],
-        tool: action.t('recipes:editor.defaultTool'),
+        tool: '',
         notes: ''
       };
       return { ...state, design: [...(state.design || []), newLayer] };

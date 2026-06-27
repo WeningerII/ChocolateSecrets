@@ -98,7 +98,8 @@
     "crossContactRiskLine": "{{allergen}} presente en {{station}} compartida",
     "crossContactRiskGenericWorkspace": "área de trabajo",
     "unitConversionSubRecipe": "No se puede convertir {{fromUnit}} a {{toUnit}} para sub-receta {{name}}",
-    "unitConversionIngredient": "No se puede convertir {{fromUnit}} a {{toUnit}} para el ingrediente {{name}}"
+    "unitConversionIngredient": "No se puede convertir {{fromUnit}} a {{toUnit}} para el ingrediente {{name}}",
+    "optimize": "Optimizar"
   },
   "successTitle": "Importación exitosa",
   "editor": {
@@ -247,7 +248,8 @@
     "fieldsFlagged_other": "{{count}} marcados",
     "flaggedBanner_one": "La IA marcó {{count}} campo como incierto — mostrar texto original",
     "flaggedBanner_other": "La IA marcó {{count}} campos como inciertos — mostrar texto original",
-    "flaggedFieldsList": "Campos marcados: {{fields}}"
+    "flaggedFieldsList": "Campos marcados: {{fields}}",
+    "newComponent": "Nuevo componente"
   },
   "suggestEquipment": "Sugerir equipo",
   "equipmentFilled": "Equipo completado ✓",
@@ -352,5 +354,6 @@
       "low_lactose": "Bajo en lactosa",
       "lactose_present": "Contiene lactosa"
     }
-  }
+  },
+  "auditRecipe": "Auditar receta"
 }

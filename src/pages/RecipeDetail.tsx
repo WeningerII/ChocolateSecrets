@@ -161,7 +161,7 @@ export default function RecipeDetail() {
               </Link>
             )}
             <Link
-              to={`/recipes/${recipe.id}/audit`}
+              to="/recipes/audit"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream-100 hover:bg-cream-200 border border-cream-300 text-cocoa-700 rounded-lg text-sm font-medium transition-colors"
             >
               <ShieldAlert className="w-4 h-4" />

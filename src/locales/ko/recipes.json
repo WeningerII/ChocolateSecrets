@@ -218,7 +218,8 @@
     "fieldsFlagged_other": "{{count}}개 리뷰 필요",
     "flaggedBanner_one": "AI가 {{count}}개 필드를 불확실한 것으로 표시했습니다 - 원본 텍스트 보기",
     "flaggedBanner_other": "AI가 {{count}}개 필드를 불확실한 것으로 표시했습니다 - 원본 텍스트 보기",
-    "flaggedFieldsList": "표시된 필드: {{fields}}"
+    "flaggedFieldsList": "표시된 필드: {{fields}}",
+    "newComponent": "새 구성 요소"
   },
   "suggestEquipment": "장비 제안",
   "equipmentFilled": "장비 완료 ✓",
@@ -258,7 +259,8 @@
     "crossContactRiskLine": "공유된 {{station}}에 {{allergen}} 존재",
     "crossContactRiskGenericWorkspace": "작업 공간",
     "unitConversionSubRecipe": "하위 레시피 {{name}}에서 {{fromUnit}}을(를) {{toUnit}}(으)로 변환할 수 없습니다",
-    "unitConversionIngredient": "재료 {{name}}에서 {{fromUnit}}을(를) {{toUnit}}(으)로 변환할 수 없습니다"
+    "unitConversionIngredient": "재료 {{name}}에서 {{fromUnit}}을(를) {{toUnit}}(으)로 변환할 수 없습니다",
+    "optimize": "최적화"
   },
   "audit": {
     "title": "레시피 감사",
@@ -352,5 +354,6 @@
       "low_lactose": "저유당",
       "lactose_present": "유당 포함"
     }
-  }
+  },
+  "auditRecipe": "레시피 감사"
 }
