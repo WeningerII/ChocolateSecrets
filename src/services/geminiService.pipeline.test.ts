@@ -12,7 +12,7 @@ vi.mock('./geminiClient', () => ({
 }));
 
 import { getGeminiClient } from './geminiClient';
-import { extractRecipe_fullPipeline } from './geminiService';
+import { extractRecipe_fullPipeline, validateExtractedRecipe } from './geminiService';
 
 describe('extractRecipe_fullPipeline', () => {
   beforeEach(() => {
@@ -87,9 +87,57 @@ describe('extractRecipe_fullPipeline', () => {
     mockGenerateContent.mockResolvedValueOnce({
       text: 'not valid json',
     });
-    
+
     await expect(
       extractRecipe_fullPipeline([{ base64: 'x', mimeType: 'image/jpeg' }], [])
     ).rejects.toThrow();
+  });
+});
+
+describe('validateExtractedRecipe (pass 3 structural QA)', () => {
+  test('a complete recipe is not flagged for review', () => {
+    const r = validateExtractedRecipe({
+      name: 'Ganache',
+      components: [{
+        name: 'Base',
+        ingredients: [{ name: 'cream', quantity: 200, unit: 'g' }],
+        steps: [{ title: 'Heat', instruction: 'Simmer the cream.' }],
+      }],
+    } as any);
+    expect(r.needsReview).toBe(false);
+    expect(r.lowConfidenceFields ?? []).toHaveLength(0);
+  });
+
+  test('missing name, empty ingredient name, missing quantity, and empty step are all flagged', () => {
+    const r = validateExtractedRecipe({
+      name: '   ',
+      components: [{
+        name: 'Base',
+        ingredients: [{ name: '', unit: 'g' }], // no quantity
+        steps: [{ title: 'x', instruction: '' }],
+      }],
+    } as any);
+    expect(r.needsReview).toBe(true);
+    const f = r.lowConfidenceFields ?? [];
+    expect(f).toContain('name');
+    expect(f).toContain('components.0.ingredients.0.name');
+    expect(f).toContain('components.0.ingredients.0.quantity');
+    expect(f).toContain('components.0.steps.0.instruction');
+  });
+
+  test('a recipe with no ingredients anywhere is flagged', () => {
+    const r = validateExtractedRecipe({ name: 'Empty', components: [] } as any);
+    expect(r.lowConfidenceFields).toContain('ingredients');
+    expect(r.needsReview).toBe(true);
+  });
+
+  test('pre-existing lowConfidenceFields are preserved (and force review)', () => {
+    const r = validateExtractedRecipe({
+      name: 'Ganache',
+      lowConfidenceFields: ['type'],
+      components: [{ name: 'Base', ingredients: [{ name: 'cream', quantity: 100, unit: 'g' }], steps: [] }],
+    } as any);
+    expect(r.lowConfidenceFields).toContain('type');
+    expect(r.needsReview).toBe(true);
   });
 });

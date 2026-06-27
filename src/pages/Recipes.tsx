@@ -7,7 +7,7 @@ import { extractRecipe_fullPipeline, ExtractedRecipe } from '../services/geminiS
 import { findBestIngredientMatch, isFuzzyMatch } from '../utils/search';
 import { LocalizedField } from '../components/LocalizedField';
 import { useRestaurantSettings } from '../hooks/useRestaurantSettings';
-import { prepareImageForUpload } from '../utils/image';
+import { prepareFileForUpload } from '../utils/image';
 import { deriveAllergens, ALLERGEN_LABELS, AllergenKey, AllergenFlag } from '../services/culinaryTools';
 
 import { useNavigate, Link } from 'react-router-dom';
@@ -112,7 +112,7 @@ export default function Recipes() {
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const imageData = await prepareImageForUpload(file, 1024);
+        const imageData = await prepareFileForUpload(file, 1024);
         imagePayloads.push(imageData);
       }
 
@@ -362,7 +362,12 @@ export default function Recipes() {
           rawExtractionData: extRecipe.rawExtractionData || '',
           confidence: extRecipe.confidence || undefined,
           ocrTranscript: extRecipe.ocrTranscript || undefined,
-          lowConfidenceFields: extRecipe.lowConfidenceFields || undefined
+          lowConfidenceFields: extRecipe.lowConfidenceFields || undefined,
+          // Reason-pass enrichment that the Recipe model supports (was computed then
+          // dropped on import). Tempering curve / yield estimate / step-equipment have
+          // no Recipe-level home and are intentionally not mapped here.
+          stationTag: (extRecipe as any).stationTag || undefined,
+          enrobing: (extRecipe as any).enrobing || undefined
         }, true);
         const uiLanguage = (i18n.language.split('-')[0] as SupportedLanguage);
         const localized = attachRecipeLocalizedFields(

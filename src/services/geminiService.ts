@@ -781,6 +781,46 @@ async function reasonAboutRecipe(recipe: ExtractedRecipe): Promise<ExtractedReci
 
 
 /**
+ * Pass 3 (validate): deterministic structural QA over an enriched recipe — no
+ * extra AI call. Adds field paths that look missing/uncertain to
+ * lowConfidenceFields and sets needsReview when anything is flagged, so the editor
+ * shows its review banner and per-field badges. Pure + side-effect-free.
+ */
+export function validateExtractedRecipe(recipe: ExtractedRecipe): ExtractedRecipe {
+  const issues = new Set<string>(recipe.lowConfidenceFields ?? []);
+
+  if (!recipe.name || !recipe.name.trim()) issues.add('name');
+
+  const components = recipe.components ?? [];
+  const topIngredients = recipe.ingredients ?? [];
+  const hasIngredients =
+    components.some((c) => (c.ingredients?.length ?? 0) > 0) || topIngredients.length > 0;
+  if (!hasIngredients) issues.add('ingredients');
+
+  components.forEach((c, ci) => {
+    (c.ingredients ?? []).forEach((ing, ii) => {
+      if (!ing.name || !String(ing.name).trim()) issues.add(`components.${ci}.ingredients.${ii}.name`);
+      const q = ing.quantity;
+      if (q === undefined || q === null || Number.isNaN(Number(q))) {
+        issues.add(`components.${ci}.ingredients.${ii}.quantity`);
+      }
+    });
+    (c.steps ?? []).forEach((s, si) => {
+      if (!s.instruction || !String(s.instruction).trim()) {
+        issues.add(`components.${ci}.steps.${si}.instruction`);
+      }
+    });
+  });
+
+  const lowConfidenceFields = [...issues];
+  return {
+    ...recipe,
+    lowConfidenceFields,
+    needsReview: recipe.needsReview === true || lowConfidenceFields.length > 0,
+  };
+}
+
+/**
  * Full multi-pass extraction: Parse → Reason → Validate.
  * Replaces extractRecipeWithConfidence as the primary extraction entry point.
  * The old function remains available for backward compatibility.
@@ -800,8 +840,13 @@ export async function extractRecipe_fullPipeline(
   // Pass 2: Reason (tool calls)
   onProgress?.('reason', 'Filling in what the card implies...');
   const enriched = await extractRecipe_reasonPass(parsed);
-  
-  return { recipes: enriched };
+
+  // Pass 3: Validate — deterministic structural QA (no extra AI call) that flags
+  // missing/uncertain fields so the editor surfaces a review banner + badges.
+  onProgress?.('validate', 'Checking the extraction...');
+  const validated = enriched.map(validateExtractedRecipe);
+
+  return { recipes: validated };
 }
 
 /**

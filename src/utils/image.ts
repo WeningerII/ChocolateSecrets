@@ -38,3 +38,29 @@ export async function prepareImageForUpload(
     reader.readAsDataURL(blob);
   });
 }
+
+/** Read any file as base64 (no data-URL prefix). */
+function fileToBase64(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(',')[1]);
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Prepare a recipe-card file for inline upload to Gemini. Images are validated and
+ * resized via prepareImageForUpload; PDFs are passed through untouched (Gemini
+ * ingests application/pdf natively, so there is no need to rasterize). Other types
+ * still throw via prepareImageForUpload.
+ */
+export async function prepareFileForUpload(
+  file: File,
+  maxDimension: number = 2048,
+): Promise<{ base64: string; mimeType: string }> {
+  if (file.type === 'application/pdf') {
+    return { base64: await fileToBase64(file), mimeType: 'application/pdf' };
+  }
+  return prepareImageForUpload(file, maxDimension);
+}
