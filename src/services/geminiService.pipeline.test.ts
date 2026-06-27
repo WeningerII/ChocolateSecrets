@@ -12,7 +12,7 @@ vi.mock('./geminiClient', () => ({
 }));
 
 import { getGeminiClient } from './geminiClient';
-import { extractRecipe_fullPipeline, validateExtractedRecipe } from './geminiService';
+import { extractRecipe_fullPipeline, validateExtractedRecipe, extractionProvenanceToMeta } from './geminiService';
 
 describe('extractRecipe_fullPipeline', () => {
   beforeEach(() => {
@@ -139,5 +139,34 @@ describe('validateExtractedRecipe (pass 3 structural QA)', () => {
     } as any);
     expect(r.lowConfidenceFields).toContain('type');
     expect(r.needsReview).toBe(true);
+  });
+});
+
+describe('extractionProvenanceToMeta (parse-pass provenance → editor FieldMeta)', () => {
+  test('returns undefined when there is no provenance (no badge, as before)', () => {
+    expect(extractionProvenanceToMeta(undefined, ['name'])).toBeUndefined();
+  });
+
+  test('maps known tags and collapses inferred_medium to inferred_low', () => {
+    const meta = extractionProvenanceToMeta(
+      { name: 'verbatim', quantity: 'inferred_high', unit: 'inferred_medium' },
+      ['name', 'quantity', 'unit'],
+    );
+    expect(meta?.name.provenance).toBe('verbatim');
+    expect(meta?.quantity.provenance).toBe('inferred_high');
+    expect(meta?.unit.provenance).toBe('inferred_low');
+    expect(meta?.name.source).toBe('ai_extraction');
+  });
+
+  test('includes only requested fields carrying a known tag', () => {
+    const meta = extractionProvenanceToMeta(
+      { name: 'verbatim', description: 'bogus_tag', type: 'inferred_high' },
+      ['name', 'description', 'type'],
+    );
+    expect(Object.keys(meta!)).toEqual(['name', 'type']); // unknown tag on description is skipped
+  });
+
+  test('returns undefined when no requested field has a known tag', () => {
+    expect(extractionProvenanceToMeta({ other: 'verbatim' }, ['name'])).toBeUndefined();
   });
 });

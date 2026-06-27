@@ -3,7 +3,7 @@ import { collection, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/fi
 import { db, handleFirestoreError, OperationType, auth } from '../firebase';
 import { Recipe, RecipeComponent } from '../types';
 import { Plus, UploadCloud, Loader2 } from 'lucide-react';
-import { extractRecipe_fullPipeline, ExtractedRecipe } from '../services/geminiService';
+import { extractRecipe_fullPipeline, extractionProvenanceToMeta, ExtractedRecipe } from '../services/geminiService';
 import { findBestIngredientMatch, isFuzzyMatch } from '../utils/search';
 import { LocalizedField } from '../components/LocalizedField';
 import { useRestaurantSettings } from '../hooks/useRestaurantSettings';
@@ -298,7 +298,8 @@ export default function Recipes() {
               originalState: ing.originalState || '',
               convertedQuantities: ing.convertedQuantities || '',
               originalString: ing.originalString || '',
-              confidence: ing.confidence || undefined
+              confidence: ing.confidence || undefined,
+              meta: extractionProvenanceToMeta(ing.provenance, ['name', 'quantity', 'unit'])
             };
           })
         }));
@@ -328,7 +329,8 @@ export default function Recipes() {
                 originalState: ing.originalState || '',
                 convertedQuantities: ing.convertedQuantities || '',
                 originalString: ing.originalString || '',
-                confidence: ing.confidence || undefined
+                confidence: ing.confidence || undefined,
+                meta: extractionProvenanceToMeta(ing.provenance, ['name', 'quantity', 'unit'])
               };
             })
           });
@@ -367,7 +369,9 @@ export default function Recipes() {
           // dropped on import). Tempering curve / yield estimate / step-equipment have
           // no Recipe-level home and are intentionally not mapped here.
           stationTag: (extRecipe as any).stationTag || undefined,
-          enrobing: (extRecipe as any).enrobing || undefined
+          enrobing: (extRecipe as any).enrobing || undefined,
+          // Per-field provenance from the parse pass → the editor's badge metadata.
+          meta: extractionProvenanceToMeta(extRecipe.provenance, ['name', 'description', 'type'])
         }, true);
         const uiLanguage = (i18n.language.split('-')[0] as SupportedLanguage);
         const localized = attachRecipeLocalizedFields(

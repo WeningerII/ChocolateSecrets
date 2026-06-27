@@ -113,6 +113,15 @@ const RECIPE_EXTRACTION_SCHEMA = {
     },
     ocrTranscript: { type: Type.STRING },
     lowConfidenceFields: { type: Type.ARRAY, items: { type: Type.STRING } },
+    provenance: {
+      type: Type.OBJECT,
+      description: "Per-field provenance: 'verbatim' if transcribed directly from the card, 'inferred_high'/'inferred_low' if generated or inferred.",
+      properties: {
+        name: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] },
+        description: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] },
+        type: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] }
+      }
+    },
     ingredients: {
       type: Type.ARRAY,
       items: {
@@ -140,6 +149,14 @@ const RECIPE_EXTRACTION_SCHEMA = {
               quantity: { type: Type.NUMBER },
               unit: { type: Type.NUMBER },
               specification: { type: Type.NUMBER }
+            }
+          },
+          provenance: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] },
+              quantity: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] },
+              unit: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] }
             }
           }
         },
@@ -216,6 +233,14 @@ const RECIPE_EXTRACTION_SCHEMA = {
                     unit: { type: Type.NUMBER },
                     specification: { type: Type.NUMBER }
                   }
+                },
+                provenance: {
+                  type: Type.OBJECT,
+                  properties: {
+                    name: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] },
+                    quantity: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] },
+                    unit: { type: Type.STRING, enum: ["verbatim", "inferred_high", "inferred_low"] }
+                  }
                 }
               },
               required: ["name", "quantity", "unit"]
@@ -228,6 +253,33 @@ const RECIPE_EXTRACTION_SCHEMA = {
   },
   required: ["name", "components"]
 };
+
+/** Map the parse-pass provenance tags onto the editor's Provenance union. */
+const PROVENANCE_TAG_MAP: Record<string, Provenance> = {
+  verbatim: 'verbatim',
+  inferred_high: 'inferred_high',
+  inferred_medium: 'inferred_low',
+  inferred_low: 'inferred_low',
+};
+
+/**
+ * Build a FieldMeta map (the shape RecipeEditor reads for provenance badges) from
+ * the parse-pass per-field provenance tags. Only the requested fields carrying a
+ * known tag are included; returns undefined when nothing maps, so callers leave
+ * meta unset (no badge) exactly as before — making provenance purely additive.
+ */
+export function extractionProvenanceToMeta(
+  provenance: Record<string, string> | undefined,
+  fields: readonly string[],
+): Record<string, FieldMeta> | undefined {
+  if (!provenance) return undefined;
+  const meta: Record<string, FieldMeta> = {};
+  for (const field of fields) {
+    const mapped = PROVENANCE_TAG_MAP[provenance[field]];
+    if (mapped) meta[field] = { provenance: mapped, source: 'ai_extraction' };
+  }
+  return Object.keys(meta).length > 0 ? meta : undefined;
+}
 
 async function withRetry<T>(
   fn: () => Promise<T>,
@@ -603,7 +655,7 @@ RULES FOR PASS 1:
 2. INSTRUCTIONS: Capture steps clearly. If the source recipe is incomplete, lacks detailed instructions, or is just an ingredients list, you MUST generate exhaustive, high-precision, professional culinary step-by-step instructions that utilize all listed ingredients. Explain the preparation exactly and completely, mimicking a perfectly detailed masterclass recipe. Ensure no recipe is left unfinished or unexplained.
 3. LANGUAGE: You MUST provide instructions and names in Spanish (populate 'instructionSpanish' and 'nameSpanish') so the user has the recipe fully translated or generated in Spanish.
 4. If the card is handwritten and a word is illegible, record it as "[illegible]" and set low confidence for that field.
-5. Set provenance: 'verbatim' for every field you transcribe directly, and 'inferred_high' or 'inferred_medium' for ingredients/instructions you generate or infer.
+5. PROVENANCE: Populate the 'provenance' object. At the recipe level set provenance.name / provenance.description / provenance.type; on each ingredient set provenance.name / provenance.quantity / provenance.unit. Use 'verbatim' for values transcribed directly from the card, and 'inferred_high' (confident) or 'inferred_low' (uncertain) for values you generate or infer.
 6. Preserve ALL numeric detail — chocolate percentages, temperatures in degrees, durations, dimensions.
 7. If the card mentions a specific brand or product name (Valrhona Guanaja, Callebaut 811, Kerrygold butter), capture it.
 8. If the card includes colors, decorative techniques, tools, or equipment explicitly, capture them.
@@ -613,7 +665,7 @@ Here are the existing ingredients in the kitchen (match against these when ident
 
 ${userHint ? `Additional hint from the user: ${userHint}` : ''}
 
-OUTPUT FORMAT: Return valid JSON matching the schema. Set extractionVersion to 2. For every field, set the corresponding entry in the provenance map to "verbatim".
+OUTPUT FORMAT: Return valid JSON matching the schema. Set extractionVersion to 2. Populate the provenance objects as described in rule 5.
 
 Begin.`;
 
