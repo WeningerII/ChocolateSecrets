@@ -337,7 +337,7 @@ async function enforceRateLimit(uid: string, requested: number, databaseId?: str
         translationCount: requested,
         windowStart: now,
         updatedAt: FieldValue.serverTimestamp(),
-      });
+      }, { merge: true });
       return;
     }
 
@@ -350,7 +350,7 @@ async function enforceRateLimit(uid: string, requested: number, databaseId?: str
         translationCount: requested,
         windowStart: now,
         updatedAt: FieldValue.serverTimestamp(),
-      });
+      }, { merge: true });
       return;
     }
 
