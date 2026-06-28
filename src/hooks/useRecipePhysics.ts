@@ -181,35 +181,22 @@ export function useRecipePhysics(
     const awBand = classifyAwBand(aw.aw ?? 0);
     const fatRegime = classifyFatRegime(aw.fatPct);
 
-    const isConfectionery = (recipe.categories ?? []).includes('confectionery');
-    let confectionery: ConfectioneryEvaluation | null = null;
-    if (isConfectionery) {
-      confectionery = evaluateConfectionery({
-        aw, pH, fatRegime,
-        resolved: resolvedIngredients,
-        ingredientCatalog: ingredientMap,
-      });
-    }
+    // Domain evaluators: each is a calibrated, category-gated layer built on the
+    // universal kernels above. forCategory keeps the gating uniform — adding a
+    // domain is one line — without forcing the evaluators to share a signature.
+    const categorySet = new Set<string>(recipe.categories ?? []);
+    const forCategory = <T>(category: string, evaluate: () => T): T | null =>
+      categorySet.has(category) ? evaluate() : null;
 
-    const isFrozen = (recipe.categories ?? []).includes('frozen');
-    let frozen: FrozenEvaluation | null = null;
-    if (isFrozen) {
-      frozen = evaluateFrozen({
-        recipe, aw,
-        resolved: resolvedIngredients,
-        ingredientCatalog: ingredientMap,
-      });
-    }
-
-    const isBread = (recipe.categories ?? []).includes('bread');
-    let bread: BreadEvaluation | null = null;
-    if (isBread) {
-      bread = evaluateBread({
-        recipe,
-        resolved: resolvedIngredients,
-        ingredientCatalog: ingredientMap,
-      });
-    }
+    const confectionery = forCategory('confectionery', () => evaluateConfectionery({
+      aw, pH, fatRegime, resolved: resolvedIngredients, ingredientCatalog: ingredientMap,
+    }));
+    const frozen = forCategory('frozen', () => evaluateFrozen({
+      recipe, aw, resolved: resolvedIngredients, ingredientCatalog: ingredientMap,
+    }));
+    const bread = forCategory('bread', () => evaluateBread({
+      recipe, resolved: resolvedIngredients, ingredientCatalog: ingredientMap,
+    }));
 
     // Process layer: integrate reaction kinetics over the recipe's bake T·time
     // profile (assembled from every component's steps; extent is order-independent,
