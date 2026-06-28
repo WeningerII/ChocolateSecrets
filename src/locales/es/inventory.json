@@ -132,5 +132,12 @@
     "errorImport": "Error al importar ingredientes."
   },
   "deleteTitle": "Eliminar Ubicación",
-  "deleteMessage": "¿Está seguro de que desea eliminar esta ubicación? Esto puede afectar los artículos de inventario almacenados aquí."
+  "deleteMessage": "¿Está seguro de que desea eliminar esta ubicación? Esto puede afectar los artículos de inventario almacenados aquí.",
+  "audit": {
+    "containers": "Cajas",
+    "pack": "Paq.",
+    "loose": "Suelto",
+    "countByContainer": "Contar por contenedor",
+    "directEntry": "Ingresar total directamente"
+  }
 }

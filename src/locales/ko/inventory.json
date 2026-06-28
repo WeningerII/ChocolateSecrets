@@ -132,5 +132,12 @@
     "errorImport": "재료 가져오기에 실패했습니다."
   },
   "deleteTitle": "위치 삭제",
-  "deleteMessage": "이 위치를 삭제하시겠습니까? 여기에 보관된 재고 품목에 영향을 줄 수 있습니다."
+  "deleteMessage": "이 위치를 삭제하시겠습니까? 여기에 보관된 재고 품목에 영향을 줄 수 있습니다.",
+  "audit": {
+    "containers": "박스",
+    "pack": "팩",
+    "loose": "낱개",
+    "countByContainer": "컨테이너 단위로 세기",
+    "directEntry": "총량 직접 입력"
+  }
 }

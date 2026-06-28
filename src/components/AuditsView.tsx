@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { db, auth, handleFirestoreError, reportFirestoreError, OperationType } from '../firebase';
-import { Audit, AuditItem, Location } from '../types';
-import { ClipboardCheck, Plus, Play, CheckCircle2, X } from 'lucide-react';
+import { Audit, AuditItem, Location, StockPosition } from '../types';
+import { ClipboardCheck, Plus, Play, CheckCircle2, X, Boxes } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../hooks/useLanguage';
 import { formatFirestoreDate } from '../utils/date';
 import { useData } from '../contexts/DataContext';
 import { updateLotQuantity } from '../utils/firestore';
+import { computeCountedQty, EMPTY_STOCK_COUNT } from '../utils/stockCount';
 
 interface AuditsViewProps {
   locations: Location[];
@@ -23,6 +24,8 @@ export default function AuditsView({ locations }: AuditsViewProps) {
   const [activeAudit, setActiveAudit] = useState<Audit | null>(null);
   const [isNewAuditModalOpen, setIsNewAuditModalOpen] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState<string>('');
+  // Lots the counter has switched into by-container entry mode (lotId set).
+  const [containerModeLots, setContainerModeLots] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const unsubscribeAudits = onSnapshot(
@@ -80,8 +83,11 @@ export default function AuditsView({ locations }: AuditsViewProps) {
 
     const updatedItems = audit.items.map(item => {
       if (item.lotId === lotId) {
+        // Direct number entry — drop any by-container breakdown so the two modes
+        // never disagree (count is rebuilt if the user switches back to containers).
+        const { count, ...rest } = item;
         return {
-          ...item,
+          ...rest,
           actualQty,
           variance: actualQty - item.expectedQty
         };
@@ -94,6 +100,36 @@ export default function AuditsView({ locations }: AuditsViewProps) {
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, 'audits');
     }
+  };
+
+  // By-container entry: store the breakdown and derive actualQty from it.
+  const handleUpdateAuditCount = async (auditId: string, lotId: string, count: StockPosition) => {
+    const audit = audits.find(a => a.id === auditId);
+    if (!audit) return;
+
+    const actualQty = computeCountedQty(count);
+    const updatedItems = audit.items.map(item =>
+      item.lotId === lotId
+        ? { ...item, count, actualQty, variance: actualQty - item.expectedQty }
+        : item
+    );
+
+    try {
+      await writeBatch(db).update(doc(db, 'audits', auditId), { items: updatedItems }).commit();
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'audits');
+    }
+  };
+
+  // Toggle a lot between direct-number and by-container entry. Leaving container
+  // mode keeps the running total but drops the breakdown.
+  const toggleContainerMode = (auditId: string, lotId: string, currentlyOn: boolean, currentActualQty: number | null) => {
+    setContainerModeLots(prev => {
+      const next = new Set(prev);
+      if (currentlyOn) next.delete(lotId); else next.add(lotId);
+      return next;
+    });
+    if (currentlyOn) handleUpdateAuditItem(auditId, lotId, currentActualQty ?? 0);
   };
 
   const handleCompleteAudit = async (audit: Audit) => {
@@ -209,6 +245,10 @@ export default function AuditsView({ locations }: AuditsViewProps) {
                 const lot = lots.find(l => l.id === item.lotId);
                 if (!ingredient || !lot) return null;
 
+                // A saved breakdown (item.count) keeps a row in container mode across reloads.
+                const inContainerMode = containerModeLots.has(item.lotId) || !!item.count;
+                const count = item.count ?? EMPTY_STOCK_COUNT;
+
                 return (
                   <tr key={item.lotId} className="hover:bg-stone-50">
                     <td className="px-6 py-4 whitespace-nowrap font-medium text-stone-900">
@@ -221,24 +261,62 @@ export default function AuditsView({ locations }: AuditsViewProps) {
                       {item.expectedQtyAtCompletion ?? item.expectedQty} {ingredient.unit}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {activeAudit.status === 'completed' ? (
-                          <span className="text-stone-900 font-medium">
-                            {item.actualQty !== null ? item.actualQty : '-'}
-                          </span>
-                        ) : (
+                      {activeAudit.status === 'completed' ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <span className="text-stone-900 font-medium">{item.actualQty !== null ? item.actualQty : '-'}</span>
+                          <span className="text-stone-500 text-sm w-8 text-left">{ingredient.unit}</span>
+                        </div>
+                      ) : inContainerMode ? (
+                        <div className="flex items-center justify-end gap-1">
                           <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.actualQty === null ? '' : item.actualQty}
+                            type="number" min="0" step="1" value={count.containerCount || ''}
+                            placeholder={t('inventory:audit.containers', 'Cases')}
+                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, containerCount: e.target.value ? Number(e.target.value) : 0 })}
+                            className="w-14 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                          <span className="text-stone-400 text-xs">×</span>
+                          <input
+                            type="number" min="0" step="0.01" value={count.unitsPerContainer || ''}
+                            placeholder={t('inventory:audit.pack', 'Pack')}
+                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, unitsPerContainer: e.target.value ? Number(e.target.value) : 0 })}
+                            className="w-16 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                          <span className="text-stone-400 text-xs">+</span>
+                          <input
+                            type="number" min="0" step="0.01" value={count.looseUnits || ''}
+                            placeholder={t('inventory:audit.loose', 'Loose')}
+                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, looseUnits: e.target.value ? Number(e.target.value) : 0 })}
+                            className="w-16 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                          <span className="text-stone-600 text-sm font-medium w-20 text-right">= {item.actualQty ?? 0} {ingredient.unit}</span>
+                          <button
+                            type="button"
+                            onClick={() => toggleContainerMode(activeAudit.id, item.lotId, true, item.actualQty)}
+                            title={t('inventory:audit.directEntry', 'Enter total directly')}
+                            className="p-1 text-amber-600 hover:text-amber-700"
+                          >
+                            <Boxes className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-2">
+                          <input
+                            type="number" min="0" step="0.01" value={item.actualQty === null ? '' : item.actualQty}
                             onChange={(e) => handleUpdateAuditItem(activeAudit.id, item.lotId, e.target.value ? Number(e.target.value) : 0)}
                             className="w-24 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
                             placeholder={t('inventory:count')}
                           />
-                        )}
-                        <span className="text-stone-500 text-sm w-8 text-left">{ingredient.unit}</span>
-                      </div>
+                          <span className="text-stone-500 text-sm w-8 text-left">{ingredient.unit}</span>
+                          <button
+                            type="button"
+                            onClick={() => toggleContainerMode(activeAudit.id, item.lotId, false, item.actualQty)}
+                            title={t('inventory:audit.countByContainer', 'Count by container')}
+                            className="p-1 text-stone-400 hover:text-amber-600"
+                          >
+                            <Boxes className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                       {activeAudit.status === 'completed' && item.varianceAtCompletion !== undefined ? (

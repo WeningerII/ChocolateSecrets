@@ -178,12 +178,18 @@ export interface Location {
   createdAt?: Timestamp | FieldValue;
 }
 
+/**
+ * A by-container stock count: `containerCount` full containers of
+ * `unitsPerContainer` each, plus any `looseUnits`. Embedded on `AuditItem.count`
+ * to record HOW a counted quantity was tallied — back-of-house counts by the case
+ * ("3 cases of 24 + 5 loose"), and the audit's `actualQty` is derived from it via
+ * computeCountedQty(). It is a count breakdown, not a separate stock ledger (the
+ * Lot quantity remains the single source of truth for how much is on hand).
+ */
 export interface StockPosition {
-  id: string;
-  locationId: string;
   containerCount: number;
   unitsPerContainer: number;
-  lotId?: string;
+  looseUnits: number;
 }
 
 export interface Lot {
@@ -225,6 +231,8 @@ export interface AuditItem {
   lotId: string;
   expectedQty: number; // Snapshot at start time
   actualQty: number | null;
+  /** Optional by-container breakdown the counter used to arrive at actualQty. */
+  count?: StockPosition;
   variance: number | null; // Stale start-time variance (can be omitted in newer versions but kept for backward compatibility)
   expectedQtyAtCompletion?: number; // Snapshot at completion time
   varianceAtCompletion?: number | null; // Actual variance computed at completion
