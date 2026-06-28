@@ -79,6 +79,13 @@ export function EditorFrozenStrip({ physics }: EditorFrozenStripProps) {
             </span>
           </div>
         </div>
+
+        {d.initialFreezingPointC !== null && (
+          <div className="flex items-center gap-1.5 border-l border-sky-200 pl-6" title={t('frozen.initialFreezingPoint', 'Initial freezing point')}>
+            <span className="text-slate-500">{t('frozen.freezingPoint', 'Freezing pt')}:</span>
+            <span className="font-mono font-semibold text-slate-700">{d.initialFreezingPointC.toFixed(1)}°C</span>
+          </div>
+        )}
       </div>
     </div>
   );

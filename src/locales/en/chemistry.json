@@ -612,6 +612,16 @@
       "sandiness_risk": "Lactose exceeds 11% of MSNF phase ({{pct}}%). Sandiness risk due to lactose crystallization.",
       "scoopability_brick": "PAC and structural factors indicate the mix will freeze solid (brick) at standard display cabinet temperatures.",
       "scoopability_soup": "PAC and structural factors indicate the mix will be too soft (soupy) at standard display cabinet temperatures."
+    },
+    "initialFreezingPoint": "Initial freezing point",
+    "frozenWaterAtServing": "% water frozen at serving",
+    "storageStability": "Storage stability (serving − Tg′)",
+    "idealColligative": "ideal colligative",
+    "freezingPoint": "Freezing pt",
+    "recipeSubtypeProvenance": {
+      "inferred_name": "Inferred from recipe name",
+      "inferred_composition": "Inferred from composition",
+      "fallback": "Default fallback"
     }
   },
   "bread": {

@@ -23,6 +23,11 @@ export function RecipeFrozenTier({ physics }: RecipeFrozenTierProps) {
         <span className="text-xs font-medium bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full uppercase tracking-wider ml-2">
           {t(`frozen.subtypes.${d.recipeSubtype}`, d.recipeSubtype.replace('_', ' '))}
         </span>
+        {d.recipeSubtypeProvenance !== 'declared' && (
+          <span className="text-[10px] italic text-slate-500 ml-1">
+            {t(`frozen.recipeSubtypeProvenance.${d.recipeSubtypeProvenance}`, d.recipeSubtypeProvenance.replace('_', ' '))}
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -112,8 +117,8 @@ export function RecipeFrozenTier({ physics }: RecipeFrozenTierProps) {
               {t('frozen.serving_temp', 'Rec. Serving Temp')}
             </span>
             <span className="text-sm font-semibold text-slate-700">
-              {d.recipeSubtype === 'gelato' ? '-11°C to -15°C' : 
-               d.recipeSubtype === 'ice_cream' ? '-14°C to -18°C' : 
+              {d.recipeSubtype === 'gelato' ? '-11°C to -15°C' :
+               d.recipeSubtype === 'ice_cream' ? '-14°C to -18°C' :
                d.recipeSubtype === 'sorbet' ? '-12°C to -16°C' :
                d.recipeSubtype === 'granita' ? '-4°C to -8°C' :
                '-12°C to -18°C'}
@@ -121,6 +126,46 @@ export function RecipeFrozenTier({ physics }: RecipeFrozenTierProps) {
           </div>
         </div>
       </div>
+
+      {/* Serum physics: colligative freezing curve + storage stability. Computed by
+          evaluateFrozen (computeFreezing / Tg′); null when there is no aqueous data. */}
+      {(d.initialFreezingPointC !== null || d.frozenWaterPctAtServing !== null || d.recrystallizationMarginC !== null) && (
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+          {d.initialFreezingPointC !== null && (
+            <FrozenStat
+              label={t('frozen.initialFreezingPoint', 'Initial freezing point')}
+              value={`${d.initialFreezingPointC.toFixed(1)}°C`}
+              caption={t('frozen.idealColligative', 'ideal colligative')}
+            />
+          )}
+          {d.frozenWaterPctAtServing !== null && (
+            <FrozenStat
+              label={t('frozen.frozenWaterAtServing', '% water frozen at serving')}
+              value={`${Math.round(d.frozenWaterPctAtServing)}%`}
+              caption={d.frozenWaterScoopability
+                ? t(`frozen.scoop_${d.frozenWaterScoopability}`, d.frozenWaterScoopability.replace('_', ' '))
+                : undefined}
+            />
+          )}
+          {d.recrystallizationMarginC !== null && (
+            <FrozenStat
+              label={t('frozen.storageStability', 'Storage stability (serving − Tg′)')}
+              value={`${d.recrystallizationMarginC.toFixed(1)}°C`}
+              caption={d.tgPrimeC !== null ? `Tg′ ${d.tgPrimeC.toFixed(1)}°C` : undefined}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FrozenStat({ label, value, caption }: { label: string; value: string; caption?: string }) {
+  return (
+    <div className="bg-white rounded p-4 border border-slate-100 shadow-sm flex flex-col items-center text-center">
+      <span className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">{label}</span>
+      <span className="text-2xl font-bold text-slate-700">{value}</span>
+      {caption && <span className="text-xs text-slate-400 mt-1">{caption}</span>}
     </div>
   );
 }

@@ -612,6 +612,16 @@
       "sandiness_risk": "La lactosa supera el 11 % de la fase SNGM ({{pct}} %). Riesgo de textura arenosa.",
       "scoopability_brick": "El PAC y los componentes estructurales indican que se congelará como una piedra en la vitrina estándar.",
       "scoopability_soup": "El PAC y los componentes indican que será demasiado blando a temperatura de vitrina."
+    },
+    "initialFreezingPoint": "Punto de congelación inicial",
+    "frozenWaterAtServing": "% de agua congelada al servir",
+    "storageStability": "Estabilidad en almacenamiento (servicio − Tg′)",
+    "idealColligative": "coligativo ideal",
+    "freezingPoint": "Pto. congelación",
+    "recipeSubtypeProvenance": {
+      "inferred_name": "Deducido por el nombre de la receta",
+      "inferred_composition": "Deducido por la composición",
+      "fallback": "Valor por defecto"
     }
   },
   "bread": {
