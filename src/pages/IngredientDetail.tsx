@@ -27,7 +27,7 @@ export default function IngredientDetail() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation(['ingredients', 'common', 'inventory', 'auth']);
   const language = useLanguage();
-  const { ingredients, lots, locations, suppliers, loading } = useData();
+  const { ingredients, lots, locations, suppliers, loading, getLocation, getLotsForIngredient } = useData();
   const { toast } = useToast();
 
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
@@ -62,7 +62,7 @@ export default function IngredientDetail() {
     );
   }
 
-  const activeLots = lots.filter(l => l.ingredientId === ingredient.id && l.quantity > 0);
+  const activeLots = getLotsForIngredient(ingredient.id).filter(l => l.quantity > 0);
 
   const openEditModal = () => {
     setFormData({
@@ -313,7 +313,7 @@ export default function IngredientDetail() {
               </thead>
               <tbody className="bg-white divide-y divide-stone-200">
                 {activeLots.map(lot => {
-                  const location = locations.find(l => l.id === lot.locationId);
+                  const location = getLocation(lot.locationId);
                   const receivedDate = formatFirestoreDate(lot.receivedAt, language, t('common:dates.unknown'));
                   const expirationDate = formatFirestoreDate(lot.expiresAt, language, t('common:dates.none'));
                   const utilization = Math.min(100, Math.max(0, (lot.quantity / (lot.initialQuantity || lot.quantity)) * 100));

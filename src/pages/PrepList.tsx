@@ -35,7 +35,7 @@ export default function PrepList() {
   const { t, i18n } = useTranslation(['prep', 'common', 'shoppingList', 'recipes', 'auth']);
   const language = useLanguage();
   const { toast } = useToast();
-  const { recipes, ingredients, locations, lots, loading: dataLoading, getIngredient, getRecipe } = useData();
+  const { recipes, ingredients, locations, lots, loading: dataLoading, getIngredient, getRecipe, getLotsForIngredient } = useData();
   const [productionRuns, setProductionRuns] = useState<ProductionRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
@@ -197,7 +197,7 @@ export default function PrepList() {
         const ingredient = getIngredient(ingredientId);
         if (!ingredient) continue;
 
-        const ingredientLots = lots.filter(l => l.ingredientId === ingredientId);
+        const ingredientLots = getLotsForIngredient(ingredientId);
         const lotsCopy = ingredientLots.map(lot => ({ ...lot }));
         const { modifiedLots, consumedLots } = depleteStock(lotsCopy, requiredQty);
         
