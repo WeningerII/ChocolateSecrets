@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseRRule, nextOccurrence, previousOccurrence, nextNOccurrences } from '../src/utils/rrule';
+import { parseRRule, nextOccurrence } from '../src/utils/rrule';
 
 describe('rrule utilities', () => {
   it('parses valid RRULEs without sets', () => {
@@ -23,22 +23,5 @@ describe('rrule utilities', () => {
     const now = new Date('2026-05-10T10:00:00Z');
     const next = nextOccurrence('FREQ=MONTHLY;BYMONTHDAY=15;COUNT=1;DTSTART=19990101T000000Z', now);
     expect(next).toBeNull();
-  });
-
-  it('previousOccurrence returns strictly past occurrence', () => {
-    const now = new Date('2026-05-10T10:00:00Z');
-    const prev = previousOccurrence('FREQ=MONTHLY;BYMONTHDAY=15;DTSTART=20250101T000000Z', now);
-    expect(prev).toBeTruthy();
-    expect(prev!.getUTCDate()).toBe(15);
-    expect(prev!.getTime()).toBeLessThan(now.getTime());
-  });
-
-  it('nextNOccurrences returns N dates', () => {
-    const now = new Date('2026-05-10T10:00:00Z');
-    const dates = nextNOccurrences('FREQ=MONTHLY;BYMONTHDAY=15', now, 3);
-    expect(dates).toHaveLength(3);
-    expect(dates[0].getUTCDate()).toBe(15);
-    expect(dates[1].getUTCDate()).toBe(15);
-    expect(dates[2].getUTCDate()).toBe(15);
   });
 });

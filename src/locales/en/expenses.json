@@ -92,7 +92,9 @@
     "saveError": "Could not save vendor",
     "nameRequired": "Name is required",
     "categoryRequired": "Category is required",
-    "recurringFromVendor": "Recurring bills from this vendor"
+    "recurringFromVendor": "Recurring bills from this vendor",
+    "addRecurring": "Add recurring",
+    "noRecurring": "None yet"
   },
   "list": {
     "billsEmpty": "No bills yet. Upload your first bill to get started.",

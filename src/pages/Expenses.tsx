@@ -31,6 +31,7 @@ export default function Expenses() {
 
   const [recurringFormOpen, setRecurringFormOpen] = useState(false);
   const [editingRecurring, setEditingRecurring] = useState<RecurringExpectation | undefined>();
+  const [prefilledRecurringVendorId, setPrefilledRecurringVendorId] = useState<string | undefined>();
 
   const [paymentFormOpen, setPaymentFormOpen] = useState(false);
 
@@ -103,6 +104,7 @@ export default function Expenses() {
 
   const handleRecurringCardClick = (expectation: RecurringExpectation) => {
     setEditingRecurring(expectation);
+    setPrefilledRecurringVendorId(undefined);
     setRecurringFormOpen(true);
   };
 
@@ -140,6 +142,7 @@ export default function Expenses() {
               <button
                 onClick={() => {
                   setEditingRecurring(undefined);
+                  setPrefilledRecurringVendorId(undefined);
                   setRecurringFormOpen(true);
                 }}
                 className="flex items-center gap-2 bg-copper hover:bg-copper-dark text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm"
@@ -233,15 +236,23 @@ export default function Expenses() {
         isOpen={vendorFormOpen}
         onClose={() => setVendorFormOpen(false)}
         existingVendor={editingVendor}
+        onAddRecurring={(vendorId) => {
+          setVendorFormOpen(false);
+          setEditingRecurring(undefined);
+          setPrefilledRecurringVendorId(vendorId);
+          setActiveTab('recurring');
+          setRecurringFormOpen(true);
+        }}
         onSaved={() => {
           setVendorFormOpen(false);
         }}
       />
-      
+
       <RecurringExpectationForm
         isOpen={recurringFormOpen}
         onClose={() => setRecurringFormOpen(false)}
         existing={editingRecurring}
+        prefilledVendorId={prefilledRecurringVendorId}
         onSaved={() => {
           setRecurringFormOpen(false);
         }}

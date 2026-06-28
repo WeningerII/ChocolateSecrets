@@ -17,10 +17,13 @@ interface VendorFormProps {
     address?: string;
     accountIdentifier?: string;
   };
+  /** When provided (e.g. from the Expenses page), shows an "Add recurring" action
+   *  that opens the recurring-expectation form pre-seeded to this vendor. */
+  onAddRecurring?: (vendorId: string) => void;
   onSaved: (vendor: Vendor) => void;
 }
 
-export default function VendorForm({ isOpen, onClose, existingVendor, prefilledFromExtraction, onSaved }: VendorFormProps) {
+export default function VendorForm({ isOpen, onClose, existingVendor, prefilledFromExtraction, onAddRecurring, onSaved }: VendorFormProps) {
   const { t } = useTranslation(['expenses']);
   const { toast } = useToast();
   
@@ -233,23 +236,38 @@ export default function VendorForm({ isOpen, onClose, existingVendor, prefilledF
               />
             </div>
 
-            {existingVendor && vendorRecurring.length > 0 && (
+            {existingVendor && (onAddRecurring || vendorRecurring.length > 0) && (
               <div>
-                <label className="block text-sm font-medium text-cocoa-700 mb-1">
-                  {t('expenses:vendorForm.recurringFromVendor', 'Recurring bills from this vendor')}
-                </label>
-                <ul className="space-y-1 text-sm text-cocoa-600 bg-cocoa-50 rounded-xl p-3 border border-cocoa-100">
-                  {vendorRecurring.map(exp => {
-                    let cadence = '';
-                    try { cadence = parseRRule(exp.rrule).toText(); } catch { cadence = exp.rrule; }
-                    return (
-                      <li key={exp.id} className="flex justify-between gap-2">
-                        <span className="capitalize">{cadence}</span>
-                        <span className="font-mono">{`$${exp.expectedAmount.toFixed(2)}`}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-cocoa-700">
+                    {t('expenses:vendorForm.recurringFromVendor', 'Recurring bills from this vendor')}
+                  </label>
+                  {onAddRecurring && existingVendor.id && (
+                    <button
+                      type="button"
+                      onClick={() => onAddRecurring(existingVendor.id!)}
+                      className="text-xs px-2 py-1 text-copper hover:text-copper-dark font-medium"
+                    >
+                      + {t('expenses:vendorForm.addRecurring', 'Add recurring')}
+                    </button>
+                  )}
+                </div>
+                {vendorRecurring.length > 0 ? (
+                  <ul className="space-y-1 text-sm text-cocoa-600 bg-cocoa-50 rounded-xl p-3 border border-cocoa-100">
+                    {vendorRecurring.map(exp => {
+                      let cadence = '';
+                      try { cadence = parseRRule(exp.rrule).toText(); } catch { cadence = exp.rrule; }
+                      return (
+                        <li key={exp.id} className="flex justify-between gap-2">
+                          <span className="capitalize">{cadence}</span>
+                          <span className="font-mono">{`$${exp.expectedAmount.toFixed(2)}`}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-cocoa-400 italic">{t('expenses:vendorForm.noRecurring', 'None yet')}</p>
+                )}
               </div>
             )}
 

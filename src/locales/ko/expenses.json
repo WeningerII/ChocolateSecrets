@@ -92,7 +92,9 @@
     "saveError": "Could not save vendor",
     "nameRequired": "Name is required",
     "categoryRequired": "Category is required",
-    "recurringFromVendor": "이 공급업체의 정기 청구서"
+    "recurringFromVendor": "이 공급업체의 정기 청구서",
+    "addRecurring": "정기 항목 추가",
+    "noRecurring": "아직 없음"
   },
   "list": {
     "billsEmpty": "No bills yet. Upload your first bill to get started.",
