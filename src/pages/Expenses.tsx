@@ -13,6 +13,7 @@ import RecurringExpectationForm from '../components/RecurringExpectationForm';
 import { Bill, Vendor, RecurringExpectation } from '../types';
 import { ExtractedBillResult, getBill } from '../services/billsService';
 import { getRecurringExpectation } from '../services/recurringExpectationsService';
+import { getVendor } from '../services/vendorsService';
 import { UploadCloud, Store, Wallet, CalendarDays } from 'lucide-react';
 
 export default function Expenses() {
@@ -37,13 +38,15 @@ export default function Expenses() {
   const handledDeepLink = useRef<string | null>(null);
 
   // Consume alert deep-links. AlertsBell navigates to /expenses?reviewBill=<id>
-  // (due-soon + anomaly alerts) or /expenses?recurringExpectation=<id> (missing-bill
-  // alerts). Open the referenced record once, switch to its tab, then strip the
-  // query param so it does not re-open on re-render or after the modal is closed.
+  // (due-soon + anomaly alerts), /expenses?recurringExpectation=<id> (missing-bill
+  // alerts), or /expenses?editVendor=<id> (vendor alerts). Open the referenced
+  // record once, switch to its tab, then strip the query param so it does not
+  // re-open on re-render or after the modal is closed.
   useEffect(() => {
     const billId = searchParams.get('reviewBill');
     const expectationId = searchParams.get('recurringExpectation');
-    const token = billId ? `bill:${billId}` : expectationId ? `exp:${expectationId}` : null;
+    const vendorId = searchParams.get('editVendor');
+    const token = billId ? `bill:${billId}` : expectationId ? `exp:${expectationId}` : vendorId ? `vendor:${vendorId}` : null;
     if (!token || handledDeepLink.current === token) return;
     handledDeepLink.current = token;
 
@@ -62,12 +65,20 @@ export default function Expenses() {
         setEditingRecurring(exp);
         setRecurringFormOpen(true);
       });
+    } else if (vendorId) {
+      setActiveTab('vendors');
+      getVendor(vendorId).then((vendor) => {
+        if (!vendor) return;
+        setEditingVendor(vendor);
+        setVendorFormOpen(true);
+      });
     }
 
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       next.delete('reviewBill');
       next.delete('recurringExpectation');
+      next.delete('editVendor');
       return next;
     }, { replace: true });
   }, [searchParams, setSearchParams]);

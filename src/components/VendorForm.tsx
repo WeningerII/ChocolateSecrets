@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Vendor, ExpenseCategory } from '../types';
+import { Vendor, ExpenseCategory, RecurringExpectation } from '../types';
 import { createVendor, updateVendor, listExpenseCategories } from '../services/vendorsService';
+import { listRecurringExpectationsForVendor } from '../services/recurringExpectationsService';
+import { parseRRule } from '../utils/rrule';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useToast } from '../contexts/ToastContext';
@@ -34,10 +36,15 @@ export default function VendorForm({ isOpen, onClose, existingVendor, prefilledF
   
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [saving, setSaving] = useState(false);
+  const [vendorRecurring, setVendorRecurring] = useState<RecurringExpectation[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       listExpenseCategories().then(setCategories).catch(console.error);
+      setVendorRecurring([]);
+      if (existingVendor?.id) {
+        listRecurringExpectationsForVendor(existingVendor.id).then(setVendorRecurring).catch(console.error);
+      }
       if (existingVendor) {
         setName(existingVendor.name || '');
         setExpenseCategoryId(existingVendor.expenseCategoryId || '');
@@ -225,7 +232,27 @@ export default function VendorForm({ isOpen, onClose, existingVendor, prefilledF
                 className="w-full border border-cocoa-100 rounded-xl px-3 py-2 focus:border-copper focus:outline-none focus:ring-2 focus:ring-copper/20 resize-none"
               />
             </div>
-            
+
+            {existingVendor && vendorRecurring.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-cocoa-700 mb-1">
+                  {t('expenses:vendorForm.recurringFromVendor', 'Recurring bills from this vendor')}
+                </label>
+                <ul className="space-y-1 text-sm text-cocoa-600 bg-cocoa-50 rounded-xl p-3 border border-cocoa-100">
+                  {vendorRecurring.map(exp => {
+                    let cadence = '';
+                    try { cadence = parseRRule(exp.rrule).toText(); } catch { cadence = exp.rrule; }
+                    return (
+                      <li key={exp.id} className="flex justify-between gap-2">
+                        <span className="capitalize">{cadence}</span>
+                        <span className="font-mono">{`$${exp.expectedAmount.toFixed(2)}`}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mt-4">
               <input
                 type="checkbox"

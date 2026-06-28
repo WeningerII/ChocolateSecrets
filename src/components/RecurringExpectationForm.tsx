@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { RecurringExpectation, Vendor, ExpenseCategory } from '../types';
-import { createRecurringExpectation, updateRecurringExpectation } from '../services/recurringExpectationsService';
+import { createRecurringExpectation, updateRecurringExpectation, deleteRecurringExpectation } from '../services/recurringExpectationsService';
 import { listVendors, listExpenseCategories } from '../services/vendorsService';
 import { parseRRule, nextNOccurrences } from '../utils/rrule';
 import { format } from 'date-fns';
@@ -199,6 +199,21 @@ export default function RecurringExpectationForm({ isOpen, onClose, existing, pr
       setSaving(false);
     }
   }
+
+  const handleDelete = async () => {
+    if (!existing?.id) return;
+    if (!window.confirm(t('expenses:recurring.form.confirmDelete', 'Delete this recurring expectation? This stops its missing-bill alerts.'))) return;
+    setSaving(true);
+    try {
+      await deleteRecurringExpectation(existing.id);
+      toast.success(t('expenses:recurring.form.deletedToast', 'Recurring expectation deleted'));
+      onClose(); // closing the form remounts the list (key flip in Expenses) → refetch
+    } catch (err) {
+      console.error(err);
+      toast.error(t('expenses:recurring.form.deleteError', 'Failed to delete recurring expectation'));
+      setSaving(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -420,21 +435,34 @@ export default function RecurringExpectationForm({ isOpen, onClose, existing, pr
             <div className="h-4"></div>
           </div>
 
-          <div className="p-6 border-t border-cocoa-100 flex justify-end gap-3 bg-cocoa-100 shrink-0">
-            <button
-              onClick={onClose}
-              disabled={saving}
-              className="px-4 py-2 text-sm font-medium text-cocoa-700 bg-white border border-cocoa-200 rounded-lg hover:bg-cocoa-100 transition-colors"
-            >
-              {t('expenses:actions.cancel')}
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving || !!preview?.error}
-              className="px-4 py-2 text-sm font-medium text-white bg-copper rounded-lg hover:bg-copper-dark transition-colors disabled:opacity-50"
-            >
-              {existing ? t('expenses:actions.save') : t('expenses:actions.save')}
-            </button>
+          <div className="p-6 border-t border-cocoa-100 flex justify-between items-center gap-3 bg-cocoa-100 shrink-0">
+            <div>
+              {existing?.id && (
+                <button
+                  onClick={handleDelete}
+                  disabled={saving}
+                  className="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                >
+                  {t('expenses:recurring.form.deleteButton', 'Delete')}
+                </button>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                disabled={saving}
+                className="px-4 py-2 text-sm font-medium text-cocoa-700 bg-white border border-cocoa-200 rounded-lg hover:bg-cocoa-100 transition-colors"
+              >
+                {t('expenses:actions.cancel')}
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !!preview?.error}
+                className="px-4 py-2 text-sm font-medium text-white bg-copper rounded-lg hover:bg-copper-dark transition-colors disabled:opacity-50"
+              >
+                {existing ? t('expenses:actions.save') : t('expenses:actions.save')}
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

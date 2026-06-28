@@ -91,7 +91,8 @@
     "savedToast": "Vendor saved",
     "saveError": "Could not save vendor",
     "nameRequired": "Name is required",
-    "categoryRequired": "Category is required"
+    "categoryRequired": "Category is required",
+    "recurringFromVendor": "Facturas recurrentes de este proveedor"
   },
   "list": {
     "billsEmpty": "No bills yet. Upload your first bill to get started.",
@@ -201,14 +202,19 @@
       "expectedAmountInvalid": "Expected amount must be positive",
       "rruleEmpty": "Cadence is required",
       "savedToast": "Recurring expectation saved",
-      "saveError": "Could not save recurring expectation"
+      "saveError": "Could not save recurring expectation",
+      "deleteButton": "Eliminar",
+      "confirmDelete": "¿Eliminar esta expectativa recurrente? Esto detiene sus alertas de facturas faltantes.",
+      "deletedToast": "Expectativa recurrente eliminada",
+      "deleteError": "No se pudo eliminar la expectativa recurrente"
     },
     "card": {
       "active": "Active",
       "inactive": "Inactive",
       "nextExpected": "Next expected: {{date}} ({{relative}})",
       "lastSatisfied": "Last satisfied: {{date}} by invoice {{invoice}}",
-      "neverSatisfied": "No bill has satisfied this expectation yet"
+      "neverSatisfied": "No bill has satisfied this expectation yet",
+      "overdue": "Atrasada"
     }
   },
   "errors": {

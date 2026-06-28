@@ -4,7 +4,7 @@ import { format, formatDistanceToNowStrict } from 'date-fns';
 import { RecurringExpectation, Vendor } from '../types';
 import { listRecurringExpectations } from '../services/recurringExpectationsService';
 import { listVendors } from '../services/vendorsService';
-import { parseRRule } from '../utils/rrule';
+import { parseRRule, previousOccurrence } from '../utils/rrule';
 import { useToast } from '../contexts/ToastContext';
 
 interface RecurringExpectationsListProps {
@@ -73,6 +73,19 @@ export default function RecurringExpectationsList({ onCardClick }: RecurringExpe
 
         const amtStr = `≈ $${exp.expectedAmount.toFixed(2)} ± $${exp.tolerance.amountToleranceBand.low} / $${exp.tolerance.amountToleranceBand.high}`;
         
+        // Overdue: an active, never-satisfied expectation whose previous expected
+        // window has already passed (and post-dates its creation, so brand-new
+        // expectations aren't falsely flagged).
+        let overdue = false;
+        if (exp.isActive && !exp.lastSatisfiedBillId) {
+          const createdSec = (exp.createdAt as any)?._seconds ?? (exp.createdAt as any)?.seconds;
+          const createdDate = createdSec ? new Date(createdSec * 1000) : null;
+          try {
+            const prev = previousOccurrence(exp.rrule, new Date());
+            if (prev && (!createdDate || prev > createdDate)) overdue = true;
+          } catch { /* unparseable rrule — leave not-overdue */ }
+        }
+
         const nextSec = (exp.nextExpectedDate as any)?._seconds ?? (exp.nextExpectedDate as any)?.seconds;
         const nextDate = nextSec ? new Date(nextSec * 1000) : null;
         let nextExpectedStr = '';
@@ -92,9 +105,16 @@ export default function RecurringExpectationsList({ onCardClick }: RecurringExpe
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-base font-semibold text-cocoa-900">{vendorName}</h3>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${exp.isActive ? 'bg-pistachio/20 text-pistachio-dark' : 'bg-cocoa-100 text-cocoa-500'}`}>
-                {exp.isActive ? t('expenses:recurring.card.active') : t('expenses:recurring.card.inactive')}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                {overdue && (
+                  <span className="text-xs px-2 py-1 rounded-full font-medium bg-red-100 text-red-700">
+                    {t('expenses:recurring.card.overdue', 'Overdue')}
+                  </span>
+                )}
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${exp.isActive ? 'bg-pistachio/20 text-pistachio-dark' : 'bg-cocoa-100 text-cocoa-500'}`}>
+                  {exp.isActive ? t('expenses:recurring.card.active') : t('expenses:recurring.card.inactive')}
+                </span>
+              </div>
             </div>
             
             <p className="text-sm font-medium text-cocoa-700 capitalize mb-1">

@@ -91,7 +91,8 @@
     "savedToast": "Vendor saved",
     "saveError": "Could not save vendor",
     "nameRequired": "Name is required",
-    "categoryRequired": "Category is required"
+    "categoryRequired": "Category is required",
+    "recurringFromVendor": "이 공급업체의 정기 청구서"
   },
   "list": {
     "billsEmpty": "No bills yet. Upload your first bill to get started.",
@@ -201,14 +202,19 @@
       "expectedAmountInvalid": "Expected amount must be positive",
       "rruleEmpty": "Cadence is required",
       "savedToast": "Recurring expectation saved",
-      "saveError": "Could not save recurring expectation"
+      "saveError": "Could not save recurring expectation",
+      "deleteButton": "삭제",
+      "confirmDelete": "이 정기 예상 항목을 삭제하시겠습니까? 누락 청구서 알림이 중지됩니다.",
+      "deletedToast": "정기 예상 항목이 삭제되었습니다",
+      "deleteError": "정기 예상 항목 삭제에 실패했습니다"
     },
     "card": {
       "active": "Active",
       "inactive": "Inactive",
       "nextExpected": "Next expected: {{date}} ({{relative}})",
       "lastSatisfied": "Last satisfied: {{date}} by invoice {{invoice}}",
-      "neverSatisfied": "No bill has satisfied this expectation yet"
+      "neverSatisfied": "No bill has satisfied this expectation yet",
+      "overdue": "기한 초과"
     }
   },
   "errors": {
