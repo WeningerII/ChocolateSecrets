@@ -89,6 +89,7 @@ export default function Ingredients() {
     stock: number;
     lowStockThreshold: number;
     parLevel?: number;
+    defaultPackSize?: number;
     category: string;
     costPerUnit?: number;
     supplier?: string;
@@ -112,6 +113,7 @@ export default function Ingredients() {
     stock: 0,
     lowStockThreshold: 0,
     parLevel: 0,
+    defaultPackSize: 0,
     category: '',
     costPerUnit: 0,
     supplier: '',
@@ -174,6 +176,7 @@ export default function Ingredients() {
         supplierId: finalSupplierId,
         lowStockThreshold: Number(formData.lowStockThreshold) || 0,
         parLevel: Number(formData.parLevel) || 0,
+        defaultPackSize: Number(formData.defaultPackSize) || 0,
         costPerUnit: Number(formData.costPerUnit) || 0,
         moq: Number(formData.moq) || 0,
         updatedAt: serverTimestamp()
@@ -254,6 +257,7 @@ export default function Ingredients() {
       stock: ingredient.stock || 0,
       lowStockThreshold: ingredient.lowStockThreshold || 0,
       parLevel: ingredient.parLevel || 0,
+      defaultPackSize: ingredient.defaultPackSize || 0,
       category: ingredient.category || '',
       costPerUnit: ingredient.costPerUnit || 0,
       supplier: ingredient.supplier || '',
@@ -732,6 +736,18 @@ export default function Ingredients() {
                     onChange={(e) => setFormData({ ...formData, parLevel: Number(e.target.value) })}
                     className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
                     placeholder={t('ingredients:placeholderParLevel')}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-stone-700 mb-1">{t('ingredients:defaultPackSize', 'Pack size (per case)')}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.defaultPackSize === 0 ? '' : formData.defaultPackSize}
+                    onChange={(e) => setFormData({ ...formData, defaultPackSize: Number(e.target.value) })}
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    placeholder={t('ingredients:placeholderDefaultPackSize', 'e.g. 24')}
                   />
                 </div>
               </div>

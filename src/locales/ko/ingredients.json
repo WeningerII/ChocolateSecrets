@@ -183,5 +183,7 @@
     "matched": "일치: {{description}} (FDC {{fdcId}})"
   },
   "usdaNoMatch": "USDA 스냅샷에서 일치하는 항목 없음",
-  "noData": "구성 데이터 없음."
+  "noData": "구성 데이터 없음.",
+  "defaultPackSize": "팩 크기 (박스당)",
+  "placeholderDefaultPackSize": "예: 24"
 }

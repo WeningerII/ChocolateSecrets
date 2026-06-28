@@ -248,6 +248,9 @@ export default function AuditsView({ locations }: AuditsViewProps) {
                 // A saved breakdown (item.count) keeps a row in container mode across reloads.
                 const inContainerMode = containerModeLots.has(item.lotId) || !!item.count;
                 const count = item.count ?? EMPTY_STOCK_COUNT;
+                // Pre-fill the pack size from the ingredient default until the counter
+                // overrides it; entering a container/loose count captures it on the breakdown.
+                const effectivePack = count.unitsPerContainer || ingredient.defaultPackSize || 0;
 
                 return (
                   <tr key={item.lotId} className="hover:bg-stone-50">
@@ -271,12 +274,12 @@ export default function AuditsView({ locations }: AuditsViewProps) {
                           <input
                             type="number" min="0" step="1" value={count.containerCount || ''}
                             placeholder={t('inventory:audit.containers', 'Cases')}
-                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, containerCount: e.target.value ? Number(e.target.value) : 0 })}
+                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, containerCount: e.target.value ? Number(e.target.value) : 0, unitsPerContainer: effectivePack })}
                             className="w-14 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
                           />
                           <span className="text-stone-400 text-xs">×</span>
                           <input
-                            type="number" min="0" step="0.01" value={count.unitsPerContainer || ''}
+                            type="number" min="0" step="0.01" value={count.unitsPerContainer || ingredient.defaultPackSize || ''}
                             placeholder={t('inventory:audit.pack', 'Pack')}
                             onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, unitsPerContainer: e.target.value ? Number(e.target.value) : 0 })}
                             className="w-16 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
@@ -285,7 +288,7 @@ export default function AuditsView({ locations }: AuditsViewProps) {
                           <input
                             type="number" min="0" step="0.01" value={count.looseUnits || ''}
                             placeholder={t('inventory:audit.loose', 'Loose')}
-                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, looseUnits: e.target.value ? Number(e.target.value) : 0 })}
+                            onChange={(e) => handleUpdateAuditCount(activeAudit.id, item.lotId, { ...count, looseUnits: e.target.value ? Number(e.target.value) : 0, unitsPerContainer: effectivePack })}
                             className="w-16 px-2 py-1 text-right border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
                           />
                           <span className="text-stone-600 text-sm font-medium w-20 text-right">= {item.actualQty ?? 0} {ingredient.unit}</span>

@@ -183,5 +183,7 @@
     "matched": "Encontrado: {{description}} (FDC {{fdcId}})"
   },
   "usdaNoMatch": "Sin coincidencia en el catálogo USDA",
-  "noData": "Sin datos de composición."
+  "noData": "Sin datos de composición.",
+  "defaultPackSize": "Tamaño de paquete (por caja)",
+  "placeholderDefaultPackSize": "p. ej. 24"
 }

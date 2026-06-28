@@ -277,6 +277,8 @@ export interface Ingredient {
   stock: number;
   lowStockThreshold: number;
   parLevel?: number;
+  /** Default units per container (case/box) — pre-fills the by-container audit count. */
+  defaultPackSize?: number;
   category?: string;
   costPerUnit?: number;
   weightedAverageCost?: number; // Added for advanced costing

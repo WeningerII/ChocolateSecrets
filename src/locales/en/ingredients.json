@@ -183,5 +183,7 @@
     "matched": "Matched: {{description}} (FDC {{fdcId}})"
   },
   "usdaNoMatch": "No match found in USDA snapshot",
-  "noData": "No composition data available."
+  "noData": "No composition data available.",
+  "defaultPackSize": "Pack size (per case)",
+  "placeholderDefaultPackSize": "e.g. 24"
 }
