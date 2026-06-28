@@ -1,7 +1,7 @@
 import type {
   Recipe, Ingredient, SearchDimension, UniversalRole,
 } from '../../../types';
-import { inferRole } from '../roles';
+import { inferRole, getRoleSwapSet } from '../roles';
 
 /**
  * Default tuning ranges per role. Used by deriveSearchSpace when the chef
@@ -90,10 +90,11 @@ export function deriveSearchSpace({
         }
       }
 
-      // 3) discrete_swap — find catalog entries that share role
-      const swapCandidates = catalog
+      // 3) discrete_swap — find catalog entries that share role (getRoleSwapSet
+      // applies the same role + 0.75-confidence filter; both filters preserve
+      // catalog order, so excluding self then taking the first 5 is equivalent).
+      const swapCandidates = getRoleSwapSet(role, catalog)
         .filter(i => i.id !== ri.ingredientId)
-        .filter(i => inferRole(i).role === role && inferRole(i).confidence >= 0.75)
         .slice(0, 5)         // cap at 5 alternatives + the base = 6 choices total
         .map(i => i.id);
       if (swapCandidates.length > 0) {

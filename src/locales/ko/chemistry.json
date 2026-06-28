@@ -749,7 +749,8 @@
       "variantSuffix": "변형",
       "derivedNote": "레시피 {{id}}에서 배합 최적화로 파생됨",
       "savedToast": "변형이 새 레시피로 저장되었습니다.",
-      "saveFailedToast": "저장 실패. 다시 시도하세요."
+      "saveFailedToast": "저장 실패. 다시 시도하세요.",
+      "basedOnLabel": "기준 레시피:"
     },
     "results": {
       "header": "상위 {{count}}개 후보"

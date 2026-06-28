@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../hooks/useLanguage';
 import { useRuntimeTranslation } from '../hooks/useRuntimeTranslation';
+import { getLocalizedText } from '../utils/localized';
 import { LocalizedString, SupportedLanguage } from '../types';
 
 interface LocalizedFieldProps {
@@ -78,11 +79,15 @@ export function resolveLocalized(
       ? { source: legacyText, sourceLanguage: legacyLanguage }
       : undefined;
   if (!effective || !effective.source) return { kind: 'empty' };
+  // getLocalizedText is the shared synchronous text extractor (source when the
+  // language matches, else the curated translation); resolveLocalized adds the
+  // kind classification on top so the component can fall through to runtime
+  // translation when no curated translation exists.
   if (effective.sourceLanguage === currentLanguage) {
-    return { kind: 'raw', text: effective.source };
+    return { kind: 'raw', text: getLocalizedText(effective, currentLanguage) };
   }
   const curated = effective.translations?.[currentLanguage];
-  if (curated) return { kind: 'curated', text: curated };
+  if (curated) return { kind: 'curated', text: getLocalizedText(effective, currentLanguage) };
   return { kind: 'runtime', source: effective.source, sourceLanguage: effective.sourceLanguage };
 }
 

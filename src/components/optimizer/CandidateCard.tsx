@@ -20,6 +20,9 @@ export function CandidateCard({ candidate, baseRecipe, onSaveAsNewRecipe }: Cand
             {t('optimizer.candidate.titlePrefix' as any)} {candidate.id.slice(0, 6)}
           </h3>
           <p className="text-[11px] text-cocoa-500 mt-0.5">
+            {t('optimizer.candidate.basedOnLabel' as any)} {baseRecipe.name}
+          </p>
+          <p className="text-[11px] text-cocoa-500 mt-0.5">
             {t('optimizer.candidate.closenessLabel' as any)}: {(candidate.topsisCloseness * 100).toFixed(0)}%
           </p>
         </div>

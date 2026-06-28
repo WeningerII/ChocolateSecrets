@@ -749,7 +749,8 @@
       "variantSuffix": "Variant",
       "derivedNote": "Derived from {{id}} by optimizer",
       "savedToast": "Saved!",
-      "saveFailedToast": "Failed!"
+      "saveFailedToast": "Failed!",
+      "basedOnLabel": "Based on"
     },
     "results": {
       "header": "Results ({{count}})"

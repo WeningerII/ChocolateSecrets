@@ -10,12 +10,11 @@
 //
 // The client-side equivalent in src/constants/gemini.ts will be retired
 // once all Gemini calls are server-side. Until then, keep them aligned.
-const DEFAULT_MODEL = 'gemini-3.1-pro-preview';
+
+/** Default Gemini model — the single source of truth; the GEMINI_MODEL env var
+ *  overrides it at runtime via getGeminiModel(). */
+export const GEMINI_MODEL = 'gemini-3.1-pro-preview';
 
 export function getGeminiModel(): string {
-  return process.env.GEMINI_MODEL || DEFAULT_MODEL;
+  return process.env.GEMINI_MODEL || GEMINI_MODEL;
 }
-
-// Legacy named export for any code that imports it as a const.
-// New code should call getGeminiModel() to pick up env overrides.
-export const GEMINI_MODEL = DEFAULT_MODEL;

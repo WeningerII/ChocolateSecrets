@@ -749,7 +749,8 @@
       "variantSuffix": "Variante",
       "derivedNote": "Derivada por el optimizador de formulación a partir de la receta {{id}}",
       "savedToast": "Variante guardada como nueva receta.",
-      "saveFailedToast": "Falló al guardar. Inténtalo de nuevo."
+      "saveFailedToast": "Falló al guardar. Inténtalo de nuevo.",
+      "basedOnLabel": "Basado en"
     },
     "results": {
       "header": "Top {{count}} candidatas"
