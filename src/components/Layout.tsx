@@ -2,7 +2,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Package, BookOpen, ClipboardList, LayoutDashboard, ShoppingCart, Building2, Globe, MapPin, History, BarChart3, LogIn, LogOut, User, Menu, X as CloseIcon, Settings, BookMarked, Receipt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { auth, signInWithGoogle, logOut } from '../firebase';
+import { auth, signInWithGoogle, signInAsGuest, logOut } from '../firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUserRole } from '../hooks/useUserRole';
@@ -21,7 +21,20 @@ export default function Layout() {
   const { alerts } = useAlerts();
 
   useEffect(() => {
+    let guestSignInFailed = false;
     const unsubscribe = onAuthStateChanged(auth, (u) => {
+      if (!u && !guestSignInFailed) {
+        // No session: start a guest one so the app is usable without Google
+        // sign-in. Keep the loading state until the guest session lands (the
+        // listener fires again with the anonymous user). If anonymous auth is
+        // disabled for the project, stop retrying and show the sign-in screen.
+        signInAsGuest().catch(() => {
+          guestSignInFailed = true;
+          setUser(null);
+          setAuthLoading(false);
+        });
+        return;
+      }
       setUser(u);
       setAuthLoading(false);
     });
@@ -112,6 +125,25 @@ export default function Layout() {
         <div className="px-3">
           {authLoading ? (
             <div className="h-10 bg-stone-100 animate-pulse rounded-xl" />
+          ) : user && user.isAnonymous ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 px-1">
+                <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-stone-900 truncate">{t('auth:guest')}</p>
+                  <p className="text-[10px] text-stone-500 truncate">{t('auth:guestHint')}</p>
+                </div>
+              </div>
+              <button
+                onClick={signInWithGoogle}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+              >
+                <LogIn className="w-4 h-4" />
+                {t('auth:login')}
+              </button>
+            </div>
           ) : user ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3 px-1">
@@ -239,13 +271,22 @@ export default function Layout() {
               <p className="text-stone-500 max-w-md mb-8">
                 {t('auth:pleaseLogin', 'Please log in using the button in the sidebar to access your workspace.')}
               </p>
-              <button
-                onClick={signInWithGoogle}
-                className="lg:hidden flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 text-white text-base font-medium rounded-xl transition-colors shadow-sm"
-              >
-                <LogIn className="w-5 h-5" />
-                {t('auth:login')}
-              </button>
+              <div className="flex flex-col items-center gap-3">
+                <button
+                  onClick={signInWithGoogle}
+                  className="lg:hidden flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 text-white text-base font-medium rounded-xl transition-colors shadow-sm"
+                >
+                  <LogIn className="w-5 h-5" />
+                  {t('auth:login')}
+                </button>
+                <button
+                  onClick={() => { signInAsGuest().catch(() => {}); }}
+                  className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-stone-100 text-stone-700 text-base font-medium rounded-xl transition-colors border border-stone-200 shadow-sm"
+                >
+                  <User className="w-5 h-5" />
+                  {t('auth:continueAsGuest')}
+                </button>
+              </div>
             </div>
           )}
         </div>
