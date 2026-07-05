@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInAnonymously, signInWithPopup, signOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import firebaseConfig from '../firebase-applet-config.json';
@@ -39,6 +39,20 @@ export const signInWithGoogle = async () => {
     await signInWithPopup(auth, provider);
   } catch (error) {
     console.error("Error signing in with Google", error);
+    throw error;
+  }
+};
+
+// Guest mode. An anonymous session satisfies every isAuthenticated() check in
+// the Firestore rules and Cloud Functions, so the app works without any Google
+// OAuth configuration. The only backend prerequisite is the Anonymous provider
+// toggle in Firebase console → Authentication → Sign-in method (no keys). If
+// that toggle is off, this rejects and the UI falls back to the sign-in screen.
+export const signInAsGuest = async () => {
+  try {
+    await signInAnonymously(auth);
+  } catch (error) {
+    console.error("Error starting guest session", error);
     throw error;
   }
 };

@@ -19,8 +19,11 @@ features (Google Gemini) proxied server-side.
 - **Food safety** — allergen and cross-contact tracking.
 - **Knowledge library** — reference content with vector embeddings for search.
 - **Localization** — multi-language UI via i18next.
-- **Access control** — Google sign-in with role-based access (admin/staff) enforced by
-  Firestore security rules.
+- **Access control** — optional Google sign-in with role-based access (admin/staff)
+  enforced by Firestore security rules. The app starts in **guest mode** (Firebase
+  anonymous auth) so no OAuth setup is needed to use it; Google sign-in only gates
+  admin features. Guest mode needs the Anonymous provider enabled once in
+  Firebase console → Authentication → Sign-in method (a toggle — no keys).
 
 AI calls run through Cloud Functions (`geminiGenerate`, `extractBill`, `translateBatch`);
 the `GEMINI_API_KEY` lives in Secret Manager and never reaches the browser.
