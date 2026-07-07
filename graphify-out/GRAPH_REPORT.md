@@ -4,104 +4,106 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 1767 nodes · 4801 edges · 98 communities (92 shown, 6 thin omitted)
+- 1767 nodes · 4801 edges · 100 communities (94 shown, 6 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.57)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ac6258f4`
+- Built from commit: `b855fe43`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Community 0|Community 0]]
-- [[_COMMUNITY_Community 1|Community 1]]
-- [[_COMMUNITY_Community 2|Community 2]]
-- [[_COMMUNITY_Community 3|Community 3]]
-- [[_COMMUNITY_Community 4|Community 4]]
-- [[_COMMUNITY_Community 5|Community 5]]
-- [[_COMMUNITY_Community 6|Community 6]]
-- [[_COMMUNITY_Community 7|Community 7]]
-- [[_COMMUNITY_Community 8|Community 8]]
-- [[_COMMUNITY_Community 9|Community 9]]
-- [[_COMMUNITY_Community 10|Community 10]]
-- [[_COMMUNITY_Community 11|Community 11]]
-- [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 13|Community 13]]
-- [[_COMMUNITY_Community 14|Community 14]]
-- [[_COMMUNITY_Community 15|Community 15]]
-- [[_COMMUNITY_Community 16|Community 16]]
-- [[_COMMUNITY_Community 17|Community 17]]
-- [[_COMMUNITY_Community 18|Community 18]]
-- [[_COMMUNITY_Community 19|Community 19]]
-- [[_COMMUNITY_Community 20|Community 20]]
-- [[_COMMUNITY_Community 21|Community 21]]
-- [[_COMMUNITY_Community 22|Community 22]]
-- [[_COMMUNITY_Community 23|Community 23]]
-- [[_COMMUNITY_Community 24|Community 24]]
-- [[_COMMUNITY_Community 25|Community 25]]
-- [[_COMMUNITY_Community 26|Community 26]]
-- [[_COMMUNITY_Community 27|Community 27]]
-- [[_COMMUNITY_Community 28|Community 28]]
-- [[_COMMUNITY_Community 29|Community 29]]
-- [[_COMMUNITY_Community 30|Community 30]]
-- [[_COMMUNITY_Community 31|Community 31]]
-- [[_COMMUNITY_Community 32|Community 32]]
-- [[_COMMUNITY_Community 33|Community 33]]
-- [[_COMMUNITY_Community 34|Community 34]]
-- [[_COMMUNITY_Community 35|Community 35]]
-- [[_COMMUNITY_Community 36|Community 36]]
-- [[_COMMUNITY_Community 37|Community 37]]
-- [[_COMMUNITY_Community 38|Community 38]]
-- [[_COMMUNITY_Community 39|Community 39]]
-- [[_COMMUNITY_Community 40|Community 40]]
-- [[_COMMUNITY_Community 41|Community 41]]
-- [[_COMMUNITY_Community 42|Community 42]]
-- [[_COMMUNITY_Community 43|Community 43]]
-- [[_COMMUNITY_Community 44|Community 44]]
-- [[_COMMUNITY_Community 45|Community 45]]
-- [[_COMMUNITY_Community 46|Community 46]]
-- [[_COMMUNITY_Community 47|Community 47]]
-- [[_COMMUNITY_Community 48|Community 48]]
-- [[_COMMUNITY_Community 49|Community 49]]
-- [[_COMMUNITY_Community 50|Community 50]]
-- [[_COMMUNITY_Community 51|Community 51]]
-- [[_COMMUNITY_Community 52|Community 52]]
-- [[_COMMUNITY_Community 53|Community 53]]
-- [[_COMMUNITY_Community 54|Community 54]]
-- [[_COMMUNITY_Community 55|Community 55]]
-- [[_COMMUNITY_Community 56|Community 56]]
-- [[_COMMUNITY_Community 57|Community 57]]
-- [[_COMMUNITY_Community 58|Community 58]]
-- [[_COMMUNITY_Community 59|Community 59]]
-- [[_COMMUNITY_Community 60|Community 60]]
-- [[_COMMUNITY_Community 61|Community 61]]
-- [[_COMMUNITY_Community 62|Community 62]]
-- [[_COMMUNITY_Community 63|Community 63]]
-- [[_COMMUNITY_Community 64|Community 64]]
-- [[_COMMUNITY_Community 65|Community 65]]
-- [[_COMMUNITY_Community 66|Community 66]]
-- [[_COMMUNITY_Community 67|Community 67]]
-- [[_COMMUNITY_Community 68|Community 68]]
-- [[_COMMUNITY_Community 69|Community 69]]
-- [[_COMMUNITY_Community 70|Community 70]]
-- [[_COMMUNITY_Community 71|Community 71]]
-- [[_COMMUNITY_Community 72|Community 72]]
-- [[_COMMUNITY_Community 73|Community 73]]
-- [[_COMMUNITY_Community 74|Community 74]]
-- [[_COMMUNITY_Community 75|Community 75]]
-- [[_COMMUNITY_Community 76|Community 76]]
-- [[_COMMUNITY_Community 77|Community 77]]
-- [[_COMMUNITY_Community 78|Community 78]]
-- [[_COMMUNITY_Community 79|Community 79]]
-- [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
-- [[_COMMUNITY_Community 82|Community 82]]
-- [[_COMMUNITY_Community 83|Community 83]]
-- [[_COMMUNITY_Community 84|Community 84]]
-- [[_COMMUNITY_Community 85|Community 85]]
-- [[_COMMUNITY_Community 86|Community 86]]
-- [[_COMMUNITY_Community 90|Community 90]]
+- Community 0
+- Community 1
+- Community 2
+- Community 3
+- Community 4
+- Community 5
+- Community 6
+- Community 7
+- Community 8
+- Community 9
+- Community 10
+- Community 11
+- Community 12
+- Community 13
+- Community 14
+- Community 15
+- Community 16
+- Community 17
+- Community 18
+- Community 19
+- Community 20
+- Community 21
+- Community 22
+- Community 23
+- Community 24
+- Community 25
+- Community 26
+- Community 27
+- Community 28
+- Community 29
+- Community 30
+- Community 31
+- Community 32
+- Community 33
+- Community 34
+- Community 35
+- Community 36
+- Community 37
+- Community 38
+- Community 39
+- Community 40
+- Community 41
+- Community 42
+- Community 43
+- Community 44
+- Community 45
+- Community 46
+- Community 47
+- Community 48
+- Community 49
+- Community 50
+- Community 51
+- Community 52
+- Community 53
+- Community 54
+- Community 55
+- Community 56
+- Community 57
+- Community 58
+- Community 59
+- Community 60
+- Community 61
+- Community 62
+- Community 63
+- Community 64
+- Community 65
+- Community 66
+- Community 67
+- Community 68
+- Community 69
+- Community 70
+- Community 71
+- Community 72
+- Community 73
+- Community 74
+- Community 75
+- Community 76
+- Community 77
+- Community 78
+- Community 79
+- Community 80
+- Community 81
+- Community 82
+- Community 83
+- Community 84
+- Community 85
+- Community 86
+- Community 87
+- Community 88
+- Community 92
 
 ## God Nodes (most connected - your core abstractions)
 1. `Ingredient` - 91 edges
@@ -130,11 +132,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (98 total, 6 thin omitted)
+## Communities (100 total, 6 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (67): dependencies, firebase-admin, firebase-functions, @google/genai, BillPaymentHistory(), BillPaymentHistoryProps, BillReview(), BillReviewProps (+59 more)
+Nodes (68): dependencies, firebase-admin, firebase-functions, @google/genai, rrule, BillPaymentHistory(), BillPaymentHistoryProps, BillReview() (+60 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -169,12 +171,12 @@ Cohesion: 0.13
 Nodes (27): FROZEN_BANDS_BY_SUBTYPE, PAC_FACTORS, POD_FACTORS, TARGET_FROZEN_WATER_PCT_BY_SUBTYPE, evaluateFrozen(), inferFrozenRecipeSubtype(), calculateLactosePct(), calculateMSNF() (+19 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.05
-Nodes (39): devDependencies, firebase-admin, @firebase/eslint-plugin-security-rules, @firebase/rules-unit-testing, jsdom, @playwright/test, tailwindcss, @testing-library/react (+31 more)
-
-### Community 10 - "Community 10"
 Cohesion: 0.06
 Nodes (25): Dashboard, Expenses, Formulate, IngredientDetail, Ingredients, Inventory, InventoryTransactions, PrepList (+17 more)
+
+### Community 10 - "Community 10"
+Cohesion: 0.15
+Nodes (23): AuditsViewProps, ConfirmModalProps, PurchaseOrderModal(), PurchaseOrderModalProps, ReceiveGoodsModalProps, ReceivePOModal(), ReceivePOModalProps, TransfersViewProps (+15 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.16
@@ -193,8 +195,8 @@ Cohesion: 0.07
 Nodes (29): RecipeCategoryPicker(), RecipeCategoryPickerProps, AlertType, Audit, AuditItem, BillAllocation, BillLineItem, BillPaymentInstruction (+21 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.23
-Nodes (21): AuditsView(), AuditsViewProps, TransfersView(), TransfersViewProps, DataContext, DataContextValue, DataProvider(), useData() (+13 more)
+Cohesion: 0.14
+Nodes (20): BarcodeScannerModal(), Props, Props, ReceiptImportModal(), db, useRestaurantSettings(), Recipes(), ALL_ALLERGEN_KEYS (+12 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.11
@@ -205,36 +207,36 @@ Cohesion: 0.12
 Nodes (18): EditorFrozenStrip(), EditorFrozenStripProps, EditorPhysicsRibbon(), EditorPhysicsRibbonProps, RecipeCostDrivers(), RecipeCostDriversProps, RecipeFrozenTier(), RecipeFrozenTierProps (+10 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.15
-Nodes (19): AdjustStockModal(), AdjustStockModalProps, Combobox(), ComboboxProps, locales, localizer, ProductionCalendarProps, TransferStockModal() (+11 more)
-
-### Community 19 - "Community 19"
-Cohesion: 0.15
-Nodes (17): BarcodeScannerModal(), Props, db, useRestaurantSettings(), Recipes(), ALL_ALLERGEN_KEYS, RestaurantSettings(), Restaurant (+9 more)
-
-### Community 20 - "Community 20"
 Cohesion: 0.10
 Nodes (13): collectFaults(), DiagnosticsInput, Fault, FaultDomain, FaultSeverity, SEVERITY_RANK, Source, SOURCES (+5 more)
 
-### Community 21 - "Community 21"
+### Community 19 - "Community 19"
 Cohesion: 0.15
 Nodes (19): RuntimeTranslatedProps, TranslateRecipeModal(), TranslateRecipeModalProps, TranslationTabs(), TranslationTabsProps, completed, hasMissingTranslations(), inFlight (+11 more)
 
-### Community 22 - "Community 22"
+### Community 20 - "Community 20"
 Cohesion: 0.14
 Nodes (20): accumulateThermalExtent(), arrheniusRate(), zValueRate(), awSuitability(), classifyBand(), computeMaillardBrowning(), MaillardBand, MaillardFlag (+12 more)
 
-### Community 23 - "Community 23"
+### Community 21 - "Community 21"
 Cohesion: 0.08
 Nodes (24): dependencies, date-fns, express, firebase, @google/genai, i18next, i18next-browser-languagedetector, lucide-react (+16 more)
 
-### Community 24 - "Community 24"
+### Community 22 - "Community 22"
+Cohesion: 0.18
+Nodes (15): AdjustStockModal(), AdjustStockModalProps, Combobox(), ComboboxProps, TransferStockModal(), TransferStockModalProps, Props, PrepList() (+7 more)
+
+### Community 23 - "Community 23"
 Cohesion: 0.13
 Nodes (18): Action, getActionIcon(), getConfidenceStyle(), getFieldMeta(), getIngredientMinConfidence(), getProvenanceStyle(), hydrateTranslationsFromLegacy(), RecipeEditor() (+10 more)
 
-### Community 25 - "Community 25"
+### Community 24 - "Community 24"
 Cohesion: 0.12
 Nodes (16): freeze(), FreezeFlag, FreezeParams, computePlankTime(), PlankFlag, PlankInput, PlankMode, PlankResult (+8 more)
+
+### Community 25 - "Community 25"
+Cohesion: 0.23
+Nodes (13): AuditsView(), BillsList(), useData(), SupportedLanguage, useLanguage(), InventoryTransactions(), Reports(), Suppliers() (+5 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.14
@@ -245,68 +247,68 @@ Cohesion: 0.12
 Nodes (16): ADDITIONS, AGENTS, CULTURES, defaultParams(), ENZYMES, Field, fmt(), OP_BY_ID (+8 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.24
-Nodes (10): ReceiveGoodsModal(), IngredientDetail(), Ingredients(), deriveIngredientDietaryFlags(), SafeBatch, sanitizeData(), withTimestamps(), stripUndefined() (+2 more)
-
-### Community 29 - "Community 29"
 Cohesion: 0.13
 Nodes (13): getGeminiModel(), GEMINI_API_KEY, geminiGenerate, GeminiGenerateInput, callGemini(), GEMINI_API_KEY, Lang, LANGUAGE_NAMES (+5 more)
 
+### Community 29 - "Community 29"
+Cohesion: 0.19
+Nodes (13): Layout(), RequireAdmin(), RequireAdminProps, app, FirestoreErrorInfo, logOut(), reportFirestoreError(), signInAsGuest() (+5 more)
+
 ### Community 30 - "Community 30"
+Cohesion: 0.28
+Nodes (11): ReceiveGoodsModal(), IngredientDetail(), Ingredients(), formatFirestoreDate(), deriveIngredientDietaryFlags(), SafeBatch, sanitizeData(), withTimestamps() (+3 more)
+
+### Community 31 - "Community 31"
 Cohesion: 0.17
 Nodes (13): REF_BATTER, refProfile, classifyBand(), computeMoistureMigration(), MoistureBand, MoistureFlag, MoistureMigrationResult, longStorage (+5 more)
 
-### Community 31 - "Community 31"
-Cohesion: 0.22
-Nodes (14): PurchaseOrderModal(), PurchaseOrderModalProps, Props, ReceiptImportModal(), ReceiveGoodsModalProps, ReceivePOModal(), ReceivePOModalProps, PurchaseOrder (+6 more)
-
 ### Community 32 - "Community 32"
-Cohesion: 0.11
-Nodes (18): compilerOptions, allowImportingTsExtensions, allowJs, experimentalDecorators, isolatedModules, jsx, lib, module (+10 more)
+Cohesion: 0.15
+Nodes (12): CsvImportModal(), CsvImportModalProps, TransfersView(), Toast, ToastContext, ToastContextValue, ToastProvider(), ToastVariant (+4 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.11
-Nodes (17): devDependencies, firebase-functions-test, typescript, vitest, engines, node, main, name (+9 more)
+Nodes (18): compilerOptions, allowImportingTsExtensions, allowJs, experimentalDecorators, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 34 - "Community 34"
+Cohesion: 0.11
+Nodes (17): devDependencies, firebase-functions-test, typescript, vitest, engines, node, main, name (+9 more)
+
+### Community 35 - "Community 35"
 Cohesion: 0.20
 Nodes (12): dompurify, candidateKey(), SourcingPanel(), SourcingPanelProps, useKeptSourcingNotes(), buildCandidate(), keepNote(), parseGeminiJson() (+4 more)
 
-### Community 35 - "Community 35"
-Cohesion: 0.16
-Nodes (11): CsvImportModal(), CsvImportModalProps, Toast, ToastContext, ToastContextValue, ToastProvider(), ToastVariant, useToast() (+3 more)
-
 ### Community 36 - "Community 36"
-Cohesion: 0.22
-Nodes (11): Layout(), RequireAdmin(), RequireAdminProps, app, FirestoreErrorInfo, logOut(), signInAsGuest(), useAlerts() (+3 more)
+Cohesion: 0.11
+Nodes (18): scripts, build, check:functions-secrets, check:hardcoded-strings, check:locale-parity, check:schema, clean, dev (+10 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.12
-Nodes (11): aliases, COLLECTION_MAP, __dirname, repoRoot, report, RULES_ONLY_ALLOWED, rulesPath, rulesText (+3 more)
+Nodes (17): devDependencies, firebase-admin, @firebase/eslint-plugin-security-rules, @firebase/rules-unit-testing, jsdom, @playwright/test, tailwindcss, @testing-library/react (+9 more)
 
 ### Community 38 - "Community 38"
+Cohesion: 0.12
+Nodes (11): aliases, COLLECTION_MAP, __dirname, repoRoot, report, RULES_ONLY_ALLOWED, rulesPath, rulesText (+3 more)
+
+### Community 39 - "Community 39"
 Cohesion: 0.19
 Nodes (14): AITC_EQ, band0to100(), beidler(), CAPSAICIN_EQ, carbonationBand(), ChemesthesisChannel, ChemesthesisFlag, chemesthesisFromComposition() (+6 more)
 
-### Community 39 - "Community 39"
+### Community 40 - "Community 40"
 Cohesion: 0.26
 Nodes (13): alphaPolyprotic(), BUFFER_REFERENCES, BufferComponent, buildPhMixture(), calculateMixedPH(), calibrateCounterion(), collectBufferComponents(), computeTitratableAcidity() (+5 more)
 
-### Community 40 - "Community 40"
-Cohesion: 0.24
-Nodes (8): BillsList(), ConfirmModalProps, SupportedLanguage, useLanguage(), Suppliers(), formatCurrency(), LOCALES, normalizeCurrencyCode()
-
 ### Community 41 - "Community 41"
+Cohesion: 0.24
+Nodes (11): BILL_EXTRACTION_SCHEMA, extractBill, ExtractBillInput, ExtractBillResult, GEMINI_API_KEY, SUPPORTED_MIME_TYPES, finiteOrNull(), isAllowedStoragePath() (+3 more)
+
+### Community 42 - "Community 42"
 Cohesion: 0.17
 Nodes (13): RuntimeTranslationState, TranslationStatus, cacheKey(), Lang, memoryCache, pending, PendingItem, persistentCache (+5 more)
 
-### Community 42 - "Community 42"
+### Community 43 - "Community 43"
 Cohesion: 0.16
 Nodes (13): AddParams, EnzymeFlag, EnzymeParams, EnzymeProfile, ENZYMES, Culture, CultureProfile, CULTURES (+5 more)
-
-### Community 43 - "Community 43"
-Cohesion: 0.26
-Nodes (10): BILL_EXTRACTION_SCHEMA, ExtractBillInput, ExtractBillResult, GEMINI_API_KEY, SUPPORTED_MIME_TYPES, finiteOrNull(), isAllowedStoragePath(), parsePlausibleDate() (+2 more)
 
 ### Community 44 - "Community 44"
 Cohesion: 0.21
@@ -401,16 +403,16 @@ Cohesion: 0.22
 Nodes (9): computeFormulaBalance(), FormulaBalanceFlag, FormulaBalanceMasses, FormulaBalanceRatios, FormulaFault, FormulaFaultKind, FormulaFaultSeverity, balancedCake() (+1 more)
 
 ### Community 68 - "Community 68"
-Cohesion: 0.27
-Nodes (6): extractBill, onLotUpdate, shouldArchiveLot(), resolveVendor, ResolveVendorInput, translateBatch
-
-### Community 69 - "Community 69"
 Cohesion: 0.31
 Nodes (6): BillStatus, PaymentMethod, recordPayment, RecordPaymentInput, RecordPaymentResult, { getFirestoreMock, runTransactionMock, collectionMock }
 
-### Community 70 - "Community 70"
+### Community 69 - "Community 69"
 Cohesion: 0.24
 Nodes (8): AromaBand, AromaReleaseClass, AromaReleaseFlag, AromaReleaseResult, classifyBand(), computeAromaRelease(), POLARITY_ANCHORS, VolatilePolarity
+
+### Community 70 - "Community 70"
+Cohesion: 0.31
+Nodes (5): onLotUpdate, shouldArchiveLot(), resolveVendor, ResolveVendorInput, translateBatch
 
 ### Community 71 - "Community 71"
 Cohesion: 0.36
@@ -437,26 +439,34 @@ Cohesion: 0.28
 Nodes (7): clamp01(), computeProteinSet(), PROTEIN_PROFILES, ProteinProfile, ProteinSetBand, ProteinSetResult, ProteinType
 
 ### Community 77 - "Community 77"
-Cohesion: 0.62
-Nodes (5): nextNOccurrences(), nextOccurrence(), parseRRule(), previousOccurrence(), rrule
-
-### Community 78 - "Community 78"
 Cohesion: 0.43
 Nodes (6): DisplayWarning, RecipeWarningsListProps, Severity, PhysicsWarning, ConfectioneryWarning, FrozenWarning
 
+### Community 78 - "Community 78"
+Cohesion: 0.80
+Nodes (4): nextNOccurrences(), nextOccurrence(), parseRRule(), previousOccurrence()
+
 ### Community 79 - "Community 79"
+Cohesion: 0.40
+Nodes (4): locales, localizer, ProductionCalendarProps, ProductionRun
+
+### Community 80 - "Community 80"
 Cohesion: 0.47
 Nodes (4): estimateTgPrime(), TG_PRIME_C, TgPrimeFlag, TgPrimeResult
 
-### Community 80 - "Community 80"
+### Community 81 - "Community 81"
 Cohesion: 0.53
 Nodes (4): blendSfcAtTemp(), FAT_MELTING_PROFILES, FatProfileKey, sfcAtTemp()
 
-### Community 81 - "Community 81"
+### Community 82 - "Community 82"
+Cohesion: 0.40
+Nodes (4): name, private, type, version
+
+### Community 83 - "Community 83"
 Cohesion: 0.70
 Nodes (4): run(), say(), harden-gcp.sh script, warn()
 
-### Community 82 - "Community 82"
+### Community 84 - "Community 84"
 Cohesion: 0.50
 Nodes (4): db, __dirname, migrate(), parseLegacyString()
 
@@ -468,16 +478,16 @@ Nodes (4): db, __dirname, migrate(), parseLegacyString()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `dependencies` connect `Community 23` to `Community 9`, `Community 34`, `Community 50`, `Community 77`?**
-  _High betweenness centrality (0.179) - this node is a cross-community bridge._
-- **Why does `react` connect `Community 50` to `Community 0`, `Community 31`, `Community 23`?**
-  _High betweenness centrality (0.105) - this node is a cross-community bridge._
-- **Why does `RecipeDetail()` connect `Community 50` to `Community 35`, `Community 4`, `Community 6`, `Community 40`, `Community 13`, `Community 14`, `Community 15`, `Community 48`, `Community 17`, `Community 19`, `Community 51`, `Community 21`, `Community 28`?**
-  _High betweenness centrality (0.102) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `Community 21` to `Community 0`, `Community 82`, `Community 35`, `Community 50`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+- **Why does `react` connect `Community 50` to `Community 0`, `Community 21`, `Community 15`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `RecipeDetail()` connect `Community 50` to `Community 32`, `Community 4`, `Community 6`, `Community 13`, `Community 14`, `Community 15`, `Community 48`, `Community 17`, `Community 19`, `Community 51`, `Community 25`, `Community 30`?**
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
 - **What connects `name`, `build`, `test` to the rest of the system?**
   _465 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.050883898709985664 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05002337540906966 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.06015037593984962 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
