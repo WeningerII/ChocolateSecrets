@@ -16,12 +16,17 @@ echo "🧠 Persistent memory is available for this repo (see CLAUDE.md → Memor
 echo "   • Declarative memory (decisions, progress, domain notes): memory/  — an Obsidian vault."
 echo "   • Structural memory (code knowledge graph): graphify-out/  — MCP server 'graphify' + GRAPH_REPORT.md."
 
-# Warn if the committed graph is older than HEAD (structure may have drifted).
+# Warn only when real app code drifted since the graph was built — not on
+# docs/vault/config commits (those are excluded from the code graph anyway).
 if [ -f graphify-out/GRAPH_REPORT.md ]; then
   built="$(grep -m1 'Built from commit' graphify-out/GRAPH_REPORT.md 2>/dev/null | grep -oE '[0-9a-f]{7,40}' | head -n1)"
-  head_sha="$(git rev-parse --short=8 HEAD 2>/dev/null)"
-  if [ -n "$built" ] && [ -n "$head_sha" ] && [ "${built:0:7}" != "${head_sha:0:7}" ]; then
-    echo "   ⚠ Code graph was built at ${built:0:8}, but HEAD is ${head_sha} — run 'graphify update .' to refresh it."
+  if [ -n "$built" ] && git rev-parse --verify --quiet "${built}^{commit}" >/dev/null 2>&1; then
+    code_changed="$(git diff --name-only "$built"..HEAD 2>/dev/null \
+      | grep -E '\.(ts|tsx|js|jsx|mjs|cjs)$' \
+      | grep -Ev '^(memory/|graphify-out/|src/locales/)' | head -n1)"
+    if [ -n "$code_changed" ]; then
+      echo "   ⚠ Code changed since the graph was built (${built:0:8}) — run 'graphify update .' to refresh it."
+    fi
   fi
 fi
 

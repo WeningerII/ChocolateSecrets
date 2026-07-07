@@ -75,6 +75,19 @@ else
   fi
 fi
 
+# 3b. Optional: local git hook for automatic refresh on every commit ----------
+# Opt in with:  INSTALL_GIT_HOOK=1 bash scripts/setup-memory.sh
+# (Needs a real `graphify` on PATH so the hook can pin a stable interpreter. The
+# committed CI workflow already keeps the graph fresh on push without this.)
+if [ "${INSTALL_GIT_HOOK:-0}" = "1" ]; then
+  if command -v graphify >/dev/null 2>&1; then
+    say "Installing graphify git hook (auto-rebuild graph on commit/checkout)"
+    graphify hook install || warn "graphify hook install failed"
+  else
+    warn "INSTALL_GIT_HOOK=1 but no 'graphify' on PATH — install it first (uv tool install graphifyy)."
+  fi
+fi
+
 # 4. MCP readiness note --------------------------------------------------------
 if command -v uvx >/dev/null 2>&1; then
   ok "MCP server ready via .mcp.json (uvx will fetch graphifyy[mcp] on demand)."

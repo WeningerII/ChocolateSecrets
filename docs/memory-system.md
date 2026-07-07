@@ -46,6 +46,7 @@ bash scripts/setup-memory.sh          # installs graphify (if needed) + builds/r
 | `memory/` | The Obsidian vault (decisions, domains, glossary, logs) | ✅ |
 | `scripts/setup-memory.sh` | Idempotent bootstrap/refresh | ✅ |
 | `scripts/memory-session-start.sh` | The SessionStart hook body | ✅ |
+| `.github/workflows/graphify-graph.yml` | CI: auto-refresh the committed graph on code push | ✅ |
 
 ---
 
@@ -116,8 +117,33 @@ Plugins browser: **Calendar** (daily-note nav), **Folders to Graph**, and (via
 
 ### Everyday loop
 - `/resume` at the start → work → `/remember` decisions as you go → `/save` at the end.
-- After structural code changes: `graphify update .` (0 tokens), then commit.
-- Optional automatic rebuild on commit: `graphify hook install` (adds git hooks).
+
+## Keeping the graph fresh (automatic)
+
+The graph is a snapshot of the code, so it must be rebuilt when code changes.
+Three complementary mechanisms keep it current — you shouldn't have to think about it:
+
+1. **CI (the backbone).** `.github/workflows/graphify-graph.yml` rebuilds the graph
+   on every push that touches TS/JS and commits the refreshed
+   `graph.json` + `GRAPH_REPORT.md` back to the branch (AST-only, 0 tokens). It is
+   loop-safe (its own graph-only commit doesn't match the code paths and is tagged
+   `[skip graph]`). This keeps the **committed** graph current for everyone,
+   including fresh Claude-Code-on-web clones.
+   - *If your default branch is protected against direct pushes:* the workflow still
+     runs on feature branches, so the graph is fresh by the time a PR merges. To
+     keep it off `main` entirely, restrict the trigger to `branches-ignore: [main]`,
+     or rely on the local hook / `/save` below.
+2. **Inside Claude Code.** `/save` runs `graphify update .` when code structure
+   changed; `/map update` refreshes on demand; the SessionStart hook warns when the
+   graph has drifted from real code changes.
+3. **Local git hook (opt-in).** For instant local refresh on every commit:
+   ```bash
+   INSTALL_GIT_HOOK=1 bash scripts/setup-memory.sh    # runs `graphify hook install`
+   ```
+   This installs a loop-safe `post-commit`/`post-checkout` hook that rebuilds the
+   graph in the background. Hooks live in `.git/hooks/` (per-clone, not committed).
+
+Manual refresh any time: `graphify update .` (incremental, 0 tokens) then commit.
 
 ---
 
