@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "graphify": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "graphifyy[mcp]",
+        "graphify-mcp",
+        "--transport",
+        "stdio",
+        "graphify-out/graph.json"
+      ],
+      "env": {}
+    }
+  }
+}

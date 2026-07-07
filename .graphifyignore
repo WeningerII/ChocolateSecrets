@@ -1,0 +1,44 @@
+# .graphifyignore — keep the codebase knowledge graph pure CODE (AST-only, zero
+# tokens, no LLM key needed). Prose/docs are DECLARATIVE memory and live in the
+# Obsidian vault (memory/), not the structural code graph. Graphify treats
+# markdown/txt/rst/html/yaml as "docs" that require an LLM backend for semantic
+# extraction; excluding them keeps `graphify extract` key-free and deterministic.
+#
+# To ALSO fold docs into the graph later, set an LLM key (e.g. ANTHROPIC_API_KEY)
+# and delete the doc-extension lines below, then re-run `graphify extract .`.
+
+# Prose / documentation (captured in the Obsidian vault instead)
+*.md
+*.mdx
+*.txt
+*.rst
+
+# Markup / config that graphify routes through the semantic (LLM) path
+*.html
+*.yaml
+*.yml
+
+# The Obsidian memory vault itself (declarative memory, not code structure)
+memory/
+
+# Machine-generated lockfiles — thousands of noise nodes, no architecture
+package-lock.json
+functions/package-lock.json
+
+# Generated Firebase blueprint blob (not hand-written source)
+firebase-blueprint.json
+
+# i18n translation data (pure key/value dictionaries — zero code structure)
+src/locales/
+
+# Firebase project config/data blobs (generated/declarative, not source architecture)
+firebase-applet-config.json
+firebase.json
+firestore.indexes.json
+
+# Memory-system tooling (meta-infrastructure, not app architecture — keep the
+# code graph focused on src/, functions/, and real maintenance scripts)
+.claude/
+.mcp.json
+scripts/setup-memory.sh
+scripts/memory-session-start.sh

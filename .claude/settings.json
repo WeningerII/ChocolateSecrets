@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(graphify:*)",
+      "Bash(graphify-mcp:*)",
+      "Bash(uvx --from graphifyy*:*)",
+      "Bash(bash scripts/setup-memory.sh:*)",
+      "Bash(bash scripts/memory-session-start.sh:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git add:*)",
+      "Bash(npm run lint)",
+      "Bash(npm test)",
+      "Bash(npm run test:*)",
+      "Bash(npm run check:schema)",
+      "mcp__graphify"
+    ],
+    "deny": [
+      "Read(graphify-out/graph.json)",
+      "Read(graphify-out/graph.html)"
+    ],
+    "ask": []
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/memory-session-start.sh 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
