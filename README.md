@@ -125,8 +125,25 @@ firebase-applet-config.json   Firebase web config (named Firestore database)
 server.ts                     Express dev server + shopping-list email/SMS endpoint
 ```
 
+## Memory & knowledge graph (Claude Code)
+
+This repo ships a **persistent, two-layer memory system** for Claude Code: a
+[Graphify](https://github.com/safishamsi/graphify) code knowledge graph
+(`graphify-out/`, queried instead of re-reading files) plus an
+[Obsidian](https://obsidian.md) "second brain" vault (`memory/`) for decisions,
+domain knowledge, and session logs — wired through the root `CLAUDE.md`,
+`.mcp.json`, and the `/resume` · `/save` · `/remember` · `/map` commands.
+
+```bash
+bash scripts/setup-memory.sh   # installs Graphify if needed, builds/refreshes the graph
+```
+
+Then open `memory/` as an Obsidian vault. Full runbook:
+[docs/memory-system.md](docs/memory-system.md).
+
 ## Docs
 
+- [docs/memory-system.md](docs/memory-system.md) — Claude Code memory & knowledge-graph setup
 - [docs/testing.md](docs/testing.md) — how and where each test runs
 - [docs/deploy-readiness.md](docs/deploy-readiness.md) — pre-deploy checklist
 - [docs/security-hardening.md](docs/security-hardening.md) — security posture & one-time setup

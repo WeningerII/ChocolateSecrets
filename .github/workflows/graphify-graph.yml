@@ -1,0 +1,63 @@
+name: graphify-graph
+
+# Keep the committed code knowledge graph (graphify-out/) in sync with the source.
+# On any push that changes TS/JS code, rebuild the AST graph (0 LLM tokens, no API
+# key) and commit the refreshed graph.json + GRAPH_REPORT.md back to the branch.
+#
+# Loop-safe: the bot's own commit touches only graph.json (JSON) and
+# GRAPH_REPORT.md (Markdown) — neither matches the code `paths` below — so it never
+# retriggers this workflow. The commit is also tagged `[skip graph]` as a backstop.
+
+on:
+  push:
+    paths:
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.mjs'
+      - '**/*.cjs'
+      - '.graphifyignore'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: graphify-graph-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    if: ${{ !contains(github.event.head_commit.message, '[skip graph]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Graphify
+        run: pip install graphifyy
+
+      - name: Rebuild code graph (AST-only, 0 tokens)
+        env:
+          PYTHONHASHSEED: '0' # deterministic community detection
+        run: |
+          graphify extract .
+          graphify cluster-only . --no-label
+
+      - name: Commit refreshed graph if changed
+        run: |
+          if git diff --quiet -- graphify-out/graph.json graphify-out/GRAPH_REPORT.md; then
+            echo "Code graph unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add graphify-out/graph.json graphify-out/GRAPH_REPORT.md
+          git commit -m "chore(graphify): refresh code knowledge graph [skip graph]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
