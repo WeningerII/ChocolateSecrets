@@ -18,10 +18,21 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
 
 const rulesPath = path.join(repoRoot, 'firestore.rules');
-const typesPath = path.join(repoRoot, 'src/types.ts');
 
 const rulesText = fs.readFileSync(rulesPath, 'utf-8');
-const typesText = fs.readFileSync(typesPath, 'utf-8');
+
+// Type definitions were split from a monolithic src/types.ts into cohesive
+// domain modules under src/types/ (src/types.ts is now a re-export barrel).
+// Read the barrel plus every module so the interface/alias parsing below still
+// finds the definitions wherever they now live.
+const typeFiles = [path.join(repoRoot, 'src/types.ts')];
+const typesDir = path.join(repoRoot, 'src/types');
+if (fs.existsSync(typesDir) && fs.statSync(typesDir).isDirectory()) {
+  for (const f of fs.readdirSync(typesDir).sort()) {
+    if (f.endsWith('.ts')) typeFiles.push(path.join(typesDir, f));
+  }
+}
+const typesText = typeFiles.map((p) => fs.readFileSync(p, 'utf-8')).join('\n\n');
 
 // Map of collection name -> { rulesValidator: string, typeName: string }
 const COLLECTION_MAP = {
