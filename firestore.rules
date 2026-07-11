@@ -440,9 +440,13 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidSourcingNote()
         && request.resource.data.keptBy == request.auth.uid;
+      // Owner-only: check the EXISTING doc's keptBy (not just the incoming
+      // one) and keep ownership immutable across updates.
       allow update: if isAuthenticated() && isValidSourcingNote()
-        && request.resource.data.keptBy == request.auth.uid;
-      allow delete: if isAuthenticated();
+        && resource.data.keptBy == request.auth.uid
+        && request.resource.data.keptBy == resource.data.keptBy;
+      allow delete: if isAuthenticated()
+        && resource.data.keptBy == request.auth.uid;
     }
 
     match /translationCache/{hash} {

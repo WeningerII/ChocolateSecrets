@@ -244,6 +244,59 @@ describe('users collection rules', () => {
   });
 });
 
+describe('sourcing_notes ownership rules', () => {
+  function validNote(overrides: Record<string, unknown> = {}) {
+    return {
+      ingredientId: 'ing1',
+      name: 'Valrhona 64%',
+      keptBy: 'alice',
+      notes: 'good price',
+      ...overrides,
+    };
+  }
+
+  async function seedNote(id: string, overrides: Record<string, unknown> = {}) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'sourcing_notes', id), validNote(overrides));
+    });
+  }
+
+  test('user can create a note kept by themselves', async () => {
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(setDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), validNote()));
+  });
+
+  test('owner can update their own note', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), { notes: 'updated' }));
+  });
+
+  test('non-owner cannot update someone else\'s note (even claiming their own uid)', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('mallory');
+    await assertFails(updateDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), { keptBy: 'mallory', notes: 'hijacked' }));
+  });
+
+  test('owner cannot transfer ownership by changing keptBy', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertFails(updateDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), { keptBy: 'bob' }));
+  });
+
+  test('owner can delete their own note', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(deleteDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1')));
+  });
+
+  test('non-owner cannot delete someone else\'s note', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('mallory');
+    await assertFails(deleteDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1')));
+  });
+});
+
 describe('bills payment-field lockdown', () => {
   function validBill(overrides: Record<string, unknown> = {}) {
     return {
