@@ -43,6 +43,9 @@ Firebase 12 (Auth, Firestore, Cloud Functions, Hosting). A small Express server
    ```bash
    npm install
    ```
+   The `postinstall` script also installs `functions/` dependencies, which the root
+   type-check (`npm run lint`) and unit tests need — no separate
+   `npm --prefix functions install` required.
 2. *(Optional)* Configure integrations — the app runs without any of these. Copy the
    template and fill in only what you need:
    ```bash

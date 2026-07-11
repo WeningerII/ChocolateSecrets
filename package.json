@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
+    "postinstall": "npm --prefix functions install",
     "lint": "tsc --noEmit",
     "migrate:i18n": "node scripts/migrate-localized-strings.mjs",
     "migrate:cross-contact": "node scripts/migrate-cross-contact-risks.mjs",

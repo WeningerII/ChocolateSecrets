@@ -105,7 +105,7 @@ Full rules in `memory/CLAUDE.md`. In short:
 ## Project quick-reference
 
 ```bash
-npm install
+npm install            # also installs functions/ deps via postinstall
 npm run dev            # Express + Vite dev server @ http://localhost:3000
 npm run lint           # tsc --noEmit (also type-checks functions/src)
 npm test               # vitest unit/logic tests
