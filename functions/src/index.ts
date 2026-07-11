@@ -10,3 +10,4 @@ export { resolveVendor } from './resolveVendor';
 export { recordPayment } from './recordPayment';
 export { onBillReviewed } from './onBillReviewed';
 export { dailyExpenseCheck } from './dailyExpenseCheck';
+export { sendShoppingList } from './sendShoppingList';
