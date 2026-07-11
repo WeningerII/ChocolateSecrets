@@ -40,6 +40,14 @@ const CHEF_PHONE_NUMBER = defineString('CHEF_PHONE_NUMBER', {
 });
 
 const RATE_LIMIT_PER_HOUR = 20;
+// Global (all-users) hourly cap. The per-uid limit alone is defeatable: the web
+// API key is public and the Anonymous provider is enabled (ADR-0005), so a
+// script can mint fresh anonymous uids via the Identity Toolkit signUp endpoint
+// and give itself a new per-uid quota each time. Because the destination is a
+// single fixed chef phone/inbox, a global cap is a per-destination cap — it
+// bounds total paid Twilio/Resend spend no matter how many uids exist, while
+// leaving legitimate guest use (per-uid limit) untouched.
+const GLOBAL_RATE_LIMIT_PER_HOUR = 40;
 const HOUR_MS = 60 * 60 * 1000;
 
 export interface ChannelResult {
@@ -101,14 +109,22 @@ export const sendShoppingList = onCall(
     }
     const { items, note } = validated;
 
-    // Per-user hourly rate limit (mirrors geminiGenerate). The SMS channel is
-    // billable and the destination is a real phone — any authenticated user
-    // (including anonymous guests, ADR-0005) must not be able to spam it.
+    // Two-layer hourly rate limit. The SMS channel is billable and the
+    // destination is a real phone — any authenticated user (including anonymous
+    // guests, ADR-0005) must not be able to spam it. The per-uid limit (mirrors
+    // geminiGenerate) throttles a single user; the global limit bounds total
+    // spend even when an attacker mints fresh anonymous uids to escape the
+    // per-uid quota (see GLOBAL_RATE_LIMIT_PER_HOUR above). Both are checked and
+    // consumed in one transaction so concurrent calls cannot slip past either.
+    // 'global' cannot collide with a real uid (Firebase Auth uids are 28-char
+    // identifiers), and its fields are namespaced regardless.
     const db = getFirestore();
     const quotaRef = db.collection('userQuotas').doc(userId);
+    const globalQuotaRef = db.collection('userQuotas').doc('global');
     const now = Date.now();
     await db.runTransaction(async (tx) => {
-      const quotaDoc = await tx.get(quotaRef);
+      const [quotaDoc, globalQuotaDoc] = await Promise.all([tx.get(quotaRef), tx.get(globalQuotaRef)]);
+
       const quota = (quotaDoc.exists && quotaDoc.data()) ? quotaDoc.data()! : {};
       let count = quota.sendShoppingListCount || 0;
       let windowStart = quota.sendShoppingListWindowStart || now;
@@ -116,7 +132,17 @@ export const sendShoppingList = onCall(
       if (count >= RATE_LIMIT_PER_HOUR) {
         throw new HttpsError('resource-exhausted', `Rate limit exceeded: ${RATE_LIMIT_PER_HOUR} shopping-list sends per hour`);
       }
+
+      const globalQuota = (globalQuotaDoc.exists && globalQuotaDoc.data()) ? globalQuotaDoc.data()! : {};
+      let globalCount = globalQuota.sendShoppingListGlobalCount || 0;
+      let globalWindowStart = globalQuota.sendShoppingListGlobalWindowStart || now;
+      if (now - globalWindowStart > HOUR_MS) { globalCount = 0; globalWindowStart = now; }
+      if (globalCount >= GLOBAL_RATE_LIMIT_PER_HOUR) {
+        throw new HttpsError('resource-exhausted', 'Shopping-list sending is temporarily paused (hourly send budget reached). Try again later.');
+      }
+
       tx.set(quotaRef, { sendShoppingListCount: count + 1, sendShoppingListWindowStart: windowStart }, { merge: true });
+      tx.set(globalQuotaRef, { sendShoppingListGlobalCount: globalCount + 1, sendShoppingListGlobalWindowStart: globalWindowStart }, { merge: true });
     });
 
     // Server-templated bodies — client input reaches the outgoing message only
