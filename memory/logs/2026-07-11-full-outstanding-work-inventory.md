@@ -54,6 +54,25 @@ postinstall bootstrap (`01da977`), npm audit root 22→0 / functions 17→9-mode
 (callable sendShoppingList + backdoor removal) launched next; statuses
 annotated in [[project-backlog]].
 
+## Round 2 executed (same session, later still)
+Workflow `backlog-attack-round-2` (4 sequential agents + 3-lens review + fix):
+- `sendShoppingList` callable landed (`090de92`): auth-required, strict input
+  validation, server-templated bodies, honest per-channel results, secrets
+  properly BOUND, params via defineString, 21 unit tests. Client rewired via
+  typed `shoppingListClient` (`cca8196`) with localized partial-success keys.
+- Dev endpoint + `npm start` prod branch retired; root resend/twilio deps
+  dropped; `functions/.env.example` added (`fb99c5e`).
+- ADR-0007 backdoor removal (`83559b0`): rules + adminRecipients; 35 emulator
+  rules tests pass incl. 4 new backdoor-regression tests (mutation-checked).
+- Review found 1 major: per-uid rate limit defeated by minting anonymous uids
+  (billable SMS channel) → fixed with a global 40/h per-destination cap in the
+  same quota transaction (`5b847d7`). A minor SDK error-mapping regression
+  (offline/not-deployed both surface as `functions/internal`) was fixed
+  directly afterward in `shoppingListClient.ts` using a `navigator.onLine`
+  disambiguation.
+⚠ One-time deploys now pending: indexes, rules, and functions (secrets +
+params first) — steps recorded in [[project-backlog]] and functions/.env.example.
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.

@@ -48,16 +48,22 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   (inventoryTransactions ingredientId+date matches no query) and 3 single-field
   entries that duplicate automatic indexes — the Admin API may reject the file
   on deploy (fewer than two fields per composite).
-- [~] [P1][S] **"Send to Chef" is dead in every production deploy.**
-  ✅ misleading-error half fixed (`b82947f`: content-type/404/405 detection +
-  localized "unavailable in this deployment" message); real fix = ADR-0006.
+- [x] [P1][S] **"Send to Chef" is dead in every production deploy.**
+  ✅ fully fixed: error handling (`b82947f`), then the real backend
+  (`090de92`/`cca8196`) — needs one-time secrets + functions deploy.
   `src/pages/PrepList.tsx:472` POSTs `/api/send-shopping-list`, which only exists
   in the dev `server.ts`; the Hosting `**` rewrite returns 200+HTML, the client
   `.json()` throws before the `ok` check (`:481`) and users see a misleading
   "network error" (`:489`). Button never hidden/gated (`:974`).
-- [~] [P1][M] **Decide + build the production home for shopping-list send.**
-  ✅ decided 2026-07-11: authenticated callable Cloud Function
-  ([[0006-shopping-list-via-callable-function]]); build in progress.
+- [x] [P1][M] **Decide + build the production home for shopping-list send.**
+  ✅ done per [[0006-shopping-list-via-callable-function]]: `sendShoppingList`
+  callable (`090de92`: auth-gated, per-uid 20/h + global 40/h rate limits,
+  server-templated bodies, honest per-channel results, 21 unit tests), client
+  rewire (`cca8196`), dev endpoint + `npm start` retired (`fb99c5e`).
+  ⚠ one-time deploy: `firebase functions:secrets:set RESEND_API_KEY /
+  TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN`, fill `functions/.env` params
+  (RESEND_FROM must be a Resend-verified sender), then
+  `firebase deploy --only functions`.
   No Cloud Function equivalent exists. Options: callable CF with auth + App Check
   (secrets via Secret Manager), HTTPS function + `/api/**` hosting rewrite, or
   remove/flag the UI. Also decide whether the `npm start` self-hosted path
@@ -97,11 +103,13 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   firebase-admin — blocked on Google; revisit at firebase-admin 14). Root prod audit: 22 vulns
   (1 critical protobufjs, 9 high incl. vite + react-router) — non-breaking
   `npm audit fix` available; functions: 17 (4 high; full fix = firebase-admin@14).
-- [ ] [P1][S] **Harden /api/send-shopping-list if server.ts survives.** No auth,
-  no rate limit, binds 0.0.0.0; client-controlled body relayed into email/SMS from
-  the app's identity (spam/phishing/cost vector). (server.ts:19-85)
-- [~] [P2][S] **Decide the owner-email admin backdoor.** ✅ decided 2026-07-11:
-  remove it — [[0007-remove-owner-email-admin-backdoor]]; removal in progress. `isAdmin()` regex-matches
+- [x] [P1][S] **Harden /api/send-shopping-list if server.ts survives.** ✅ moot:
+  endpoint removed (`fb99c5e`); the callable replacement is auth-gated,
+  rate-limited (per-uid + global), and server-templates all message bodies.
+- [x] [P2][S] **Decide the owner-email admin backdoor.** ✅ removed (`83559b0`)
+  per [[0007-remove-owner-email-admin-backdoor]]: rules email-branch gone,
+  adminRecipients fallback gone, 4 emulator-verified regression tests added.
+  ⚠ needs a rules deploy; ensure the owner's users doc has `role: "admin"` first. `isAdmin()` regex-matches
   `weningerii@gmail.com` (firestore.rules:37-44) — committed PII, unauditable
   second admin path surviving role revocation; also hardcoded fallback in
   `functions/src/utils/adminRecipients.ts:19`.
@@ -263,8 +271,9 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   geminiService.ts + sourcingService.ts:61 still send a client-pinned model that
   overrides the server default (geminiGenerate.ts:42); src/constants/gemini.ts
   says "migrate then delete this file" — transport migration is already done.
-- [ ] [P3][S] Delete dead `GoogleGenAI` import in server.ts:6 (invites a
-  client-key Gemini path, contra ADR [[0002-gemini-server-side-only]]).
+- [x] [P3][S] Delete dead `GoogleGenAI` import in server.ts:6. ✅ removed in
+  `fb99c5e` (with the whole production-serve branch and `npm start` path,
+  per [[0002-gemini-server-side-only]] hygiene).
 - [ ] [P1][S] **Run the pending-deletions production gate** before removing the
   legacy `Recipe.ingredients` shape: re-run migrateRecipesToV2 in prod, expect
   `liftedLegacyIngredients === 0`, spot-check recipes. (docs/pending-deletions.md)

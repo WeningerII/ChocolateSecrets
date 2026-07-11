@@ -32,10 +32,14 @@ export interface SendShoppingListResult {
  * which the server reports inside a successful response):
  * - `unauthenticated` — no Firebase Auth session; the user must sign in.
  * - `unavailable` — the callable is not deployed in this environment
- *   (`functions/not-found`), i.e. this deployment has no send backend.
- * - `network` — the Functions endpoint could not be reached
- *   (`functions/unavailable`: offline, DNS, timeout).
- * - `error` — anything else (invalid argument, rate limit, internal).
+ *   (`functions/not-found`, or a fetch-level failure while the browser is
+ *   online — an undeployed callable 404s without CORS headers, which the
+ *   Functions SDK surfaces as a synthetic `functions/internal`).
+ * - `network` — the Functions endpoint could not be reached because the
+ *   device is offline (fetch-level failure with `navigator.onLine` false),
+ *   or the backend answered 503 (`functions/unavailable`) / timed out
+ *   (`functions/deadline-exceeded`).
+ * - `error` — anything else (invalid argument, rate limit, real internal).
  */
 export type SendShoppingListFailureReason =
   | 'unauthenticated'
@@ -84,7 +88,23 @@ export async function sendShoppingList(
           // /api/send-shopping-list content-type sniff used to detect.
           return { ok: false, reason: 'unavailable' };
         case 'functions/unavailable':
+        case 'functions/deadline-exceeded':
           return { ok: false, reason: 'network' };
+        case 'functions/internal':
+          // The Functions SDK converts any fetch-level failure (status 0) to
+          // a synthetic `internal` whose message is exactly "internal". That
+          // bucket covers both "device offline" and "callable not deployed"
+          // (an infrastructure 404 has no CORS headers, so the browser blocks
+          // it and fetch rejects). Disambiguate with navigator.onLine: offline
+          // → network problem; online → no reachable send backend here. A
+          // *real* server-side internal error carries a different message and
+          // falls through to the generic failure path.
+          if (error.message.includes('internal')) {
+            const offline =
+              typeof navigator !== 'undefined' && navigator.onLine === false;
+            return { ok: false, reason: offline ? 'network' : 'unavailable' };
+          }
+          break;
       }
     }
     return { ok: false, reason: 'error' };
