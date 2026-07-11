@@ -51,3 +51,4 @@ first. See [[system-overview]] for where these components live and
 
 ## Related
 - [[0004-decompose-god-modules]] · [[system-overview]] · [[recipes-and-costing]]
+- Superset inventory (2026-07-11 full audit): [[project-backlog]]
