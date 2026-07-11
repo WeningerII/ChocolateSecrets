@@ -32,6 +32,7 @@
   "shoppingListSent": "Lista de compras enviada con éxito.",
   "shoppingListFailed": "Error al enviar la lista de compras.",
   "networkError": "Error de red. Por favor, compruebe su conexión.",
+  "sendUnavailable": "El envío no está disponible en esta instalación. Use \"Añadir a Lista Maestra\" en su lugar.",
   "builder": "Constructor de Producción",
   "items": "artículos",
   "runNamePlaceholder": "ej., Preparación Lunes Mañana",

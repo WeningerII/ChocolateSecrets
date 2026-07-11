@@ -478,8 +478,19 @@ export default function PrepList() {
         })
       });
 
+      // On static hosting the SPA rewrite answers 200 + HTML (or the endpoint
+      // 404s/405s) — that means this deployment has no send backend, not a
+      // network problem. Only parse JSON when the server actually sent JSON.
+      const contentType = response.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+
+      if (!isJson || response.status === 404 || response.status === 405) {
+        setSendResult({ success: false, message: t('prep:sendUnavailable') });
+        return;
+      }
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setSendResult({ success: true, message: t('prep:shoppingListSent') });
       } else {

@@ -32,6 +32,7 @@
   "shoppingListSent": "Shopping list sent successfully.",
   "shoppingListFailed": "Failed to send shopping list.",
   "networkError": "Network error. Please check your connection.",
+  "sendUnavailable": "Sending isn't available in this deployment. Use \"Add to Master List\" instead.",
   "builder": "Run Builder",
   "items": "items",
   "runNamePlaceholder": "e.g., Monday Morning Prep",

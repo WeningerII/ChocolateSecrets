@@ -32,6 +32,7 @@
   "shoppingListSent": "쇼핑 목록이 성공적으로 전송되었습니다.",
   "shoppingListFailed": "쇼핑 목록 전송에 실패했습니다.",
   "networkError": "네트워크 오류. 연결을 확인해 주세요.",
+  "sendUnavailable": "이 배포 환경에서는 전송 기능을 사용할 수 없습니다. 대신 \"마스터 목록에 추가\"를 사용하세요.",
   "builder": "생산 빌더",
   "items": "품목",
   "runNamePlaceholder": "예: 월요일 오전 준비",
