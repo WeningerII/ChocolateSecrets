@@ -13,6 +13,7 @@ import { formatCurrency } from '../utils/formatters';
 import { SafeBatch, updateLotQuantity } from '../utils/firestore';
 import { depleteStock, computeProducedLotExpiry, DEFAULT_PRODUCED_LOT_SHELF_LIFE_DAYS } from '../utils/inventory';
 import { addManualShoppingListItem } from '../utils/shoppingList';
+import { sendShoppingList } from '../services/shoppingListClient';
 import { lotNumberForProduction } from '../utils/identifiers';
 import { useData } from '../contexts/DataContext';
 import Combobox from '../components/Combobox';
@@ -456,48 +457,48 @@ export default function PrepList() {
     setSendResult(null);
   };
 
-  const sendShoppingList = async () => {
+  const handleSendShoppingList = async () => {
     if (shoppingList.length === 0) return;
-    
+
     setIsSending(true);
     setSendResult(null);
-    
+
     try {
       const items = shoppingList.map(item => ({
         name: item.name,
-        quantity: item.toOrder,
+        quantity: String(item.toOrder),
         unit: item.unit
       }));
 
-      const response = await fetch('/api/send-shopping-list', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: `Here is the shopping list for production run "${currentRun.name}":`,
-          items
-        })
-      });
+      const note = currentRun.name?.trim() ? currentRun.name.trim() : undefined;
+      const outcome = await sendShoppingList(items, note);
 
-      // On static hosting the SPA rewrite answers 200 + HTML (or the endpoint
-      // 404s/405s) — that means this deployment has no send backend, not a
-      // network problem. Only parse JSON when the server actually sent JSON.
-      const contentType = response.headers.get('content-type') || '';
-      const isJson = contentType.includes('application/json');
-
-      if (!isJson || response.status === 404 || response.status === 405) {
-        setSendResult({ success: false, message: t('prep:sendUnavailable') });
+      if (outcome.ok === false) {
+        const message =
+          outcome.reason === 'unauthenticated' ? t('auth:pleaseSignIn')
+          : outcome.reason === 'unavailable' ? t('prep:sendUnavailable')
+          : outcome.reason === 'network' ? t('prep:networkError')
+          : t('prep:shoppingListFailed');
+        setSendResult({ success: false, message });
         return;
       }
 
-      const data = await response.json();
-
-      if (response.ok) {
+      // Per-channel honesty: the server reports each channel (email/SMS)
+      // separately, and a channel counts only when the provider accepted it.
+      const { email, sms } = outcome.result;
+      if (email.sent && sms.sent) {
         setSendResult({ success: true, message: t('prep:shoppingListSent') });
+      } else if (email.sent) {
+        setSendResult({ success: true, message: t('prep:shoppingListSentEmailOnly') });
+      } else if (sms.sent) {
+        setSendResult({ success: true, message: t('prep:shoppingListSentSmsOnly') });
+      } else if (!email.attempted && !sms.attempted) {
+        // Neither channel is configured server-side — same "no send backend
+        // in this deployment" situation as an undeployed function.
+        setSendResult({ success: false, message: t('prep:sendUnavailable') });
       } else {
-        setSendResult({ success: false, message: data.error || t('prep:shoppingListFailed') });
+        setSendResult({ success: false, message: t('prep:shoppingListFailed') });
       }
-    } catch (error) {
-      setSendResult({ success: false, message: t('prep:networkError') });
     } finally {
       setIsSending(false);
     }
@@ -983,7 +984,7 @@ export default function PrepList() {
                   
                   <div className="flex flex-col gap-2">
                     <button
-                      onClick={sendShoppingList}
+                      onClick={handleSendShoppingList}
                       disabled={isSending}
                       className="w-full bg-amber-700 hover:bg-amber-800 disabled:bg-amber-700/50 text-white font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
                     >

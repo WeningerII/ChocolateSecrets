@@ -30,6 +30,8 @@
   "completeTitle": "Complete Production Run",
   "completeMessage": "Are you sure you want to complete this production run? This will update your inventory.",
   "shoppingListSent": "Shopping list sent successfully.",
+  "shoppingListSentEmailOnly": "Shopping list sent by email. SMS was not sent.",
+  "shoppingListSentSmsOnly": "Shopping list sent by SMS. Email was not sent.",
   "shoppingListFailed": "Failed to send shopping list.",
   "networkError": "Network error. Please check your connection.",
   "sendUnavailable": "Sending isn't available in this deployment. Use \"Add to Master List\" instead.",
