@@ -15,7 +15,14 @@ code. None of the code changes here alter app behavior until you opt in.
 | Secret keys never reach the browser | `GEMINI_API_KEY` via `defineSecret` (Secret Manager); Gemini calls proxied through a Cloud Function | `geminiClient.ts` calls `httpsCallable`, not the API directly |
 | No Cloud Storage exposure | — | app stores bill image *paths*, not files via the Storage SDK |
 
-The hardcoded admin email in `firestore.rules` (`isAdmin()`) is the **owner's** account — an intentional bootstrap so you're always admin, not a hole.
+Admin is granted **only** by the `users/{uid}` role doc (`role == 'admin'`) — the
+old hardcoded owner-email bootstrap in `isAdmin()` was removed (ADR-0007), so no
+token claim can confer admin. To bootstrap (or recover) the first admin, set
+`role: "admin"` on your own `users/{uid}` doc in the Firebase console — clients
+can't escalate roles through the rules. Cloud Functions resolve back-office alert
+recipients the same role-based way; the optional `SUPER_ADMIN_EMAIL` env var can
+add a recipient by email, and with no admins resolvable the functions skip the
+alert and log a warning instead of falling back to a baked-in address.
 
 ## To do (one-time, console / CLI)
 

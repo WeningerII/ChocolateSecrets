@@ -39,6 +39,8 @@ function usersSnap(ids: string[]) {
 describe('onBillReviewed', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // ADR-0007: resolveAdminUserIds only queries by email when this env is set.
+    delete process.env.SUPER_ADMIN_EMAIL;
   });
 
   const createEvent = (beforeStatus: string | undefined, afterStatus: string, afterData: any = {}) => ({
@@ -175,7 +177,7 @@ describe('onBillReviewed', () => {
       ]
     });
     getMock.mockResolvedValueOnce(usersSnap(['admin1', 'admin2'])); // role admins
-    getMock.mockResolvedValueOnce(usersSnap([])); // super-admin email (none)
+    // No SUPER_ADMIN_EMAIL set -> no second users query by email (ADR-0007).
 
     // Bill carries no createdBy -> recipients fall back to the back-office admins.
     const event = createEvent('extracted', 'reviewed', { totalAmount: 500, createdBy: undefined });

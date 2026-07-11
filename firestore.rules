@@ -34,13 +34,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Admin derives ONLY from the users/{uid} role doc (ADR-0007). There is
+    // deliberately no email-based bypass: token claims must never confer admin.
     function isAdmin() {
       return isAuthenticated() &&
-        (
-          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-          (request.auth.token.email != null && request.auth.token.email.matches("(?i)weningerii@gmail\\.com") && request.auth.token.email_verified == true)
-        );
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function hasRequiredFields(fields) {
