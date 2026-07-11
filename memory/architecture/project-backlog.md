@@ -9,6 +9,13 @@ type: architecture
 
 # Project Backlog — full outstanding-work inventory
 
+> **Status 2026-07-11 (round 1 executed):** items marked ✅ below landed on
+> `claude/next-priorities-f3wywa` and passed a 3-lens adversarial review with
+> zero findings. `[~]` = partially done or decided-with-work-pending.
+> Decisions taken: [[0005-keep-anonymous-guest-mode]] ·
+> [[0006-shopping-list-via-callable-function]] ·
+> [[0007-remove-owner-email-admin-backdoor]].
+
 Complete inventory of everything left to do, produced 2026-07-11 by a 12-agent
 audit (8 dimension sweeps + completeness critic + 4 follow-up sweeps) covering:
 the vault, code markers, the full check suite (run live), docs, GitHub, feature
@@ -27,7 +34,9 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## A. Broken in production right now
 
-- [ ] [P0][S] **Fix missing Firestore composite indexes (6 uncovered queries).**
+- [x] [P0][S] **Fix missing Firestore composite indexes (6 uncovered queries).**
+  ✅ landed 2026-07-11 (`de1906b`) — ⚠ still requires a manual
+  `firebase deploy --only firestore:indexes` (no automation, C-6).
   `dailyExpenseCheck` throws `failed-precondition` on BOTH its sweeps
   (`functions/src/dailyExpenseCheck.ts:39` bills vendorId==+billDate range+status-in;
   `:90` status-in+dueDate range), killing missing-bill and due-soon alerts daily.
@@ -35,16 +44,20 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   `src/hooks/useKeptSourcingNotes.ts:17` (ingredientId==+orderBy keptAt — UI silently
   shows zero kept notes); `src/services/vendorsService.ts:63` (isActive+name — vendor
   pickers fail); latent `recurringExpectationsService.ts:48` (isActive+createdAt).
-- [ ] [P2][S] **Repair firestore.indexes.json itself.** 1 orphaned index
+- [x] [P2][S] **Repair firestore.indexes.json itself.** ✅ landed with `de1906b`. 1 orphaned index
   (inventoryTransactions ingredientId+date matches no query) and 3 single-field
   entries that duplicate automatic indexes — the Admin API may reject the file
   on deploy (fewer than two fields per composite).
-- [ ] [P1][S] **"Send to Chef" is dead in every production deploy.**
+- [~] [P1][S] **"Send to Chef" is dead in every production deploy.**
+  ✅ misleading-error half fixed (`b82947f`: content-type/404/405 detection +
+  localized "unavailable in this deployment" message); real fix = ADR-0006.
   `src/pages/PrepList.tsx:472` POSTs `/api/send-shopping-list`, which only exists
   in the dev `server.ts`; the Hosting `**` rewrite returns 200+HTML, the client
   `.json()` throws before the `ok` check (`:481`) and users see a misleading
   "network error" (`:489`). Button never hidden/gated (`:974`).
-- [ ] [P1][M] **Decide + build the production home for shopping-list send.**
+- [~] [P1][M] **Decide + build the production home for shopping-list send.**
+  ✅ decided 2026-07-11: authenticated callable Cloud Function
+  ([[0006-shopping-list-via-callable-function]]); build in progress.
   No Cloud Function equivalent exists. Options: callable CF with auth + App Check
   (secrets via Secret Manager), HTTPS function + `/api/**` hosting rewrite, or
   remove/flag the UI. Also decide whether the `npm start` self-hosted path
@@ -53,7 +66,8 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   sender `onboarding@resend.dev` (`server.ts:57`) can't deliver to arbitrary
   CHEF_EMAIL; server returns 200 `{success:true}` regardless (`:62,80`) → false
   success toast. Also Twilio 1600-char overflow → partial send (`:66`).
-- [ ] [P1][S] **Bump Cloud Functions off decommissioned Node 18.**
+- [x] [P1][S] **Bump Cloud Functions off decommissioned Node 18.** ✅ landed
+  (`ad1100f`, engines 18→20; lockfile synced in `01da977`).
   `functions/package.json` engines.node "18"; GCF Node 18 decommissioned 2025-10;
   new deploys rejected. CI already tests on Node 20.
 - [ ] [P2][M] **Translate the shipped-English es/ko strings.** ~50 English values
@@ -63,11 +77,14 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## B. Security & data protection
 
-- [ ] [P1][M] **Rethink anonymous guest-mode write access.** `signInAsGuest()`
+- [x] [P1][M] **Rethink anonymous guest-mode write access.** ✅ closed by
+  decision 2026-07-11: risk accepted, kept as-is — [[0005-keep-anonymous-guest-mode]]
+  (revisit triggers recorded there). `signInAsGuest()`
   (`src/firebase.ts:51`) satisfies `isAuthenticated()`, the only gate on
   create/update for 16+ collections (delete too on shopping_list/sourcing_notes)
   — any visitor can write/corrupt kitchen data. (firestore.rules:352-509)
-- [ ] [P1][S] **Close the sourcing_notes ownership hole.** Update checks only the
+- [x] [P1][S] **Close the sourcing_notes ownership hole.** ✅ landed (`c69cf70`,
+  rules + 6 emulator-verified tests incl. mutation check against the old rules). Update checks only the
   incoming `keptBy`, never `resource.data.keptBy`; delete has no owner check —
   any user can hijack/delete others' notes. (firestore.rules:443-445)
 - [ ] [P1][M] **Finish the security-hardening "To do"** (docs/security-hardening.md):
@@ -75,13 +92,16 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   flip enforcement, `enforceAppCheck: true` on callables); restrict the public web
   API key (scripts/harden-gcp.sh); verify deployed rules on the named DB and lock
   `(default)`; prune Auth authorized domains; optional key rotation.
-- [ ] [P1][S] **Patch dependency vulnerabilities.** Root prod audit: 22 vulns
+- [x] [P1][S] **Patch dependency vulnerabilities.** ✅ landed (`5d15773`): root
+  prod 22→0; functions 17→9 moderate (single upstream `uuid` advisory via
+  firebase-admin — blocked on Google; revisit at firebase-admin 14). Root prod audit: 22 vulns
   (1 critical protobufjs, 9 high incl. vite + react-router) — non-breaking
   `npm audit fix` available; functions: 17 (4 high; full fix = firebase-admin@14).
 - [ ] [P1][S] **Harden /api/send-shopping-list if server.ts survives.** No auth,
   no rate limit, binds 0.0.0.0; client-controlled body relayed into email/SMS from
   the app's identity (spam/phishing/cost vector). (server.ts:19-85)
-- [ ] [P2][S] **Decide the owner-email admin backdoor.** `isAdmin()` regex-matches
+- [~] [P2][S] **Decide the owner-email admin backdoor.** ✅ decided 2026-07-11:
+  remove it — [[0007-remove-owner-email-admin-backdoor]]; removal in progress. `isAdmin()` regex-matches
   `weningerii@gmail.com` (firestore.rules:37-44) — committed PII, unauditable
   second admin path surviving role revocation; also hardcoded fallback in
   `functions/src/utils/adminRecipients.ts:19`.
@@ -90,7 +110,8 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## C. CI/CD & deploy pipeline
 
-- [ ] [P1][S] **Run `npm run build` on PRs + add a bundle-size budget.** The
+- [~] [P1][S] **Run `npm run build` on PRs + add a bundle-size budget.**
+  ✅ build step landed (`bb4ad42`); bundle-size budget still open (see I-4). The
   production build first runs post-merge in deploy-pages.yml; a broken bundle
   merges green. (checks.yml)
 - [ ] [P2][S] **Gate deploy-pages on checks.** It triggers on push to main
@@ -113,7 +134,8 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 - [ ] [P2][S] **Wire up check:functions-secrets.** Gated on
   `CHECK_FUNCTIONS_SECRETS=1` that nothing sets → the GEMINI_API_KEY Secret
   Manager guard never runs; production secret state unverified.
-- [ ] [P1][S] **Fix fresh-clone DX.** Root `npm run lint`/`npm test` fail with 20
+- [x] [P1][S] **Fix fresh-clone DX.** ✅ landed (`01da977`: root postinstall
+  bootstraps functions deps; CLAUDE.md + README updated). Root `npm run lint`/`npm test` fail with 20
   TS errors until `npm --prefix functions install` — the CLAUDE.md/README
   quick-start omits that step; document or auto-install.
 - [ ] [P2][S] **Add .firebaserc** (default project alias) — documented CLI flows

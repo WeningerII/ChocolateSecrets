@@ -37,9 +37,22 @@ type: log
   CI green, 0 open issues/PRs, graph fresh, zero TODO comments/skipped tests.
 
 ## Decisions
-- None taken — this session was inventory only. The backlog's "Recommended
-  attack order" proposes: indexes fix → security batch → Node 20 + CI build →
-  Send-to-Chef decision → refactor ladder ([[0004-decompose-god-modules]]).
+- [[0005-keep-anonymous-guest-mode]] — guest write access kept as accepted risk.
+- [[0006-shopping-list-via-callable-function]] — Send-to-Chef ports to an
+  authenticated callable Cloud Function with Secret Manager secrets.
+- [[0007-remove-owner-email-admin-backdoor]] — email regex + hardcoded fallback
+  removed; users/{uid} doc is the single admin source.
+
+## Round 1 executed (same session, later)
+Workflow `backlog-attack-round-1` (7 sequential fix agents + 3-lens review, 0
+findings): missing composite indexes fixed (`de1906b`), sourcing_notes
+ownership hole closed with emulator-verified rules tests (`c69cf70`), PrepList
+misleading-error fix + localized `prep:sendUnavailable` (`b82947f`), functions
+Node 18→20 (`ad1100f`), CI production-build step (`bb4ad42`), fresh-clone
+postinstall bootstrap (`01da977`), npm audit root 22→0 / functions 17→9-moderate
+(`5d15773`). ⚠ Indexes/rules still need a manual `firebase deploy`. Round 2
+(callable sendShoppingList + backdoor removal) launched next; statuses
+annotated in [[project-backlog]].
 
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
