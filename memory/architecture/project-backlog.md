@@ -208,9 +208,12 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## E. Refactors (from [[refactor-backlog]] / PR #39 deferral)
 
-- [ ] [P1][L] **Decompose RecipeEditor.tsx JSX (~1445 LOC) into tab sub-components**
-  — reducer already extracted; needs manual UI verify (tabs, focus/scroll,
-  physics ribbon). Backlog #1.
+- [x] [P1][L] **Decompose RecipeEditor.tsx JSX (~1445 LOC) into tab sub-components**
+  ✅ done (`f3983ac`): 1445 → 485 LOC; extracted `OverviewTab`, `DesignTab`,
+  `ComponentsTab`, `editorShared` under `src/components/recipeEditor/`. Verbatim
+  move — parent keeps all hooks/state/handlers + the tab wrappers. Verified via
+  tsc + 917 tests + build + a real-browser smoke drive (all three tabs render/
+  switch, production-details toggle, live-math footer, save→onSave). Backlog #1.
 - [ ] [P2][L] **Split the ~25-`useState` pages** (Ingredients, BillReview,
   PrepList) into reducers/child components; click-through verify. Backlog #2.
 - Process (binding on each): one item per PR; lint + tests + manual UI pass;

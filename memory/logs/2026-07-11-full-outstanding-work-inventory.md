@@ -73,6 +73,21 @@ Workflow `backlog-attack-round-2` (4 sequential agents + 3-lens review + fix):
 ⚠ One-time deploys now pending: indexes, rules, and functions (secrets +
 params first) — steps recorded in [[project-backlog]] and functions/.env.example.
 
+## Round 3 executed (RecipeEditor JSX decomposition)
+Refactor-backlog item #1 (top planned refactor) landed (`f3983ac`): extracted
+the three tab panels + shared presentational helpers from RecipeEditor.tsx
+(1445 → 485 LOC) into `src/components/recipeEditor/{OverviewTab,DesignTab,
+ComponentsTab,editorShared}.tsx`. Behavior-preserving verbatim move — parent
+keeps all hooks/state/handlers and the `activeTab` wrapper divs. Since the repo
+convention is "no jsdom render tests; render coverage lives in the smoke layer"
+(per LocalizedField.test.tsx), and the sandbox can't reach Firebase for the e2e
+auth flow, I verified with a temporary Vite-served harness that mounted the real
+RecipeEditor with mock props and drove it in Chromium: all three tabs render and
+switch, production-details toggles, live-math footer renders, and save fires
+onSave — plus tsc + 917 tests + production build. Harness files were removed
+after the run (not committed). An adversarial verbatim-equivalence review of the
+diff was also run.
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.

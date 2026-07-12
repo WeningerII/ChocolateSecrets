@@ -18,11 +18,14 @@ first. See [[system-overview]] for where these components live and
 
 ## Prioritized checklist
 
-- [ ] **1. Decompose `RecipeEditor.tsx` JSX into tab sub-components.**
-  The reducer/state was already extracted to `src/components/recipeEditor/`
-  ([[0004-decompose-god-modules]]); the remaining ~1445 LOC is one large JSX
-  tree. Split each editor tab into its own component. Needs manual UI verify:
-  tab switching, focus/scroll, and physics-ribbon updates must be unchanged.
+- [x] **1. Decompose `RecipeEditor.tsx` JSX into tab sub-components.** ✅ DONE
+  2026-07-12 (`f3983ac`): extracted `OverviewTab`, `DesignTab`, `ComponentsTab`,
+  and shared `editorShared` (ProvenanceBadge/ConfidenceDot/getActionIcon) under
+  `src/components/recipeEditor/`; RecipeEditor.tsx 1445 → 485 LOC as a slim
+  orchestrator. Behavior-preserving (verbatim JSX; parent keeps all hooks/state/
+  handlers and the tab wrappers). Verified: tsc + 917 tests + production build +
+  a Chromium smoke drive (tab switching, production-details toggle, live-math
+  footer, save→onSave all confirmed). See [[project-backlog]] section E.
 
 - [ ] **2. Split the 25-`useState` pages into smaller stateful units.**
   `src/pages/Ingredients.tsx`, `src/pages/BillReview.tsx`, and
