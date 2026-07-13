@@ -34,11 +34,14 @@ first. See [[system-overview]] for where these components live and
   clicking through each page — form edits, filters, modals, and save flows — to
   confirm no state-timing regressions.
 
-- [ ] **3. Migrate to i18next typed keys to delete the `t('key' as any)` casts.**
-  ~233 `t('key' as any)` casts exist because the translation keys aren't typed.
-  Generate a typed key union (i18next `resources`/`CustomTypeOptions`) and drop
-  the casts. Needs the app running with each locale to confirm no key resolves to
-  a missing/raw string at runtime.
+- [x] **3. Migrate to i18next typed keys to delete the `t('key' as any)` casts.**
+  ✅ DONE 2026-07-12 (`fbdc296`, `98b56e1`). The typed union already existed; the
+  casts were forced by TS's instantiation-depth limit on big namespaces (bare deep
+  keys fail, `t('ns:key')` fully-qualified keys pass). Removed 103 static + 3
+  `useTranslation` + 3 `(t as any)` casts; kept 121 dynamic (inherently un-typeable)
+  covered instead by a new `src/i18n.keys.test.ts` guard. Found & fixed 12 missing
+  keys + 6 placeholder-mismatch bugs the casts hid. Full write-up in
+  [[project-backlog]] section D.
 
 - [ ] **4. Type the ~dozen genuine data `any`s.**
   Replace real (non-key-cast) `any`s on data shapes with proper types — e.g. the

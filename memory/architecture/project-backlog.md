@@ -172,10 +172,19 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   the pipeline produces. (src/services/geminiService.ts:667-845)
 - [ ] [P1][S] **Fix `createdAt?: any; updatedAt?: any`** on the shared production
   type. (src/types/production.ts:10-11)
-- [ ] [P2][M] **Typed i18next keys** ([[refactor-backlog]] #3): 262 `t('key' as any)`
-  casts across ~40 files; root causes include the unregistered `chemistry`
-  namespace (`useTranslation('chemistry' as any)` ×3). Precedent bug: PR #34's
-  mistyped key only compiled because of the cast.
+- [x] [P2][M] **Typed i18next keys** ([[refactor-backlog]] #3) — ✅ done
+  (`fbdc296`, `98b56e1`). NB the premise was partly wrong: the type decl already
+  existed and all 26 namespaces (incl. chemistry) were registered. The casts
+  persisted because i18next's key-type hits TS's instantiation-depth limit on big
+  nested namespaces — so **bare** deep keys fail to typecheck but **fully-qualified**
+  `t('ns:key')` ones pass. Removed 103 static casts (fully-qualified), 3
+  `useTranslation(as any)`, 3 `(t as any)`; 121 **dynamic** template-literal casts
+  kept (runtime-interpolated keys are inherently un-typeable — a typed alias does
+  not satisfy the overloads). Added `src/i18n.keys.test.ts` — a vitest guard
+  validating 1386 static keys + dynamic-key prefixes against the en JSON (the real
+  safety net for the dynamic case). **Real bugs found & fixed:** 12 missing keys
+  the casts hid (7 renamed bread-warning kinds + auth/inventory/ledger keys) and 6
+  bread-warning interpolation placeholder mismatches that rendered blank numbers.
 - [ ] [P2][M] **One typed Firestore-Timestamp coercion helper** — the
   `(x as any)?._seconds ?? .seconds` duck-typing repeats 9× across 5 expenses
   components (PaymentForm, PaymentsList, BillsList, BillPaymentHistory,

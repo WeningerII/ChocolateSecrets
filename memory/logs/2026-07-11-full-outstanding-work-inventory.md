@@ -88,6 +88,26 @@ onSave — plus tsc + 917 tests + production build. Harness files were removed
 after the run (not committed). An adversarial verbatim-equivalence review of the
 diff was also run.
 
+## Round 4 executed (typed i18n keys)
+Refactor-backlog item #3. Diagnosis reframed it: the typed union already existed
+(all 26 namespaces registered) — the ~232 `t('key' as any)` casts persisted
+because i18next's key-type resolution exceeds TS's instantiation-depth limit on
+large nested namespaces, so **bare** deep keys don't typecheck while
+**fully-qualified** `t('ns:key')` ones do. Workflow (8 parallel editors on
+disjoint files → tsc gate + fix → key-guard → 2-lens review, 0 findings):
+removed 103 static casts (fully-qualified), 3 `useTranslation(as any)`, 3
+`(t as any)`; kept 121 dynamic template-literal casts (runtime-interpolated keys
+are inherently un-typeable — a typed alias fails the overloads, empirically
+confirmed). Added `src/i18n.keys.test.ts` (validates 1386 static keys +
+dynamic-key prefixes vs en JSON — the real safety net). **Real bugs found &
+fixed** (the casts were hiding them, PR #34 class): 12 missing keys (7 renamed
+bread-warning kinds + auth/inventory/ledger) added to all 3 locales, and 6
+bread-warning interpolation placeholder mismatches (`{{pct}}`/`{{min}}`/`{{score}}`
+that the code never passed → blank numbers at runtime) corrected across en/es/ko
+(`98b56e1`). Verified: tsc clean, 920 tests, build, locale-parity,
+hardcoded-strings all green; 0 static casts remain. Commits `fbdc296` + `98b56e1`.
+All four rounds are on PR #40 (branch claude/next-priorities-f3wywa).
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.
