@@ -6,12 +6,12 @@ interface EditorPhysicsRibbonProps {
 }
 
 export function EditorPhysicsRibbon({ physics }: EditorPhysicsRibbonProps) {
-  const { t } = useTranslation('chemistry');
+  const { t } = useTranslation(['chemistry']);
 
   if (!physics) {
     return (
       <div className="px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-md text-xs text-cocoa-500">
-        {t('editor.ribbon.empty' as any)}
+        {t('chemistry:editor.ribbon.empty')}
       </div>
     );
   }
@@ -21,11 +21,11 @@ export function EditorPhysicsRibbon({ physics }: EditorPhysicsRibbonProps) {
 
   return (
     <div className="px-4 py-2.5 bg-cream-50 border border-cream-200 rounded-md flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs">
-      <Tile label={t('tier.aw' as any)} value={aw === null ? '—' : aw.toFixed(3)} caption={t(physics.awBand.labelKey as any)} />
-      {showPH && <Tile label={t('tier.ph' as any)} value={physics.pH!.pH.toFixed(2)} />}
-      <Tile label={t('tier.aqueousSugar' as any)} value={`${Math.round(physics.aw.aqueousSugarPct)}%`} />
-      <Tile label={t('tier.totalFat' as any)} value={`${Math.round(physics.aw.fatPct)}%`} caption={t(physics.fatRegime.labelKey as any)} />
-      <Tile label={t('strip.shelfLife' as any)} value={t('shelfLife.weeksOther' as any, { count: physics.shelfLife.weeks })} />
+      <Tile label={t('chemistry:tier.aw')} value={aw === null ? '—' : aw.toFixed(3)} caption={t(physics.awBand.labelKey as any)} />
+      {showPH && <Tile label={t('chemistry:tier.ph')} value={physics.pH!.pH.toFixed(2)} />}
+      <Tile label={t('chemistry:tier.aqueousSugar')} value={`${Math.round(physics.aw.aqueousSugarPct)}%`} />
+      <Tile label={t('chemistry:tier.totalFat')} value={`${Math.round(physics.aw.fatPct)}%`} caption={t(physics.fatRegime.labelKey as any)} />
+      <Tile label={t('chemistry:strip.shelfLife')} value={t('chemistry:shelfLife.weeksOther', { count: physics.shelfLife.weeks })} />
     </div>
   );
 }

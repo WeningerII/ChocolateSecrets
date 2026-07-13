@@ -150,5 +150,6 @@
     "errorImport": "Error al importar ingredientes."
   },
   "deleteTitle": "Eliminar Ubicación",
-  "deleteMessage": "¿Está seguro de que desea eliminar esta ubicación? Esto puede afectar los artículos de inventario almacenados aquí."
+  "deleteMessage": "¿Está seguro de que desea eliminar esta ubicación? Esto puede afectar los artículos de inventario almacenados aquí.",
+  "viewAudit": "Ver Auditoría"
 }

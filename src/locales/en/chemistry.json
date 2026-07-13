@@ -613,6 +613,13 @@
     },
     "warnings": {
       "no_flour": "No flour detected. Baker's percentages cannot be calculated.",
+      "no_flour_present": "No flour detected. Baker's percentages cannot be calculated.",
+      "yeast_outside_band": "Instant yeast equivalent ({{yeast}}%) is outside the {{subtype}} range ({{min}}–{{max}}%).",
+      "water_temp_unsafe_high": "Calculated water temperature ({{waterTempC}}°C) will kill yeast. Adjust room or flour temperature.",
+      "water_temp_unsafe_low": "Calculated water temperature ({{waterTempC}}°C) is near freezing. Adjust room or flour temperature.",
+      "sourdough_no_starter": "Sourdough formulation but little or no starter detected. Add a natural starter.",
+      "enriched_recipe_in_lean_subtype": "Added fat ({{fatPct}}%) detected in a lean dough subtype ({{subtype}}). Recheck categorization.",
+      "whole_grain_fraction_outside_band": "Whole grain fraction ({{fraction}}%) is outside the {{subtype}} range ({{min}}–{{max}}%).",
       "hydration_low": "Hydration ({{pct}}%) is below the {{subtype}} minimum ({{min}}%).",
       "hydration_high": "Hydration ({{pct}}%) exceeds the {{subtype}} maximum ({{max}}%).",
       "salt_low": "Salt ({{pct}}%) is below the standard minimum (1.4%). Fermentation may be too rapid and flavor lacking.",

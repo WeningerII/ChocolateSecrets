@@ -19,7 +19,7 @@ export function RecipeCategoryPicker({ selected, onChange, onAutoDetect }: Recip
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <span className="text-xs uppercase tracking-wide text-cocoa-500 font-medium">
-        {t('category.label' as any)}
+        {t('recipes:category.label')}
       </span>
       {RECIPE_CATEGORIES.map(cat => {
         const active = selected.includes(cat);
@@ -45,7 +45,7 @@ export function RecipeCategoryPicker({ selected, onChange, onAutoDetect }: Recip
           className="text-xs px-2.5 py-0.5 rounded-full border border-copper-300 text-copper-700 hover:bg-copper-50 inline-flex items-center gap-1 transition-colors"
         >
           <Sparkles className="w-3 h-3" />
-          {t('category.autoDetect' as any)}
+          {t('recipes:category.autoDetect')}
         </button>
       )}
     </div>

@@ -613,6 +613,13 @@
     },
     "warnings": {
       "no_flour": "No se detecta harina. No se pueden calcular porcentajes de panadero.",
+      "no_flour_present": "No se detecta harina. No se pueden calcular porcentajes de panadero.",
+      "yeast_outside_band": "La levadura instantánea equivalente ({{yeast}}%) está fuera del rango para {{subtype}} ({{min}}–{{max}}%).",
+      "water_temp_unsafe_high": "La temperatura calculada del agua ({{waterTempC}}°C) matará la levadura. Ajuste la temperatura ambiente o de la harina.",
+      "water_temp_unsafe_low": "La temperatura calculada del agua ({{waterTempC}}°C) está cerca de la congelación. Ajuste la temperatura ambiente o de la harina.",
+      "sourdough_no_starter": "Formulación de masa madre pero se detecta poca o ninguna masa madre. Añada un fermento natural.",
+      "enriched_recipe_in_lean_subtype": "Grasa añadida ({{fatPct}}%) detectada en un subtipo de masa magra ({{subtype}}). Revise la categorización.",
+      "whole_grain_fraction_outside_band": "La fracción de grano entero ({{fraction}}%) está fuera del rango para {{subtype}} ({{min}}–{{max}}%).",
       "hydration_low": "La hidratación ({{pct}}%) está por debajo del mínimo para {{subtype}} ({{min}}%).",
       "hydration_high": "La hidratación ({{pct}}%) excede el máximo para {{subtype}} ({{max}}%).",
       "salt_low": "La sal ({{pct}}%) está por debajo del mínimo estándar (1.4%). La fermentación puede ser muy rápida.",

@@ -112,7 +112,7 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
             <div className="flex justify-between">
               <span className="text-cocoa-500">{t('chemistry:detail.nutrition.macros')}</span>
               <span className="font-mono">
-                {t('chemistry:detail.nutrition.macroSplit' as any, {
+                {t('chemistry:detail.nutrition.macroSplit', {
                   carb: physics.nutrition.carbohydrateG.toFixed(1),
                   fat: physics.nutrition.fatG.toFixed(1),
                   protein: physics.nutrition.proteinG.toFixed(1),
@@ -132,7 +132,7 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
       )}
       {aw.flags.find(f => f.kind === 'ethanol_volatility_applied') && (
         <p className="text-[11px] italic text-cocoa-500 mt-1">
-          † {t('chemistry:detail.norrish.footnoteEthanol' as any, { lossPct: 10 })}
+          † {t('chemistry:detail.norrish.footnoteEthanol', { lossPct: 10 })}
         </p>
       )}
 
@@ -174,7 +174,7 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
             </tbody>
           </table>
           <p className="text-xs mt-3 leading-relaxed">
-            {t('chemistry:detail.ph.explanation' as any, { pH: ph.pH.toFixed(2) })}
+            {t('chemistry:detail.ph.explanation', { pH: ph.pH.toFixed(2) })}
           </p>
           {phInterpretationKey && (
             <p className="text-xs mt-1 italic text-cocoa-600">{t(phInterpretationKey as any)}</p>
@@ -242,7 +242,7 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
             <div className="flex justify-between">
               <span className="text-cocoa-500">{t('chemistry:detail.browning.cookValueLabel')}</span>
               <span className="font-mono">
-                {t('chemistry:detail.browning.cookValueUnit' as any, { minutes: (physics.browning.cookValueS / 60).toFixed(1) })}
+                {t('chemistry:detail.browning.cookValueUnit', { minutes: (physics.browning.cookValueS / 60).toFixed(1) })}
               </span>
             </div>
           </div>
@@ -358,7 +358,7 @@ Aw = e^(${(aw.lnXw - totalDepression).toFixed(4)}) = ${aw.aw.toFixed(4)}`}
                   {' · '}
                   {physics.gelation.gels
                     ? (physics.gelation.setTempC !== null
-                        ? t('chemistry:detail.structure.gelation.setsAt' as any, { temp: physics.gelation.setTempC })
+                        ? t('chemistry:detail.structure.gelation.setsAt', { temp: physics.gelation.setTempC })
                         : t('chemistry:detail.structure.gelation.sets'))
                     : t('chemistry:detail.structure.gelation.wontSet')}
                 </span>

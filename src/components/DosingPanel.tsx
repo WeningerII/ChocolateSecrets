@@ -19,7 +19,7 @@ const TASTES: TunableTaste[] = ['sweet', 'salty', 'sour', 'bitter'];
  * the dose→effect curve. Honest about aroma-dominant additions.
  */
 export function DosingPanel({ recipe, ingredients, recipes }: DosingPanelProps) {
-  const { t } = useTranslation('chemistry');
+  const { t } = useTranslation(['chemistry']);
   const [additionId, setAdditionId] = useState('');
   const [mode, setMode] = useState<'balance' | 'target'>('balance');
   const [quality, setQuality] = useState<TunableTaste>('sour');
@@ -103,7 +103,7 @@ export function DosingPanel({ recipe, ingredients, recipes }: DosingPanelProps) 
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-cocoa-600">{t('chemistry:dosing.targetValue' as any, { value: target })}</span>
+            <span className="text-cocoa-600">{t('chemistry:dosing.targetValue', { value: target })}</span>
             <input
               type="range" min={0} max={100} step={1}
               value={target}
@@ -125,7 +125,7 @@ export function DosingPanel({ recipe, ingredients, recipes }: DosingPanelProps) 
             <span className="text-cocoa-500 text-xs">{t('chemistry:dosing.grams')}</span>
           </div>
           <p className="text-xs text-cocoa-600 mt-1">
-            {t('chemistry:dosing.balanceBeforeAfter' as any, {
+            {t('chemistry:dosing.balanceBeforeAfter', {
               before: Math.round(result.baseline.palatability),
               after: Math.round(result.achieved.palatability),
             })}
@@ -155,7 +155,7 @@ export function DosingPanel({ recipe, ingredients, recipes }: DosingPanelProps) 
 
           {result.flavorCeilingG !== null && (
             <p className="text-[11px] text-amber-600 mt-2">
-              {t('chemistry:dosing.ceiling' as any, { dose: result.flavorCeilingG.toFixed(1) })}
+              {t('chemistry:dosing.ceiling', { dose: result.flavorCeilingG.toFixed(1) })}
             </p>
           )}
 

@@ -613,6 +613,13 @@
     },
     "warnings": {
       "no_flour": "밀가루가 발견되지 않아 베이커스 퍼센트를 계산할 수 없습니다.",
+      "no_flour_present": "밀가루가 발견되지 않아 베이커스 퍼센트를 계산할 수 없습니다.",
+      "yeast_outside_band": "인스턴트 효모 동등치({{yeast}}%)가 {{subtype}}의 범위({{min}}–{{max}}%)를 벗어났습니다.",
+      "water_temp_unsafe_high": "계산된 물 온도({{waterTempC}}°C)가 효모를 죽일 수 있습니다. 실내 온도나 밀가루 온도를 조절하세요.",
+      "water_temp_unsafe_low": "계산된 물 온도({{waterTempC}}°C)가 빙점에 가깝습니다. 실내 온도나 밀가루 온도를 조절하세요.",
+      "sourdough_no_starter": "사워도우 배합이지만 발효종이 거의 또는 전혀 없습니다. 천연 발효종을 추가하세요.",
+      "enriched_recipe_in_lean_subtype": "지방이 없는 {{subtype}} 서브타입에 지방({{fatPct}}%)이 추가되었습니다. 분류를 확인하세요.",
+      "whole_grain_fraction_outside_band": "통곡물 비율({{fraction}}%)이 {{subtype}}의 범위({{min}}–{{max}}%)를 벗어났습니다.",
       "hydration_low": "수분율({{pct}}%)이 {{subtype}}의 최소치({{min}}%)보다 낮습니다.",
       "hydration_high": "수분율({{pct}}%)이 {{subtype}}의 최대치({{max}}%)를 초과합니다.",
       "salt_low": "소금({{pct}}%)이 일반적인 최소치(1.4%)보다 낮습니다. 발효가 너무 빠를 수 있습니다.",

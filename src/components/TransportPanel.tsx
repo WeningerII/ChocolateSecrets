@@ -42,7 +42,7 @@ const DIFFUSANTS: Diffusant[] = ['salt_in_meat', 'salt_in_vegetable', 'sugar_osm
  * temperature over time / time-to-doneness, or brine/cure penetration time.
  */
 export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelProps) {
-  const { t } = useTranslation('chemistry');
+  const { t } = useTranslation(['chemistry']);
   const [geometry, setGeometry] = useState<Geometry>('sphere');
   const [sizeCm, setSizeCm] = useState(2.5);
   const [mode, setMode] = useState<'cook' | 'brine' | 'freeze' | 'dry'>('cook');
@@ -199,7 +199,7 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
             </div>
             {cook?.surfaceCoefficient && (
               <p className="text-[11px] text-cocoa-500 mt-1">
-                {t('chemistry:transport.hBreakdown' as any, {
+                {t('chemistry:transport.hBreakdown', {
                   h: cook.h.toFixed(0),
                   conv: cook.surfaceCoefficient.hConv.toFixed(0),
                   rad: cook.surfaceCoefficient.hRad.toFixed(0),
@@ -240,7 +240,7 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
               </select>
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-cocoa-600">{t('chemistry:transport.targetSaturation' as any, { value: saturation })}</span>
+              <span className="text-cocoa-600">{t('chemistry:transport.targetSaturation', { value: saturation })}</span>
               <input type="range" min={5} max={95} step={5} value={saturation}
                 onChange={e => setSaturation(parseInt(e.target.value, 10))} className="w-full" />
             </label>
@@ -292,7 +292,7 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
           <div className="grid sm:grid-cols-3 gap-3 text-xs mt-3">
             <NumField label={t('chemistry:transport.airTemp')} value={dryAirTempC} onChange={setDryAirTemp} />
             <label className="flex flex-col gap-1">
-              <span className="text-cocoa-600">{t('chemistry:transport.humidity' as any, { value: dryRH })}</span>
+              <span className="text-cocoa-600">{t('chemistry:transport.humidity', { value: dryRH })}</span>
               <input type="range" min={5} max={95} step={5} value={dryRH}
                 onChange={e => setDryRH(parseInt(e.target.value, 10))} className="w-full" />
             </label>
@@ -311,7 +311,7 @@ export function TransportPanel({ recipe, ingredients, recipes }: TransportPanelP
             <Stat label={t('chemistry:transport.dryingRate')} value={dry ? dry.fluxKgM2h.toFixed(2) : '—'} unit="kg/m²·h" />
           </div>
           <p className="text-[11px] text-cocoa-500 mt-2">
-            {t('chemistry:transport.dryNote' as any, { cooling: dry ? dry.evaporativeCoolingC.toFixed(0) : '0' })}
+            {t('chemistry:transport.dryNote', { cooling: dry ? dry.evaporativeCoolingC.toFixed(0) : '0' })}
           </p>
         </>
       )}

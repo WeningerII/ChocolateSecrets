@@ -76,7 +76,7 @@ export function TranslationTabs({
   className = '',
   renderTabAdornment,
 }: TranslationTabsProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common']);
   const uiLang = useLanguage();
   const effectiveSourceLanguage = sourceLanguage ?? uiLang;
 
@@ -150,7 +150,7 @@ export function TranslationTabs({
       />
       {!isSourceTab && (
         <p className="mt-1 text-[10px] text-cocoa-400">
-          {t('common:translationTabs.translationHint' as any, { sourceLanguage: t(`common:languages.${effectiveSourceLanguage}`) })}
+          {t('common:translationTabs.translationHint', { sourceLanguage: t(`common:languages.${effectiveSourceLanguage}`) })}
         </p>
       )}
     </div>

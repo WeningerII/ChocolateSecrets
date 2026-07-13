@@ -157,7 +157,7 @@ export default function RecipeDetail() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream-100 hover:bg-cream-200 border border-cream-300 text-cocoa-700 rounded-lg text-sm font-medium transition-colors"
               >
                 <Beaker className="w-4 h-4" />
-                {t('recipes:detail.optimize' as any)}
+                {t('recipes:detail.optimize')}
               </Link>
             )}
             <Link
@@ -165,7 +165,7 @@ export default function RecipeDetail() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream-100 hover:bg-cream-200 border border-cream-300 text-cocoa-700 rounded-lg text-sm font-medium transition-colors"
             >
               <ShieldAlert className="w-4 h-4" />
-              {t('recipes:auditRecipe' as any, 'Audit Recipe')}
+              {t('recipes:auditRecipe', 'Audit Recipe')}
             </Link>
             <Link
               to={`/recipes/${recipe.id}/cook`}
