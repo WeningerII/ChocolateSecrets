@@ -4,7 +4,7 @@ import { INGREDIENT_CATEGORIES, RECIPE_TYPES, COMPONENT_TYPES, ACTION_TYPES, CAN
 import { 
   Recipe, RecipeIngredient, RecipeStep, RecipeComponent, YieldEquation,
   FieldMeta, Provenance, ChocolateSpec, AllergenFlag,
-  StationTag, EnrobingSpec, HACCPMetadata, TemperingCurve, RoleTag
+  StationTag, EnrobingSpec, HACCPMetadata, TemperingCurve, RoleTag, AlcoholSpec
 } from '../types';
 import { classifyStation, deriveAllergens, inferEquipment, parseChocolateSpec, inferEnrobing, estimateYield, lookupTemperingCurve } from './culinaryTools';
 import { inferRoleTag } from './foodScience/roles';
@@ -270,6 +270,7 @@ export interface ExtractedRecipeIngredient {
     specification?: number;
   };
   chocolateSpec?: ChocolateSpec;
+  alcoholSpec?: AlcoholSpec;
   allergens?: AllergenFlag[];
   yieldFactor?: number;
   prepAction?: string;
@@ -384,6 +385,9 @@ export interface ExtractedRecipe {
   stationTag?: StationTag;
   haccp?: HACCPMetadata;
   enrobing?: EnrobingSpec;
+  inferredEquipment?: string[];
+  yieldEstimate?: ReturnType<typeof estimateYield>;
+  temperingCurve?: TemperingCurve;
   crossContactRisks?: never; // Derived at save time via computeCrossContactRisks; never extracted.
   provenance?: Record<string, Provenance>;
   extractionVersion?: number;
@@ -703,7 +707,7 @@ async function reasonAboutRecipe(recipe: ExtractedRecipe): Promise<ExtractedReci
   // Parse chocolate specs
   for (const component of enriched.components || []) {
     for (const ing of component.ingredients || []) {
-      const name = (ing as any).name;
+      const name = ing.name;
       if (name && (name.toLowerCase().includes('chocolate') || name.toLowerCase().includes('cocoa'))) {
         try {
           const spec = parseChocolateSpec(name);
@@ -723,9 +727,9 @@ async function reasonAboutRecipe(recipe: ExtractedRecipe): Promise<ExtractedReci
   for (const component of enriched.components || []) {
     for (const ing of component.ingredients || []) {
       const name = ing.name;
-      const category = ing.category as any;
+      const category = ing.category;
       const chocolateSpec = ing.chocolateSpec;
-      const alcoholSpec = (ing as any).alcoholSpec;
+      const alcoholSpec = ing.alcoholSpec;
       if (name) {
         const roleTag = inferRoleTag({ name, category, chocolateSpec, alcoholSpec });
         if (roleTag) {
@@ -812,29 +816,29 @@ function applyToolResult(recipe: ExtractedRecipe, toolName: string, args: any, r
   
   switch (toolName) {
     case 'classify_station':
-      (recipe as any).stationTag = result;
+      recipe.stationTag = result;
       break;
     case 'derive_allergens':
-      (recipe as any).allergens = result;
+      recipe.allergens = result;
       break;
     case 'infer_equipment':
       // Applied to recipe level; individual step equipment is a separate concern
-      (recipe as any).inferredEquipment = result;
+      recipe.inferredEquipment = result;
       break;
     case 'infer_enrobing':
-      (recipe as any).enrobing = result;
+      recipe.enrobing = result;
       break;
     case 'estimate_yield':
       if (result.piecesEstimated) {
-        (recipe as any).yieldEstimate = result;
+        recipe.yieldEstimate = result;
       }
       break;
     case 'parse_chocolate_spec':
       // Match by text: find an ingredient whose name contains the parsed text
       for (const component of recipe.components || []) {
         for (const ing of component.ingredients || []) {
-          if ((ing as any).name && (ing as any).name.includes(args.text.slice(0, 20))) {
-            (ing as any).chocolateSpec = result;
+          if (ing.name && ing.name.includes(args.text.slice(0, 20))) {
+            ing.chocolateSpec = result;
           }
         }
       }
@@ -842,7 +846,7 @@ function applyToolResult(recipe: ExtractedRecipe, toolName: string, args: any, r
     case 'lookup_tempering_curve':
       // Could be attached to specific steps that mention tempering
       // Simplest: attach to recipe level
-      (recipe as any).temperingCurve = result;
+      recipe.temperingCurve = result;
       break;
   }
 }

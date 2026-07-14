@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { logger } from 'firebase-functions/v2';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, type ContentListUnion, type GenerateContentConfig } from '@google/genai';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getGeminiModel } from './constants';
 
@@ -12,8 +12,8 @@ const MAX_PAYLOAD_BYTES = 8 * 1024 * 1024; // base64 images are legitimately lar
 
 interface GeminiGenerateInput {
   model?: string;
-  contents: unknown;
-  config?: Record<string, unknown>;
+  contents: ContentListUnion;
+  config?: GenerateContentConfig;
 }
 
 /**
@@ -69,8 +69,8 @@ export const geminiGenerate = onCall(
     try {
       response = await client.models.generateContent({
         model,
-        contents: input.contents as any,
-        config: input.config as any,
+        contents: input.contents,
+        config: input.config,
       });
     } catch (err: any) {
       logger.error('geminiGenerate call failed', { err: err?.message || String(err), userId, model });

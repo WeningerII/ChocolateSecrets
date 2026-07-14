@@ -124,6 +124,45 @@ behavior could drift — review confirmed no "missing date → now" regression);
 Still open in section D: geminiGenerate payload cast, Gemini enrichment output
 modeling (11 casts — deferred), BillReview/save-path casts, ~35 scattered anys.
 
+## Round 6 executed (Gemini enrichment output modeling + AI-proxy payload)
+The two hard section-D P1s. Scouting split the casts into spurious (field already
+existed) vs genuinely-missing-field. Workflow (2 sequential impl + gate + review,
+0 findings): 14 casts removed (`72f8159`). geminiService.ts — added the 4 fields
+the reason-pass writes but the type omitted (`inferredEquipment: string[]`,
+`yieldEstimate: ReturnType<typeof estimateYield>`, `temperingCurve: TemperingCurve`,
+ingredient `alcoholSpec: AlcoholSpec`) using each producing fn's real return type,
+then removed all 12 `(recipe as any)/(ing as any)` casts; `ing.category` needed
+no cast (types already matched). geminiGenerate.ts — typed the callable payload
+with the real @google/genai SDK types (`ContentListUnion`, `GenerateContentConfig`),
+closing the client-data-as-any gap in the guardrail proxy with no new runtime
+validation. Verified independently: tsc clean, 920 tests, functions build + 119
+functions tests, full build, pipeline test; 0 `as any` left in either file.
+Section D now: BillReview/save-path casts + ~35 scattered anys remain (the
+god-node write helpers, timestamps, i18n, Gemini paths are all done).
+
+## Deploy request (2026-07-12): blocked in-sandbox
+User said "deploy and continue". Deploy is NOT possible from this environment:
+no Firebase credentials (no service account / FIREBASE_TOKEN / login) and it's a
+production action the sandbox isn't provisioned for. Gave the user the exact
+`firebase deploy --only firestore:indexes|rules` + functions/secrets commands,
+with the critical prerequisite: set the owner's `users/{uid}` doc to
+`role:"admin"` BEFORE the rules deploy or [[0007-remove-owner-email-admin-backdoor]]
+locks admin out; and merge PR #40 first (deploy from main, not the branch). The
+three one-time deploys (indexes/rules/functions) remain pending on the user.
+
+## Round 7 executed (Firestore rules-test coverage)
+Backlog section F. Workflow (4 parallel writers → emulator gate → adversarial
+false-coverage review, 0 findings): coverage went 6/22 → 22/22 collections via
+124 new emulator-verified tests in 4 isolated files (unique projectIds; glob-
+picked by vitest.config.rules.ts). Security-critical focus: the `if false`
+write-locks on payments/userQuotas/translationCache/archivedLots, the alerts
+"update may only change dismissedAt" diff rule, recipes' 50-component boundary,
+and the deny-by-default catch-all. Verified independently: full suite 159 pass
+(35 existing + 124 new), and a live MUTATION CHECK — weakening payments
+`if false`→`if true` failed exactly 4 tests, proving the assertions have teeth
+(not false coverage). firestore.rules unchanged; no rules bug surfaced. Commit
+`63b7fec`.
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.

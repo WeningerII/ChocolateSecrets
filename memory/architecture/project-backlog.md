@@ -160,17 +160,21 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## D. Type-safety debt at data boundaries (~60 non-test casts + 262 i18n casts)
 
-- [ ] [P1][S] **geminiGenerate passes client payload as `any` into the Gemini SDK**
-  (`contents/config as any`) — in the security-guardrail path.
-  (functions/src/geminiGenerate.ts:72-73)
+- [x] [P1][S] **geminiGenerate passes client payload as `any` into the Gemini SDK**
+  ✅ done (`72f8159`): typed with the real @google/genai SDK types
+  (`ContentListUnion`, `GenerateContentConfig`); both casts gone, no new runtime
+  validation. Closes the client-data-as-any gap in the guardrail proxy.
 - [x] [P1][M] **Type `src/utils/firestore.ts` write helpers** ✅ done (`782288f`):
   `sanitizeData<T>(obj:T):T` generic identity, SafeBatch.set/update typed via
   `WithFieldValue<DocumentData>`/`DocumentData`, `withTimestamps` generic — bodies
   byte-identical, 8 anys gone.
-- [ ] [P1][M] **Model the Gemini enrichment output.** 11 casts write untyped
-  fields onto extracted recipes (`(recipe as any).stationTag/allergens/...`,
-  `(ing as any).name/chocolateSpec/...`) — `ExtractedRecipe` doesn't model what
-  the pipeline produces. (src/services/geminiService.ts:667-845)
+- [x] [P1][M] **Model the Gemini enrichment output.** ✅ done (`72f8159`, 12
+  casts): added the 4 fields the reason-pass actually writes but the type omitted
+  — `inferredEquipment?: string[]`, `yieldEstimate?: ReturnType<typeof
+  estimateYield>`, `temperingCurve?: TemperingCurve`, ingredient `alcoholSpec?:
+  AlcoholSpec` — using each producing fn's real return type; the other casts wrote
+  already-existing fields. `ing.category` needed no cast (types already matched).
+  Also clears the 6th inline-name cast (geminiService.ts:706).
 - [x] [P1][S] **Fix `createdAt?: any; updatedAt?: any`** on the shared production
   type. ✅ done (`782288f`): `Timestamp | FieldValue` in production.ts (Restaurant)
   and sourcing.ts (SourcingNote.keptAt). Other type files already used this.
@@ -202,11 +206,10 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 - [ ] [P2][S] RecipeEditor state fields accessed via `(state as any)
   .storageEnvironment/shelfLifeDays/storageInstructions`; reducer action union has
   `t: any` ×2 (RecipeEditor.tsx:809-836; recipeEditor.types.ts:13,19).
-- [~] [P2][S] Model the inline-ingredient name variant — `(ing as any).name`
-  fallback. ✅ 5 of 6 removed (`782288f`): all were UNNECESSARY —
-  `RecipeIngredient` already declares `name?: string` (foodSafety.ts:41,
-  RecipeDetail.tsx ×2, Recipes.tsx:483, RecipeCookingMode.tsx:125). The 6th
-  (geminiService.ts:706) is folded into the Gemini-enrichment item below.
+- [x] [P2][S] Model the inline-ingredient name variant — `(ing as any).name`
+  fallback. ✅ done: 5 removed in `782288f` (all UNNECESSARY —
+  `RecipeIngredient` already declares `name?: string`), 6th cleared in `72f8159`
+  with the Gemini-enrichment work.
 - [ ] [P2][S] Untyped AI/payment parsing in services + functions: sourcingService
   (6 `any`s), extractBill.ts:155-206, recordPayment.ts:33-36, translation.ts
   catch params.
@@ -254,11 +257,14 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 - [ ] [P2][S] handleFirestoreError/firebase.ts, culinary/yield.ts, server.ts
   endpoints untested.
 - [ ] [P2][L] Component/page rendering coverage ~3/56 and 1/18.
-- [ ] [P1][M] **Rules tests cover only 6 of 22 collections.** Highest value
-  uncovered: payments/alerts CF-only-write rules (alerts has the most complex
-  rule in the file), userQuotas (tampering bypasses the Gemini rate limit),
-  recipes validation (isValidRecipe, 50-component cap, admin-only delete), and
-  the default-deny catch-all itself.
+- [x] [P1][M] **Rules tests cover only 6 of 22 collections.** ✅ done (`63b7fec`):
+  now all 22 covered — added 124 emulator-verified tests in 4 isolated files
+  (securityCfOnly, recipesAndCatalog, inventoryOps, expensesAndDefaultDeny). The
+  security-critical ones are done: payments/userQuotas/translationCache/
+  archivedLots `if false` write-locks, the alerts dismissedAt-only diff rule,
+  recipes 50-component boundary, and the default-deny catch-all. Full suite 159
+  pass; adversarial review found no false coverage; a mutation check
+  (payments `if false`→`if true` fails 4 tests) confirms the assertions bite.
 - [ ] [P2][S] Emulator-level trigger tests (onTransactionCreate/onLotUpdate touch
   only extracted pure functions); resolveVendor wrapper; adminRecipients.
 - [ ] [P3][M] 8 maintenance/migration scripts (~1,280 LOC, run against prod
