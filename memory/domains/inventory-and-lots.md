@@ -25,7 +25,10 @@ threshold-driven shopping list.
   [[weighted-average-cost]] costing in [[recipes-and-costing]].
 - Transactions and lot updates fan out through Firestore triggers — reconciliation
   script exists to repair drift.
-- Shopping list can be emailed/texted via `server.ts` (Resend / Twilio).
+- Shopping list can be emailed/texted via the `sendShoppingList` callable
+  Cloud Function (Resend / Twilio, auth-gated + rate-limited) — see
+  [[0006-shopping-list-via-callable-function]]. (Was a dev-server endpoint
+  until 2026-07-11; that path is retired.)
 
 ## Related
 - [[system-overview]] · [[lot]] · [[weighted-average-cost]] · [[sourcing-and-vendors]]

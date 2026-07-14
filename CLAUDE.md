@@ -105,7 +105,7 @@ Full rules in `memory/CLAUDE.md`. In short:
 ## Project quick-reference
 
 ```bash
-npm install
+npm install            # also installs functions/ deps via postinstall
 npm run dev            # Express + Vite dev server @ http://localhost:3000
 npm run lint           # tsc --noEmit (also type-checks functions/src)
 npm test               # vitest unit/logic tests
@@ -116,8 +116,9 @@ Firestore-rules tests (`npm run test:rules`) and e2e (`npm run test:e2e`) need t
 Firebase emulator / Playwright — see `docs/testing.md`.
 
 **Layout:** `src/` React app · `functions/src/` Cloud Functions (AI proxy,
-Firestore triggers, payments) · `scripts/` maintenance & migration · `firestore.rules`
-default-deny role-based rules · `server.ts` dev server + shopping-list email/SMS.
+Firestore triggers, payments, shopping-list email/SMS) · `scripts/` maintenance &
+migration · `firestore.rules` default-deny role-based rules · `server.ts` dev
+server only (Express + Vite middleware).
 
 **Guardrails**
 - Gemini runs **server-side only** (`functions/src/geminiGenerate.ts`); never add a

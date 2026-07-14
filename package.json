@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
+    "postinstall": "npm --prefix functions install",
     "lint": "tsc --noEmit",
     "migrate:i18n": "node scripts/migrate-localized-strings.mjs",
     "migrate:cross-contact": "node scripts/migrate-cross-contact-risks.mjs",
@@ -19,8 +20,7 @@
     "check:hardcoded-strings": "node scripts/check-hardcoded-strings.mjs",
     "check:functions-secrets": "node scripts/check-functions-secrets.mjs",
     "seed:expense-categories": "node scripts/seed-expense-categories.mjs",
-    "test:functions": "npm --prefix functions run test",
-    "start": "node server.ts"
+    "test:functions": "npm --prefix functions run test"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -46,9 +46,7 @@
     "react-router-dom": "^7.13.1",
     "react-to-print": "^3.3.0",
     "recharts": "^3.8.1",
-    "resend": "^6.9.4",
-    "rrule": "^2.8.1",
-    "twilio": "^5.13.0"
+    "rrule": "^2.8.1"
   },
   "devDependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.2",

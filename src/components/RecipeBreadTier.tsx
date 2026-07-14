@@ -17,7 +17,7 @@ export function RecipeBreadTier({ bread }: RecipeBreadTierProps) {
     <div className="rounded-md bg-cream-100 px-5 py-4 border border-cream-200 flex flex-col gap-3">
       <div className="flex items-baseline gap-2">
         <p className="text-[11px] uppercase tracking-wider text-cocoa-500 font-medium">
-          {t('bread.tier.title' as any)}
+          {t('chemistry:bread.tier.title')}
         </p>
         <p className="text-xs text-cocoa-700 font-medium">
           {t(`bread.recipeSubtype.${bread.derived.recipeSubtype}` as any)}
@@ -31,28 +31,28 @@ export function RecipeBreadTier({ bread }: RecipeBreadTierProps) {
 
       {/* Top row: bakers percentages */}
       <div className="flex flex-wrap gap-x-6 gap-y-2">
-        <Tile label={t('bread.tier.totalFlour' as any)} value={`${Math.round(c.totalFlourMass)} g`} />
-        <Tile label={t('bread.tier.hydration' as any)} value={`${c.hydrationPct.toFixed(1)}%`} inBand={inBand(c.hydrationPct, band.hydrationPctRange)} />
-        <Tile label={t('bread.tier.salt' as any)} value={`${c.saltPct.toFixed(2)}%`} inBand={inBand(c.saltPct, band.saltPctRange)} />
-        <Tile label={t('bread.tier.yeast' as any)} value={`${c.instantYeastEquivalentPct.toFixed(2)}%`} inBand={
+        <Tile label={t('chemistry:bread.tier.totalFlour')} value={`${Math.round(c.totalFlourMass)} g`} />
+        <Tile label={t('chemistry:bread.tier.hydration')} value={`${c.hydrationPct.toFixed(1)}%`} inBand={inBand(c.hydrationPct, band.hydrationPctRange)} />
+        <Tile label={t('chemistry:bread.tier.salt')} value={`${c.saltPct.toFixed(2)}%`} inBand={inBand(c.saltPct, band.saltPctRange)} />
+        <Tile label={t('chemistry:bread.tier.yeast')} value={`${c.instantYeastEquivalentPct.toFixed(2)}%`} inBand={
           bread.derived.recipeSubtype === 'sourdough'
             ? c.instantYeastEquivalentPct < 0.05
             : inBand(c.instantYeastEquivalentPct, band.instantYeastPctRange)
         } />
         {c.starterPct > 0 && (
-          <Tile label={t('bread.tier.starter' as any)} value={`${c.starterPct.toFixed(1)}%`} />
+          <Tile label={t('chemistry:bread.tier.starter')} value={`${c.starterPct.toFixed(1)}%`} />
         )}
         {c.wholeGrainFraction > 0 && (
-          <Tile label={t('bread.tier.wholeGrain' as any)} value={`${(c.wholeGrainFraction * 100).toFixed(0)}%`} />
+          <Tile label={t('chemistry:bread.tier.wholeGrain')} value={`${(c.wholeGrainFraction * 100).toFixed(0)}%`} />
         )}
       </div>
 
       {/* Second row: gluten + DDT */}
       <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-cream-200 pt-3">
-        <Tile label={t('bread.tier.glutenScore' as any)} value={`${bread.derived.gluten.rawScore.toFixed(2)} — ${t(`bread.gluten.${bread.derived.gluten.band}` as any)}`} />
-        <Tile label={t('bread.tier.ddt' as any)} value={`${ddt.desiredDoughTempC}°C`} />
-        <Tile label={t('bread.tier.waterTemp' as any)} value={`${ddt.waterTempC.toFixed(1)}°C`} />
-        <Tile label={t('bread.tier.frictionFactor' as any)} value={`${ddt.frictionFactorC}°C`} />
+        <Tile label={t('chemistry:bread.tier.glutenScore')} value={`${bread.derived.gluten.rawScore.toFixed(2)} — ${t(`bread.gluten.${bread.derived.gluten.band}` as any)}`} />
+        <Tile label={t('chemistry:bread.tier.ddt')} value={`${ddt.desiredDoughTempC}°C`} />
+        <Tile label={t('chemistry:bread.tier.waterTemp')} value={`${ddt.waterTempC.toFixed(1)}°C`} />
+        <Tile label={t('chemistry:bread.tier.frictionFactor')} value={`${ddt.frictionFactorC}°C`} />
       </div>
     </div>
   );

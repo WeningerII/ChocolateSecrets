@@ -34,13 +34,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Admin derives ONLY from the users/{uid} role doc (ADR-0007). There is
+    // deliberately no email-based bypass: token claims must never confer admin.
     function isAdmin() {
       return isAuthenticated() &&
-        (
-          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-          (request.auth.token.email != null && request.auth.token.email.matches("(?i)weningerii@gmail\\.com") && request.auth.token.email_verified == true)
-        );
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function hasRequiredFields(fields) {
@@ -440,9 +439,13 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidSourcingNote()
         && request.resource.data.keptBy == request.auth.uid;
+      // Owner-only: check the EXISTING doc's keptBy (not just the incoming
+      // one) and keep ownership immutable across updates.
       allow update: if isAuthenticated() && isValidSourcingNote()
-        && request.resource.data.keptBy == request.auth.uid;
-      allow delete: if isAuthenticated();
+        && resource.data.keptBy == request.auth.uid
+        && request.resource.data.keptBy == resource.data.keptBy;
+      allow delete: if isAuthenticated()
+        && resource.data.keptBy == request.auth.uid;
     }
 
     match /translationCache/{hash} {

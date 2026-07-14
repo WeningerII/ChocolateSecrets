@@ -38,7 +38,7 @@ export function computeCrossContactRisks(
     for (const comp of recipe.components || []) {
       for (const ing of comp.ingredients || []) {
         if (ing.ingredientId && byId.has(ing.ingredientId)) continue;
-        const inline = (ing as any).name;
+        const inline = ing.name;
         if (inline) names.add(inline);
       }
     }

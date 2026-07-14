@@ -12,7 +12,7 @@ interface SearchSpaceListProps {
 export function SearchSpaceList({
   dimensions, ingredientCatalog, lockedIds, onToggleLock,
 }: SearchSpaceListProps) {
-  const { t } = useTranslation('chemistry' as any);
+  const { t } = useTranslation('chemistry');
   const catalogById = new Map(ingredientCatalog.map(i => [i.id, i]));
 
   // Group dimensions by ingredient for display
@@ -32,10 +32,10 @@ export function SearchSpaceList({
   return (
     <div className="border border-cream-200 rounded-md bg-cream-50 p-3">
       <p className="text-[10px] uppercase tracking-wider text-cocoa-500 mb-2">
-        {t('optimizer.searchSpace.header' as any)} ({dimensions.length} {t('optimizer.searchSpace.dimensions' as any)})
+        {t('chemistry:optimizer.searchSpace.header')} ({dimensions.length} {t('chemistry:optimizer.searchSpace.dimensions')})
       </p>
       {byIngredient.size === 0 ? (
-        <p className="text-xs italic text-cocoa-500">{t('optimizer.searchSpace.empty' as any)}</p>
+        <p className="text-xs italic text-cocoa-500">{t('chemistry:optimizer.searchSpace.empty')}</p>
       ) : (
         <ul className="divide-y divide-cream-100">
           {Array.from(byIngredient.entries()).map(([id, dims]) => {
@@ -53,7 +53,7 @@ export function SearchSpaceList({
                   type="button"
                   onClick={() => onToggleLock(id)}
                   className="p-1 hover:bg-cream-200 rounded transition-colors"
-                  aria-label={locked ? t('optimizer.searchSpace.unlock' as any) : t('optimizer.searchSpace.lock' as any)}
+                  aria-label={locked ? t('chemistry:optimizer.searchSpace.unlock') : t('chemistry:optimizer.searchSpace.lock')}
                 >
                   {locked
                     ? <Lock className="w-3 h-3 text-copper-600" />

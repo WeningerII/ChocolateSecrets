@@ -150,5 +150,6 @@
     "errorImport": "Failed to import ingredients."
   },
   "deleteTitle": "Delete Location",
-  "deleteMessage": "Are you sure you want to delete this location? This may affect inventory items stored here."
+  "deleteMessage": "Are you sure you want to delete this location? This may affect inventory items stored here.",
+  "viewAudit": "View Audit"
 }

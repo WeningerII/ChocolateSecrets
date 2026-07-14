@@ -61,7 +61,7 @@ export default function RecipeDetail() {
     for (const comp of recipe.components || []) {
       for (const ing of comp.ingredients) {
         const resolved = ingredients.find(i => i.id === ing.ingredientId);
-        const name = resolved?.name || (ing as any).name;
+        const name = resolved?.name || ing.name;
         if (name) ingredientNames.push(name);
         // Also include the ingredient-state field which often carries form info
         if (ing.state) ingredientNames.push(`${name} ${ing.state}`);
@@ -157,7 +157,7 @@ export default function RecipeDetail() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream-100 hover:bg-cream-200 border border-cream-300 text-cocoa-700 rounded-lg text-sm font-medium transition-colors"
               >
                 <Beaker className="w-4 h-4" />
-                {t('recipes:detail.optimize' as any)}
+                {t('recipes:detail.optimize')}
               </Link>
             )}
             <Link
@@ -165,7 +165,7 @@ export default function RecipeDetail() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cream-100 hover:bg-cream-200 border border-cream-300 text-cocoa-700 rounded-lg text-sm font-medium transition-colors"
             >
               <ShieldAlert className="w-4 h-4" />
-              {t('recipes:auditRecipe' as any, 'Audit Recipe')}
+              {t('recipes:auditRecipe', 'Audit Recipe')}
             </Link>
             <Link
               to={`/recipes/${recipe.id}/cook`}
@@ -378,7 +378,7 @@ export default function RecipeDetail() {
                   <tbody className="divide-y divide-cocoa-100">
                     {component.ingredients.map((ing, ingIdx) => {
                       const ingredient = getIngredient(ing.ingredientId);
-                      const name = ingredient?.name || (ing as any).name || t('recipes:detail.unknownIngredient');
+                      const name = ingredient?.name || ing.name || t('recipes:detail.unknownIngredient');
                       return (
                         <tr key={ingIdx} className="hover:bg-cream/50">
                           <td className="px-4 py-3">

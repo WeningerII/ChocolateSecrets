@@ -31,7 +31,7 @@ const TEXTURE_OBJECTIVES: OptimizerObjective[] = [
 ];
 
 export function Formulate() {
-  const { t } = useTranslation('chemistry' as any);
+  const { t } = useTranslation(['chemistry']);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { recipes, ingredients } = useData();
@@ -97,8 +97,8 @@ export function Formulate() {
     try {
       const newRecipeData = {
         ...candidate.recipe,
-        name: `${baseRecipe?.name ?? 'Recipe'} — ${t('optimizer.candidate.variantSuffix' as any)}`,
-        description: `${baseRecipe?.description ?? ''}\n\n${(t as any)('optimizer.candidate.derivedNote', { id: baseRecipe?.id ?? '' })}`,
+        name: `${baseRecipe?.name ?? 'Recipe'} — ${t('chemistry:optimizer.candidate.variantSuffix')}`,
+        description: `${baseRecipe?.description ?? ''}\n\n${t('chemistry:optimizer.candidate.derivedNote', { id: baseRecipe?.id ?? '' })}`,
       };
       delete (newRecipeData as { id?: string }).id;
       delete (newRecipeData as { createdAt?: unknown }).createdAt;
@@ -110,19 +110,19 @@ export function Formulate() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      appToast.success(t('optimizer.candidate.savedToast' as any));
+      appToast.success(t('chemistry:optimizer.candidate.savedToast'));
       navigate(`/recipes/${newDoc.id}`);
     } catch (e) {
       console.error(e);
-      appToast.error(t('optimizer.candidate.saveFailedToast' as any));
+      appToast.error(t('chemistry:optimizer.candidate.saveFailedToast'));
     }
   };
 
   if (!baseRecipe) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12 text-center">
-        <h2 className="font-serif text-2xl text-cocoa-900">{t('optimizer.noBaseRecipe' as any)}</h2>
-        <p className="text-cocoa-600 mt-2">{t('optimizer.noBaseRecipeHelp' as any)}</p>
+        <h2 className="font-serif text-2xl text-cocoa-900">{t('chemistry:optimizer.noBaseRecipe')}</h2>
+        <p className="text-cocoa-600 mt-2">{t('chemistry:optimizer.noBaseRecipeHelp')}</p>
       </div>
     );
   }
@@ -132,31 +132,31 @@ export function Formulate() {
       <header className="flex items-center gap-3 mb-6">
         <Beaker className="w-6 h-6 text-cocoa-700" />
         <div>
-          <h1 className="font-serif text-2xl text-cocoa-900">{t('optimizer.pageTitle' as any)}</h1>
+          <h1 className="font-serif text-2xl text-cocoa-900">{t('chemistry:optimizer.pageTitle')}</h1>
           <p className="text-sm text-cocoa-600">
-            {t('optimizer.basedOn' as any)} <span className="font-medium">{baseRecipe.name}</span>
+            {t('chemistry:optimizer.basedOn')} <span className="font-medium">{baseRecipe.name}</span>
           </p>
         </div>
       </header>
 
       {/* Targets */}
       <section className="mb-5">
-        <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('optimizer.targets.header' as any)}</h2>
+        <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('chemistry:optimizer.targets.header')}</h2>
         <div className="grid grid-cols-2 gap-3 text-xs">
           <NumericField
-            label={t('optimizer.targets.awTarget' as any)}
+            label={t('chemistry:optimizer.targets.awTarget')}
             value={targets.awTarget ?? 0}
             min={0.50} max={0.99} step={0.01}
             onChange={v => setTargets(s => ({ ...s, awTarget: v }))}
           />
           <NumericField
-            label={t('optimizer.targets.shelfLifeWeeksMin' as any)}
+            label={t('chemistry:optimizer.targets.shelfLifeWeeksMin')}
             value={targets.shelfLifeWeeksMin ?? 0}
             min={1} max={52} step={1}
             onChange={v => setTargets(s => ({ ...s, shelfLifeWeeksMin: v }))}
           />
           <NumericField
-            label={t('optimizer.targets.costPerGramMaxUsd' as any)}
+            label={t('chemistry:optimizer.targets.costPerGramMaxUsd')}
             value={targets.costPerGramMaxUsd ?? 0}
             min={0.001} max={1.00} step={0.001}
             onChange={v => setTargets(s => ({ ...s, costPerGramMaxUsd: v }))}
@@ -164,13 +164,13 @@ export function Formulate() {
           {isFrozen && (
             <>
               <NumericField
-                label={t('optimizer.targets.servingTempC' as any)}
+                label={t('chemistry:optimizer.targets.servingTempC')}
                 value={targets.servingTempC ?? -13}
                 min={-30} max={-4} step={0.5}
                 onChange={v => setTargets(s => ({ ...s, servingTempC: v }))}
               />
               <NumericField
-                label={t('optimizer.targets.frozenWaterTarget' as any)}
+                label={t('chemistry:optimizer.targets.frozenWaterTarget')}
                 value={targets.frozenWaterTarget ?? 0.73}
                 min={0.30} max={0.95} step={0.01}
                 onChange={v => setTargets(s => ({ ...s, frozenWaterTarget: v }))}
@@ -182,7 +182,7 @@ export function Formulate() {
 
       {/* Weights */}
       <section className="mb-5">
-        <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('optimizer.weights.header' as any)}</h2>
+        <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('chemistry:optimizer.weights.header')}</h2>
         <div className="grid grid-cols-2 gap-2 text-xs">
           {objectives.map(obj => (
             <div key={obj} className="flex items-center gap-2">
@@ -202,7 +202,7 @@ export function Formulate() {
 
       {/* Search space */}
       <section className="mb-5">
-        <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('optimizer.searchSpace.title' as any)}</h2>
+        <h2 className="text-sm font-serif text-cocoa-800 mb-2">{t('chemistry:optimizer.searchSpace.title')}</h2>
         <SearchSpaceList
           dimensions={dimensions}
           ingredientCatalog={ingredients}
@@ -221,7 +221,7 @@ export function Formulate() {
             className="bg-cocoa-700 text-cream px-4 py-2 rounded inline-flex items-center gap-2 hover:bg-cocoa-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Play className="w-4 h-4" />
-            {t('optimizer.run' as any)}
+            {t('chemistry:optimizer.run')}
           </button>
         ) : (
           <button
@@ -230,12 +230,12 @@ export function Formulate() {
             className="bg-copper-600 text-cream px-4 py-2 rounded inline-flex items-center gap-2 hover:bg-copper-700 transition-colors"
           >
             <Square className="w-4 h-4" />
-            {t('optimizer.cancel' as any)}
+            {t('chemistry:optimizer.cancel')}
           </button>
         )}
         {status === 'running' && progress && (
           <p className="text-xs text-cocoa-600">
-            {(t as any)('optimizer.progressLabel', {
+            {t('chemistry:optimizer.progressLabel', {
               gen: progress.generation,
               total: progress.totalGenerations,
               front: progress.paretoFrontSize,
@@ -254,7 +254,7 @@ export function Formulate() {
       {result && result.candidates.length > 0 && (
         <section>
           <h2 className="text-sm font-serif text-cocoa-800 mb-3">
-            {(t as any)('optimizer.results.header', { count: result.candidates.length })}
+            {t('chemistry:optimizer.results.header', { count: result.candidates.length })}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {result.candidates.map(c => (

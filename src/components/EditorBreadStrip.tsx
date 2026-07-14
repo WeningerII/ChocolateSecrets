@@ -14,11 +14,11 @@ export function EditorBreadStrip({ bread }: EditorBreadStripProps) {
       <span className="text-[10px] uppercase tracking-wider text-cocoa-500">
         {t(`bread.recipeSubtype.${bread.derived.recipeSubtype}` as any)}
       </span>
-      <Item label={t('bread.tier.hydration' as any)} value={`${c.hydrationPct.toFixed(1)}%`} />
-      <Item label={t('bread.tier.salt' as any)} value={`${c.saltPct.toFixed(2)}%`} />
-      <Item label={t('bread.tier.yeast' as any)} value={`${c.instantYeastEquivalentPct.toFixed(2)}%`} />
-      <Item label={t('bread.tier.glutenScore' as any)} value={bread.derived.gluten.rawScore.toFixed(2)} />
-      <Item label={t('bread.tier.waterTemp' as any)} value={`${bread.derived.ddt.waterTempC.toFixed(1)}°C`} />
+      <Item label={t('chemistry:bread.tier.hydration')} value={`${c.hydrationPct.toFixed(1)}%`} />
+      <Item label={t('chemistry:bread.tier.salt')} value={`${c.saltPct.toFixed(2)}%`} />
+      <Item label={t('chemistry:bread.tier.yeast')} value={`${c.instantYeastEquivalentPct.toFixed(2)}%`} />
+      <Item label={t('chemistry:bread.tier.glutenScore')} value={bread.derived.gluten.rawScore.toFixed(2)} />
+      <Item label={t('chemistry:bread.tier.waterTemp')} value={`${bread.derived.ddt.waterTempC.toFixed(1)}°C`} />
     </div>
   );
 }

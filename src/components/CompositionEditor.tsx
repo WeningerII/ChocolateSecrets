@@ -16,7 +16,7 @@ interface CompositionEditorProps {
 export function CompositionEditor({
   ingredientName, category, composition, onChange, onUsdaMatch,
 }: CompositionEditorProps) {
-  const { t } = useTranslation('ingredients');
+  const { t } = useTranslation(['ingredients']);
   const [expanded, setExpanded] = useState(false);
   const [usdaResultMessage, setUsdaResultMessage] = useState<string | null>(null);
 
@@ -45,7 +45,7 @@ export function CompositionEditor({
     if (match) {
       onChange({ ...match.composition });
       onUsdaMatch?.(match.fdcId);
-      setUsdaResultMessage(t('ingredients:usdaFdcId.matched' as any, { description: match.description, fdcId: match.fdcId }));
+      setUsdaResultMessage(t('ingredients:usdaFdcId.matched', { description: match.description, fdcId: match.fdcId }));
     } else {
       setUsdaResultMessage(t('ingredients:usdaNoMatch', 'No match found in USDA snapshot'));
     }
@@ -64,8 +64,8 @@ export function CompositionEditor({
         </span>
         <span className={`text-xs font-mono ${complete ? 'text-cocoa-500' : 'text-copper-600'}`}>
           {complete
-            ? t('ingredients:composition.sumIndicator' as any, { sum: sum.toFixed(1) })
-            : t('ingredients:composition.sumIndicatorIncomplete' as any, { sum: sum.toFixed(1) })}
+            ? t('ingredients:composition.sumIndicator', { sum: sum.toFixed(1) })
+            : t('ingredients:composition.sumIndicatorIncomplete', { sum: sum.toFixed(1) })}
         </span>
       </button>
 

@@ -10,7 +10,7 @@ interface RecipeOutputStripProps {
 }
 
 export function RecipeOutputStrip({ recipe, ingredients, physics }: RecipeOutputStripProps) {
-  const { t } = useTranslation('chemistry');
+  const { t } = useTranslation(['chemistry']);
   const ingredientMap = new Map(ingredients.map(i => [i.id, i]));
 
   // Production-accurate amounts come straight from the resolved leaf vector
@@ -67,7 +67,7 @@ export function RecipeOutputStrip({ recipe, ingredients, physics }: RecipeOutput
             {t('chemistry:strip.shelfLife')}
           </p>
           <p className="font-mono text-base text-cocoa-900">
-            {t('chemistry:shelfLife.weeksOther' as any, { count: weeks })}
+            {t('chemistry:shelfLife.weeksOther', { count: weeks })}
           </p>
         </div>
       </div>

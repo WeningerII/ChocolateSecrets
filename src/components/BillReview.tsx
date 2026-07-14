@@ -9,6 +9,7 @@ import { useToast } from '../contexts/ToastContext';
 import VendorPicker from './VendorPicker';
 import VendorForm from './VendorForm';
 import { format } from 'date-fns';
+import { parseFirestoreDate } from '../utils/date';
 import BillPaymentHistory from './BillPaymentHistory';
 import PaymentForm from './PaymentForm';
 import { Timestamp } from 'firebase/firestore';
@@ -60,12 +61,8 @@ export default function BillReview({ isOpen, onClose, extractedResult, existingB
 
   const dateToYMD = (ts: any): string => {
     if (!ts) return '';
-    if (typeof ts.toDate === 'function') {
-      return format(ts.toDate(), 'yyyy-MM-dd');
-    }
-    const secs = ts._seconds ?? ts.seconds;
-    if (!secs) return '';
-    return format(new Date(secs * 1000), 'yyyy-MM-dd');
+    const d = parseFirestoreDate(ts, new Date(0));
+    return d.getTime() !== 0 ? format(d, 'yyyy-MM-dd') : '';
   };
 
   const getYMDToTs = (ymd: string): Timestamp | null => {

@@ -235,12 +235,102 @@ describe('users collection rules', () => {
     await assertSucceeds(updateDoc(doc(ctx.firestore(), 'users', 'bob'), { role: 'admin' }));
   });
 
-  test('admin check does not error for tokens without an email claim', async () => {
-    // isAdmin() calls request.auth.token.email.matches(...); authenticatedContext
-    // tokens have no email claim, so this must not raise an evaluation error.
-    await seedRole('alice', 'user');
+});
+
+describe('isAdmin() derives only from the users/{uid} role doc (ADR-0007)', () => {
+  // Regression tests for the removed owner-email backdoor: a verified token
+  // bearing the former bootstrap email must NOT confer admin — only a
+  // users/{uid} doc with role == 'admin' does.
+  const ownerToken = { email: 'weningerii@gmail.com', email_verified: true };
+
+  test('verified owner email without an admin role doc is denied admin-only writes', async () => {
+    const ctx = testEnv.authenticatedContext('owner-uid', ownerToken);
+    await assertFails(setDoc(doc(ctx.firestore(), 'restaurants', 'default'), {
+      name: 'Backdoor attempt',
+      zipCode: '00000',
+      standingAllergenDisclaimer: [],
+    }));
+  });
+
+  test('verified owner email without an admin role doc is denied admin-only deletes', async () => {
+    await testEnv.withSecurityRulesDisabled(async (adminCtx) => {
+      await setDoc(doc(adminCtx.firestore(), 'recipes', 'r1'), { name: 'Truffle' });
+    });
+    const ctx = testEnv.authenticatedContext('owner-uid', ownerToken);
+    await assertFails(deleteDoc(doc(ctx.firestore(), 'recipes', 'r1')));
+  });
+
+  test('verified owner email with role user (not admin) is still denied', async () => {
+    await seedRole('owner-uid', 'user');
+    const ctx = testEnv.authenticatedContext('owner-uid', ownerToken);
+    await assertFails(setDoc(doc(ctx.firestore(), 'restaurants', 'default'), {
+      name: 'Backdoor attempt',
+      zipCode: '00000',
+      standingAllergenDisclaimer: [],
+    }));
+  });
+
+  test('admin role doc still grants admin regardless of email claims', async () => {
+    await seedRole('owner-uid', 'admin');
+    const ctx = testEnv.authenticatedContext('owner-uid', ownerToken);
+    await assertSucceeds(setDoc(doc(ctx.firestore(), 'restaurants', 'default'), {
+      name: 'Legit Restaurant',
+      zipCode: '75201',
+      standingAllergenDisclaimer: [],
+    }));
+  });
+});
+
+describe('sourcing_notes ownership rules', () => {
+  function validNote(overrides: Record<string, unknown> = {}) {
+    return {
+      ingredientId: 'ing1',
+      name: 'Valrhona 64%',
+      keptBy: 'alice',
+      notes: 'good price',
+      ...overrides,
+    };
+  }
+
+  async function seedNote(id: string, overrides: Record<string, unknown> = {}) {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'sourcing_notes', id), validNote(overrides));
+    });
+  }
+
+  test('user can create a note kept by themselves', async () => {
     const ctx = testEnv.authenticatedContext('alice');
-    await assertSucceeds(getDoc(doc(ctx.firestore(), 'users', 'alice')));
+    await assertSucceeds(setDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), validNote()));
+  });
+
+  test('owner can update their own note', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(updateDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), { notes: 'updated' }));
+  });
+
+  test('non-owner cannot update someone else\'s note (even claiming their own uid)', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('mallory');
+    await assertFails(updateDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), { keptBy: 'mallory', notes: 'hijacked' }));
+  });
+
+  test('owner cannot transfer ownership by changing keptBy', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertFails(updateDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1'), { keptBy: 'bob' }));
+  });
+
+  test('owner can delete their own note', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('alice');
+    await assertSucceeds(deleteDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1')));
+  });
+
+  test('non-owner cannot delete someone else\'s note', async () => {
+    await seedNote('n1');
+    const ctx = testEnv.authenticatedContext('mallory');
+    await assertFails(deleteDoc(doc(ctx.firestore(), 'sourcing_notes', 'n1')));
   });
 });
 

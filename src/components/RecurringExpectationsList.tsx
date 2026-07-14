@@ -6,6 +6,7 @@ import { listRecurringExpectations } from '../services/recurringExpectationsServ
 import { listVendors } from '../services/vendorsService';
 import { parseRRule } from '../utils/rrule';
 import { useToast } from '../contexts/ToastContext';
+import { parseFirestoreDate } from '../utils/date';
 
 interface RecurringExpectationsListProps {
   onCardClick: (expectation: RecurringExpectation) => void;
@@ -73,8 +74,8 @@ export default function RecurringExpectationsList({ onCardClick }: RecurringExpe
 
         const amtStr = `≈ $${exp.expectedAmount.toFixed(2)} ± $${exp.tolerance.amountToleranceBand.low} / $${exp.tolerance.amountToleranceBand.high}`;
         
-        const nextSec = (exp.nextExpectedDate as any)?._seconds ?? (exp.nextExpectedDate as any)?.seconds;
-        const nextDate = nextSec ? new Date(nextSec * 1000) : null;
+        const nextParsed = parseFirestoreDate(exp.nextExpectedDate, new Date(0));
+        const nextDate = nextParsed.getTime() !== 0 ? nextParsed : null;
         let nextExpectedStr = '';
         if (nextDate) {
            const relative = formatDistanceToNowStrict(nextDate, { addSuffix: true });

@@ -36,12 +36,16 @@ function usersSnap(ids: string[]) {
 }
 
 // dailyExpenseCheck resolves admin recipients immediately after the
-// expectations query (and before any per-expectation work) via two users
-// queries: role == 'admin', then the super-admin email. Queue their results so
-// the shared getMock sequence stays aligned with the code's call order.
-function queueAdmins(roleIds: string[], emailIds: string[] = []) {
+// expectations query (and before any per-expectation work) via a users query
+// for role == 'admin' — plus a second query by email ONLY when the
+// SUPER_ADMIN_EMAIL env is set (ADR-0007: no hardcoded fallback). Queue the
+// result(s) so the shared getMock sequence stays aligned with the code's call
+// order: pass emailIds only in tests that also set SUPER_ADMIN_EMAIL.
+function queueAdmins(roleIds: string[], emailIds?: string[]) {
   getMock.mockResolvedValueOnce(usersSnap(roleIds));
-  getMock.mockResolvedValueOnce(usersSnap(emailIds));
+  if (emailIds) {
+    getMock.mockResolvedValueOnce(usersSnap(emailIds));
+  }
 }
 
 describe('dailyExpenseCheck', () => {
@@ -49,10 +53,12 @@ describe('dailyExpenseCheck', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-15T10:00:00Z'));
+    delete process.env.SUPER_ADMIN_EMAIL;
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    delete process.env.SUPER_ADMIN_EMAIL;
   });
 
   it('skips expectations recently checked', async () => {
@@ -124,6 +130,7 @@ describe('dailyExpenseCheck', () => {
         })
       }]
     });
+    process.env.SUPER_ADMIN_EMAIL = 'Owner@Example.com'; // opt in to the email lookup
     queueAdmins(['admin1', 'admin2'], ['owner']); // role admins + super-admin email
     getMock.mockResolvedValueOnce({ empty: true, docs: [] }); // bill lookup
     getMock.mockResolvedValueOnce({ docs: [] }); // due snap
@@ -156,7 +163,7 @@ describe('dailyExpenseCheck', () => {
         })
       }]
     });
-    queueAdmins([], []); // no admins resolvable
+    queueAdmins([]); // no role admins, no SUPER_ADMIN_EMAIL -> nobody resolvable
     getMock.mockResolvedValueOnce({ empty: true, docs: [] }); // bill lookup
     getMock.mockResolvedValueOnce({ docs: [] }); // due snap
 
@@ -217,6 +224,7 @@ describe('dailyExpenseCheck', () => {
   });
 
   it('fans out a due_soon alert to admins when the bill has no creator', async () => {
+    process.env.SUPER_ADMIN_EMAIL = 'owner@example.com'; // opt in to the email lookup
     getMock.mockResolvedValueOnce({ docs: [] }); // expectations
     queueAdmins(['admin1', 'admin2'], ['owner']);
     getMock.mockResolvedValueOnce({

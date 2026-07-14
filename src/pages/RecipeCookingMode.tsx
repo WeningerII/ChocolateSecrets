@@ -122,7 +122,7 @@ export default function RecipeCookingMode() {
           <div className="space-y-2">
             {components.flatMap(comp => comp.ingredients).map((ing, idx) => {
               const ingredient = getIngredient(ing.ingredientId);
-              const name = ingredient?.name || (ing as any).name || '';
+              const name = ingredient?.name || ing.name || '';
               return (
                 <div key={idx} className="flex items-baseline gap-3 text-base">
                   <span className="text-cocoa-900 font-medium w-16 shrink-0">

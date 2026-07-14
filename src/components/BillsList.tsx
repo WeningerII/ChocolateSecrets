@@ -8,6 +8,7 @@ import { getVendorsByIds } from '../services/vendorsService';
 import { useToast } from '../contexts/ToastContext';
 import { useLanguage } from '../hooks/useLanguage';
 import { formatCurrency } from '../utils/formatters';
+import { parseFirestoreDate } from '../utils/date';
 
 interface BillsListProps {
   onCardClick: (bill: Bill) => void;
@@ -84,8 +85,10 @@ export default function BillsList({ onCardClick }: BillsListProps) {
     <div className="space-y-4">
       {bills.map(bill => {
         const displayName = bill.vendorId ? vendorNames[bill.vendorId] || bill.extractedVendorName : bill.extractedVendorName;
-        const bDateSeconds = (bill.billDate as any)?._seconds ?? (bill.billDate as any)?.seconds;
-        const dDateSeconds = (bill.dueDate as any)?._seconds ?? (bill.dueDate as any)?.seconds;
+        const bDate = parseFirestoreDate(bill.billDate, new Date(0));
+        const hasBillDate = bDate.getTime() !== 0;
+        const dDate = parseFirestoreDate(bill.dueDate, new Date(0));
+        const hasDueDate = dDate.getTime() !== 0;
         return (
           <div
             key={bill.id}
@@ -100,9 +103,9 @@ export default function BillsList({ onCardClick }: BillsListProps) {
                 </span>
               </div>
               <div className="text-sm text-cocoa-500 flex items-center gap-3">
-                {bDateSeconds && <span>{t('expenses:list.billCardBill')}: {format(new Date(bDateSeconds * 1000), 'MMM d, yyyy')}</span>}
-                {dDateSeconds && (
-                  <span>| {t('expenses:list.billCardDue')}: {format(new Date(dDateSeconds * 1000), 'MMM d, yyyy')}</span>
+                {hasBillDate && <span>{t('expenses:list.billCardBill')}: {format(bDate, 'MMM d, yyyy')}</span>}
+                {hasDueDate && (
+                  <span>| {t('expenses:list.billCardDue')}: {format(dDate, 'MMM d, yyyy')}</span>
                 )}
               </div>
             </div>

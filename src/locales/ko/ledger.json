@@ -20,5 +20,7 @@
     "last7Days": "최근 7일",
     "last30Days": "최근 30일",
     "last90Days": "최근 90일"
-  }
+  },
+  "newTransactionsAvailable": "새 거래가 있습니다 — 클릭하여 새로 고침",
+  "loadMore": "더 보기"
 }

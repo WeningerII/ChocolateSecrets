@@ -23,8 +23,10 @@ production-management dashboard for a chocolate/confectionery kitchen.
   Functions** (`functions/src/`), Hosting. See [[cloud-functions-and-triggers]].
 - **AI:** Google **Gemini**, always proxied server-side — see [[gemini-ai-functions]]
   and the decision [[0002-gemini-server-side-only]].
-- **Dev server:** `server.ts` (Express + Vite middleware) at `:3000`, plus a
-  shopping-list email/SMS endpoint (Resend / Twilio).
+- **Dev server:** `server.ts` (Express + Vite middleware) at `:3000` — dev
+  only, no API endpoints. Shopping-list email/SMS is the `sendShoppingList`
+  callable Cloud Function (Resend / Twilio via Secret Manager) — see
+  [[0006-shopping-list-via-callable-function]].
 
 ## Core domain models (god nodes)
 The most-connected symbols in the code graph (see `../graphify-out/GRAPH_REPORT.md`):

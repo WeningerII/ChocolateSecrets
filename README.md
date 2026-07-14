@@ -32,8 +32,8 @@ the `GEMINI_API_KEY` lives in Secret Manager and never reaches the browser.
 
 React 19 + Vite 6 + TypeScript, Tailwind CSS 4, React Router 7, i18next, Recharts;
 Firebase 12 (Auth, Firestore, Cloud Functions, Hosting). A small Express server
-(`server.ts`) serves the dev build and a shopping-list email/SMS endpoint
-(Resend / Twilio).
+(`server.ts`) wraps Vite for local development only; all backend features —
+including the shopping-list email/SMS (Resend / Twilio) — run as Cloud Functions.
 
 ## Run locally
 
@@ -43,6 +43,9 @@ Firebase 12 (Auth, Firestore, Cloud Functions, Hosting). A small Express server
    ```bash
    npm install
    ```
+   The `postinstall` script also installs `functions/` dependencies, which the root
+   type-check (`npm run lint`) and unit tests need — no separate
+   `npm --prefix functions install` required.
 2. *(Optional)* Configure integrations — the app runs without any of these. Copy the
    template and fill in only what you need:
    ```bash
@@ -64,20 +67,24 @@ box. To run against the Firebase emulators instead, see [docs/testing.md](docs/t
 
 Every variable is **optional** for running the UI; each one enables a specific
 integration (see `.env.example`). `VITE_*` variables are loaded from `.env.local` by
-Vite and exposed to the browser; the rest are read from the process environment by
-`server.ts`.
+Vite and exposed to the browser.
 
 | Variable | Read by | Purpose |
 | --- | --- | --- |
 | `VITE_USDA_FDC_API_KEY` | client | Live USDA FoodData Central lookups (falls back to a bundled snapshot when absent) |
 | `VITE_FIREBASE_APPCHECK_SITE_KEY` / `VITE_FIREBASE_APPCHECK_DEBUG_TOKEN` | client | Optional Firebase App Check (off unless the site key is set) — see [docs/security-hardening.md](docs/security-hardening.md) |
-| `RESEND_API_KEY`, `CHEF_EMAIL` | `server.ts` | Email the shopping list via Resend |
-| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`, `CHEF_PHONE_NUMBER` | `server.ts` | Text the shopping list via Twilio |
 
 > **Gemini API key — not a client variable.** The Cloud Functions read `GEMINI_API_KEY`
 > from Secret Manager (`firebase functions:secrets:set GEMINI_API_KEY`). Do **not** set
 > `GEMINI_API_KEY` / `VITE_GEMINI_API_KEY` for the web build — all Gemini calls are
 > proxied through the functions. See [docs/deploy-readiness.md](docs/deploy-readiness.md) §6.
+
+> **Shopping-list email/SMS ("Send to Chef")** is served by the `sendShoppingList`
+> Cloud Function (ADR-0006), not the dev server. Provider credentials are Secret
+> Manager secrets (`firebase functions:secrets:set RESEND_API_KEY` /
+> `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN`); the non-secret config (`RESEND_FROM`,
+> `CHEF_EMAIL`, `TWILIO_PHONE_NUMBER`, `CHEF_PHONE_NUMBER`) is bound as function
+> params at deploy time — see [functions/.env.example](functions/.env.example).
 
 ## Testing
 
@@ -106,7 +113,9 @@ npm run build         # → dist/
   `BASE_PATH=/ChocolateSecrets/` on push to `main`. Note: Google sign-in is **blocked**
   there (cross-origin auth handler) — use Firebase Hosting for a working signed-in app.
 - **Cloud Functions:** `npm --prefix functions ci && npm --prefix functions run build`,
-  then `firebase deploy --only functions`. Set the `GEMINI_API_KEY` secret first.
+  then `firebase deploy --only functions`. Set the `GEMINI_API_KEY` secret first; for
+  shopping-list email/SMS also set the Resend/Twilio secrets and params
+  (see [functions/.env.example](functions/.env.example)).
 - **Firestore rules** deploy to the **named** database declared in `firebase.json`;
   details in [docs/security-hardening.md](docs/security-hardening.md).
 
@@ -122,7 +131,7 @@ scripts/     Maintenance / migration & check scripts (see package.json)
 docs/        Setup, testing, deploy, and security docs
 firestore.rules               Default-deny, role-based security rules
 firebase-applet-config.json   Firebase web config (named Firestore database)
-server.ts                     Express dev server + shopping-list email/SMS endpoint
+server.ts                     Express + Vite dev server (development only)
 ```
 
 ## Memory & knowledge graph (Claude Code)

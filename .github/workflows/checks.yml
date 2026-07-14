@@ -46,6 +46,9 @@ jobs:
       - name: Functions tests
         run: npm run test:functions
 
+      - name: Production build
+        run: npm run build
+
   rules-tests:
     runs-on: ubuntu-latest
     steps:
