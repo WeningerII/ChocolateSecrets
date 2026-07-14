@@ -108,6 +108,22 @@ that the code never passed → blank numbers at runtime) corrected across en/es/
 hardcoded-strings all green; 0 static casts remain. Commits `fbdc296` + `98b56e1`.
 All four rounds are on PR #40 (branch claude/next-priorities-f3wywa).
 
+## Round 5 executed (Firestore write-path + timestamp boundary anys)
+Backlog section D. Scoped after scouting to the coherent Firestore/timestamp
+theme (left the harder Gemini-enrichment modeling for a dedicated follow-up).
+Workflow (4 sequential impl agents — typing needs tsc as oracle, so serial to
+avoid the shared-tree race — → gate → behavior-preservation review, 0 findings):
+34 casts removed (`782288f`). `sanitizeData(any):any` → generic identity
+`<T>(obj:T):T`; SafeBatch/withTimestamps typed; production.ts + sourcing.ts
+timestamps → `Timestamp | FieldValue`; extended `parseFirestoreDate` with an
+additive serialized-`{_seconds}` branch and routed the ~9 expense duck-typing
+sites through it with an epoch-sentinel + `getTime()!==0` gate (the one place
+behavior could drift — review confirmed no "missing date → now" regression); 5
+`(ing as any).name` casts removed as unnecessary (RecipeIngredient already types
+`name?`). Verified independently: tsc clean, 920 tests, build, locale-parity.
+Still open in section D: geminiGenerate payload cast, Gemini enrichment output
+modeling (11 casts — deferred), BillReview/save-path casts, ~35 scattered anys.
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.

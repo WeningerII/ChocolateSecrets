@@ -163,15 +163,17 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 - [ ] [P1][S] **geminiGenerate passes client payload as `any` into the Gemini SDK**
   (`contents/config as any`) — in the security-guardrail path.
   (functions/src/geminiGenerate.ts:72-73)
-- [ ] [P1][M] **Type `src/utils/firestore.ts` write helpers** (7 `any`s:
-  sanitizeData, batch set/update, withTimestamps) — every Firestore write
-  bypasses type checking through this god-node utility.
+- [x] [P1][M] **Type `src/utils/firestore.ts` write helpers** ✅ done (`782288f`):
+  `sanitizeData<T>(obj:T):T` generic identity, SafeBatch.set/update typed via
+  `WithFieldValue<DocumentData>`/`DocumentData`, `withTimestamps` generic — bodies
+  byte-identical, 8 anys gone.
 - [ ] [P1][M] **Model the Gemini enrichment output.** 11 casts write untyped
   fields onto extracted recipes (`(recipe as any).stationTag/allergens/...`,
   `(ing as any).name/chocolateSpec/...`) — `ExtractedRecipe` doesn't model what
   the pipeline produces. (src/services/geminiService.ts:667-845)
-- [ ] [P1][S] **Fix `createdAt?: any; updatedAt?: any`** on the shared production
-  type. (src/types/production.ts:10-11)
+- [x] [P1][S] **Fix `createdAt?: any; updatedAt?: any`** on the shared production
+  type. ✅ done (`782288f`): `Timestamp | FieldValue` in production.ts (Restaurant)
+  and sourcing.ts (SourcingNote.keptAt). Other type files already used this.
 - [x] [P2][M] **Typed i18next keys** ([[refactor-backlog]] #3) — ✅ done
   (`fbdc296`, `98b56e1`). NB the premise was partly wrong: the type decl already
   existed and all 26 namespaces (incl. chemistry) were registered. The casts
@@ -185,10 +187,13 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   safety net for the dynamic case). **Real bugs found & fixed:** 12 missing keys
   the casts hid (7 renamed bread-warning kinds + auth/inventory/ledger keys) and 6
   bread-warning interpolation placeholder mismatches that rendered blank numbers.
-- [ ] [P2][M] **One typed Firestore-Timestamp coercion helper** — the
-  `(x as any)?._seconds ?? .seconds` duck-typing repeats 9× across 5 expenses
-  components (PaymentForm, PaymentsList, BillsList, BillPaymentHistory,
-  RecurringExpectationsList).
+- [x] [P2][M] **One typed Firestore-Timestamp coercion helper** ✅ done
+  (`782288f`): extended `parseFirestoreDate` (src/utils/date.ts) with an additive
+  branch for serialized `{_seconds}/{seconds}` timestamps (they arrive as plain
+  objects from Cloud Functions/REST, not Timestamp instances — which is why the
+  duck-typing existed); routed all ~9 sites through it with an epoch-sentinel +
+  `getTime()!==0` gate that preserves the old no-date truthiness exactly (18 casts
+  removed). Adversarial review confirmed no "missing date → now" drift.
 - [ ] [P2][S] BillReview builds the bill doc through 7 `as any` casts
   (src/components/BillReview.tsx:256-274).
 - [ ] [P2][S] Ingredient/recipe save paths coerce via `as unknown as` + `(data as
@@ -197,9 +202,11 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 - [ ] [P2][S] RecipeEditor state fields accessed via `(state as any)
   .storageEnvironment/shelfLifeDays/storageInstructions`; reducer action union has
   `t: any` ×2 (RecipeEditor.tsx:809-836; recipeEditor.types.ts:13,19).
-- [ ] [P2][S] Model the inline-ingredient name variant — `(ing as any).name`
-  fallback ×6 (foodSafety.ts:41, RecipeDetail.tsx, Recipes.tsx:483,
-  RecipeCookingMode.tsx:125, geminiService.ts:706).
+- [~] [P2][S] Model the inline-ingredient name variant — `(ing as any).name`
+  fallback. ✅ 5 of 6 removed (`782288f`): all were UNNECESSARY —
+  `RecipeIngredient` already declares `name?: string` (foodSafety.ts:41,
+  RecipeDetail.tsx ×2, Recipes.tsx:483, RecipeCookingMode.tsx:125). The 6th
+  (geminiService.ts:706) is folded into the Gemini-enrichment item below.
 - [ ] [P2][S] Untyped AI/payment parsing in services + functions: sourcingService
   (6 `any`s), extractBill.ts:155-206, recordPayment.ts:33-36, translation.ts
   catch params.
