@@ -124,6 +124,22 @@ behavior could drift — review confirmed no "missing date → now" regression);
 Still open in section D: geminiGenerate payload cast, Gemini enrichment output
 modeling (11 casts — deferred), BillReview/save-path casts, ~35 scattered anys.
 
+## Round 6 executed (Gemini enrichment output modeling + AI-proxy payload)
+The two hard section-D P1s. Scouting split the casts into spurious (field already
+existed) vs genuinely-missing-field. Workflow (2 sequential impl + gate + review,
+0 findings): 14 casts removed (`72f8159`). geminiService.ts — added the 4 fields
+the reason-pass writes but the type omitted (`inferredEquipment: string[]`,
+`yieldEstimate: ReturnType<typeof estimateYield>`, `temperingCurve: TemperingCurve`,
+ingredient `alcoholSpec: AlcoholSpec`) using each producing fn's real return type,
+then removed all 12 `(recipe as any)/(ing as any)` casts; `ing.category` needed
+no cast (types already matched). geminiGenerate.ts — typed the callable payload
+with the real @google/genai SDK types (`ContentListUnion`, `GenerateContentConfig`),
+closing the client-data-as-any gap in the guardrail proxy with no new runtime
+validation. Verified independently: tsc clean, 920 tests, functions build + 119
+functions tests, full build, pipeline test; 0 `as any` left in either file.
+Section D now: BillReview/save-path casts + ~35 scattered anys remain (the
+god-node write helpers, timestamps, i18n, Gemini paths are all done).
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.
