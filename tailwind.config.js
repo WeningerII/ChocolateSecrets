@@ -30,8 +30,10 @@ export default {
         'vanilla-cream': '#FFF8ED',
       },
       fontFamily: {
-        display: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
-        body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // "… Variable" = the self-hosted @fontsource variable faces (see
+        // src/main.tsx); plain names kept as fallback for safety.
+        display: ['Fraunces Variable', 'Fraunces', 'ui-serif', 'Georgia', 'serif'],
+        body: ['Inter Variable', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1.5' }],

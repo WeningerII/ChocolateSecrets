@@ -1,0 +1,3 @@
+# Chocolate Secrets is a private internal kitchen dashboard — not for indexing.
+User-agent: *
+Disallow: /
