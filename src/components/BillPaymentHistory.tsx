@@ -5,6 +5,7 @@ import { listPaymentsForBill } from '../services/paymentsService';
 import { format } from 'date-fns';
 import { getBill } from '../services/billsService';
 import { useToast } from '../contexts/ToastContext';
+import { parseFirestoreDate } from '../utils/date';
 
 interface BillPaymentHistoryProps {
   billId: string;
@@ -52,8 +53,8 @@ export default function BillPaymentHistory({ billId }: BillPaymentHistoryProps) 
         {payments.map(p => {
           const alloc = p.billAllocations.find(a => a.billId === billId);
           if (!alloc) return null;
-          const pDateSecs = (p.paymentDate as any)?._seconds ?? (p.paymentDate as any)?.seconds;
-          const dt = pDateSecs ? format(new Date(pDateSecs * 1000), 'MMM d, yyyy') : '';
+          const pDate = parseFirestoreDate(p.paymentDate, new Date(0));
+          const dt = pDate.getTime() !== 0 ? format(pDate, 'MMM d, yyyy') : '';
           return (
             <div key={p.id} className="text-sm text-cocoa-700 flex flex-wrap gap-1">
               <span>{dt} — ${alloc.amount.toFixed(2)}</span>

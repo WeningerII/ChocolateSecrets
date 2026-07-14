@@ -480,7 +480,7 @@ export default function Recipes() {
             for (const comp of recipe.components || []) {
               for (const ing of comp.ingredients) {
                 const resolved = ingredients.find(i => i.id === ing.ingredientId);
-                const name = resolved?.name || (ing as any).name;
+                const name = resolved?.name || ing.name;
                 if (name) ingredientNames.push(name);
               }
             }

@@ -1,21 +1,23 @@
-import { 
-  WriteBatch, 
-  writeBatch, 
-  Firestore, 
-  DocumentReference, 
-  serverTimestamp, 
+import {
+  WriteBatch,
+  writeBatch,
+  Firestore,
+  DocumentReference,
+  serverTimestamp,
   Timestamp,
   FieldValue,
-  doc
+  doc,
+  type DocumentData,
+  type WithFieldValue
 } from 'firebase/firestore';
 
 /**
  * Recursively removes undefined values from an object.
  * Also ensures numbers are valid and converts common types.
  */
-export function sanitizeData(obj: any): any {
+export function sanitizeData<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
-    if (typeof obj === 'number' && isNaN(obj)) return 0;
+    if (typeof obj === 'number' && isNaN(obj)) return 0 as T;
     return obj;
   }
 
@@ -24,16 +26,17 @@ export function sanitizeData(obj: any): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(sanitizeData);
+    return obj.map((item) => sanitizeData(item)) as T;
   }
 
-  const sanitized: any = {};
-  for (const key in obj) {
-    if (obj[key] !== undefined) {
-      sanitized[key] = sanitizeData(obj[key]);
+  const source = obj as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = {};
+  for (const key in source) {
+    if (source[key] !== undefined) {
+      sanitized[key] = sanitizeData(source[key]);
     }
   }
-  return sanitized;
+  return sanitized as T;
 }
 
 /**
@@ -44,8 +47,8 @@ export class SafeBatch {
   private operations: Array<{
     type: 'set' | 'update' | 'delete';
     ref: DocumentReference;
-    data?: any;
-    options?: any;
+    data?: DocumentData;
+    options?: { merge?: boolean };
   }> = [];
   private db: Firestore;
   private readonly LIMIT = 450;
@@ -54,11 +57,11 @@ export class SafeBatch {
     this.db = db;
   }
 
-  set(ref: DocumentReference, data: any, options?: { merge?: boolean }) {
+  set(ref: DocumentReference, data: WithFieldValue<DocumentData>, options?: { merge?: boolean }) {
     this.operations.push({ type: 'set', ref, data: sanitizeData(data), options });
   }
 
-  update(ref: DocumentReference, data: any) {
+  update(ref: DocumentReference, data: DocumentData) {
     this.operations.push({ type: 'update', ref, data: sanitizeData(data) });
   }
 
@@ -102,7 +105,10 @@ export class SafeBatch {
 /**
  * Helper to add standard timestamps to data
  */
-export function withTimestamps(data: any, isNew: boolean = false) {
+export function withTimestamps<T extends object>(
+  data: T,
+  isNew: boolean = false
+): T & { updatedAt: FieldValue; createdAt?: FieldValue } {
   const now = serverTimestamp();
   return {
     ...data,

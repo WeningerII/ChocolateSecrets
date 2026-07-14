@@ -8,6 +8,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useToast } from '../contexts/ToastContext';
 import { PAYMENT_METHODS } from '../constants';
+import { parseFirestoreDate } from '../utils/date';
 
 interface PaymentFormProps {
   isOpen: boolean;
@@ -35,8 +36,8 @@ export default function PaymentForm({ isOpen, onClose, initialBill, onSaved }: P
     if (isOpen && initialBill) {
       const outstanding = (initialBill.amountDue ?? initialBill.totalAmount) - (initialBill.paidAmount || 0);
       
-      const bDateSeconds = (initialBill.billDate as any)?._seconds ?? (initialBill.billDate as any)?.seconds;
-      const dateDesc = bDateSeconds ? format(new Date(bDateSeconds * 1000), 'MMM d, yyyy') : '';
+      const bDate = parseFirestoreDate(initialBill.billDate, new Date(0));
+      const dateDesc = bDate.getTime() !== 0 ? format(bDate, 'MMM d, yyyy') : '';
       const description = `${initialBill.extractedVendorName || t('expenses:paymentForm.unknownVendorFallback')} - ${initialBill.invoiceNumber || dateDesc}`;
       
       setAllocations([{
@@ -113,8 +114,8 @@ export default function PaymentForm({ isOpen, onClose, initialBill, onSaved }: P
 
   const addBill = (b: Bill) => {
     const outstanding = (b.amountDue ?? b.totalAmount) - (b.paidAmount || 0);
-    const bDateSeconds = (b.billDate as any)?._seconds ?? (b.billDate as any)?.seconds;
-    const dateDesc = bDateSeconds ? format(new Date(bDateSeconds * 1000), 'MMM d, yyyy') : '';
+    const bDate = parseFirestoreDate(b.billDate, new Date(0));
+    const dateDesc = bDate.getTime() !== 0 ? format(bDate, 'MMM d, yyyy') : '';
     const description = `${b.extractedVendorName || t('expenses:paymentForm.unknownVendorFallback')} - ${b.invoiceNumber || dateDesc}`;
     
     setAllocations([...allocations, {
@@ -228,8 +229,8 @@ export default function PaymentForm({ isOpen, onClose, initialBill, onSaved }: P
                         <div className="absolute left-0 mt-1 w-full bg-white rounded-xl shadow-lg border border-cocoa-100 z-20 max-h-64 overflow-y-auto">
                           {otherBills.map(b => {
                             const outstanding = (b.amountDue ?? b.totalAmount) - (b.paidAmount || 0);
-                            const bDateSeconds = (b.billDate as any)?._seconds ?? (b.billDate as any)?.seconds;
-                            const dateDesc = bDateSeconds ? format(new Date(bDateSeconds * 1000), 'MMM d, yyyy') : '';
+                            const bDate = parseFirestoreDate(b.billDate, new Date(0));
+                            const dateDesc = bDate.getTime() !== 0 ? format(bDate, 'MMM d, yyyy') : '';
                             return (
                               <button
                                 key={b.id}

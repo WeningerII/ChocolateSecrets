@@ -7,6 +7,7 @@ import { getBillsByIds } from '../services/billsService';
 import { format } from 'date-fns';
 import { Receipt } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
+import { parseFirestoreDate } from '../utils/date';
 
 export default function PaymentsList() {
   const { t } = useTranslation(['expenses']);
@@ -38,8 +39,8 @@ export default function PaymentsList() {
             vendorIds.add(b.vendorId);
             bVendorMap[b.id] = b.vendorId;
           }
-          const bDateSeconds = (b.billDate as any)?._seconds ?? (b.billDate as any)?.seconds;
-          const dateDesc = bDateSeconds ? format(new Date(bDateSeconds * 1000), 'MMM d, yyyy') : '';
+          const bDate = parseFirestoreDate(b.billDate, new Date(0));
+          const dateDesc = bDate.getTime() !== 0 ? format(bDate, 'MMM d, yyyy') : '';
           bDescMap[b.id] = b.invoiceNumber || dateDesc;
         });
         setBillDescriptions(bDescMap);
@@ -85,7 +86,8 @@ export default function PaymentsList() {
   return (
     <div className="space-y-4">
       {payments.map(payment => {
-        const pDateSeconds = (payment.paymentDate as any)?._seconds ?? (payment.paymentDate as any)?.seconds;
+        const pDate = parseFirestoreDate(payment.paymentDate, new Date(0));
+        const hasPaymentDate = pDate.getTime() !== 0;
         
         let vendorName: string = t('expenses:review.unknownVendor');
         if (payment.billAllocations.length > 0) {
@@ -103,8 +105,8 @@ export default function PaymentsList() {
                   <span>${payment.amount.toFixed(2)}</span>
                   <span className="px-2 py-0.5 bg-cocoa-100 text-cocoa-600 rounded-full text-xs">{t(`expenses:paymentMethod.${payment.method}` as any)}</span>
                 </div>
-                {pDateSeconds && (
-                  <div className="text-sm text-cocoa-500 mt-1">{format(new Date(pDateSeconds * 1000), 'MMM d, yyyy')}</div>
+                {hasPaymentDate && (
+                  <div className="text-sm text-cocoa-500 mt-1">{format(pDate, 'MMM d, yyyy')}</div>
                 )}
               </div>
               {payment.reference && (

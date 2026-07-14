@@ -7,8 +7,8 @@ export interface Restaurant {
   // Standing allergen disclaimer: allergens the kitchen may cross-contact across all recipes.
   // Example: "Every food item sold here may contain tree nuts, peanuts, wheat, milk, eggs, sesame or soy."
   standingAllergenDisclaimer?: string[]; // array of AllergenKey strings
-  updatedAt?: any;
-  createdAt?: any;
+  updatedAt?: Timestamp | FieldValue;
+  createdAt?: Timestamp | FieldValue;
 }
 
 export interface StationTag {

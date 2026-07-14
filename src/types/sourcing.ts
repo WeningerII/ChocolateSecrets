@@ -77,7 +77,7 @@ export interface SourcingNote {
   notes?: string;
   ingredientId: string;
   restaurantId: string;           // 'default' for now; future multi-restaurant support
-  keptAt: any;                     // Firestore Timestamp
+  keptAt: Timestamp | FieldValue;  // Firestore Timestamp (serverTimestamp on write)
   keptBy: string;                  // user uid
   promotedToSupplierId?: string;   // set once the note has been turned into a supplier record
   updatedAt?: Timestamp | FieldValue;

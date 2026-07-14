@@ -61,7 +61,7 @@ export default function RecipeDetail() {
     for (const comp of recipe.components || []) {
       for (const ing of comp.ingredients) {
         const resolved = ingredients.find(i => i.id === ing.ingredientId);
-        const name = resolved?.name || (ing as any).name;
+        const name = resolved?.name || ing.name;
         if (name) ingredientNames.push(name);
         // Also include the ingredient-state field which often carries form info
         if (ing.state) ingredientNames.push(`${name} ${ing.state}`);
@@ -378,7 +378,7 @@ export default function RecipeDetail() {
                   <tbody className="divide-y divide-cocoa-100">
                     {component.ingredients.map((ing, ingIdx) => {
                       const ingredient = getIngredient(ing.ingredientId);
-                      const name = ingredient?.name || (ing as any).name || t('recipes:detail.unknownIngredient');
+                      const name = ingredient?.name || ing.name || t('recipes:detail.unknownIngredient');
                       return (
                         <tr key={ingIdx} className="hover:bg-cream/50">
                           <td className="px-4 py-3">
