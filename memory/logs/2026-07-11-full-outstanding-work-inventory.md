@@ -140,6 +140,29 @@ functions tests, full build, pipeline test; 0 `as any` left in either file.
 Section D now: BillReview/save-path casts + ~35 scattered anys remain (the
 god-node write helpers, timestamps, i18n, Gemini paths are all done).
 
+## Deploy request (2026-07-12): blocked in-sandbox
+User said "deploy and continue". Deploy is NOT possible from this environment:
+no Firebase credentials (no service account / FIREBASE_TOKEN / login) and it's a
+production action the sandbox isn't provisioned for. Gave the user the exact
+`firebase deploy --only firestore:indexes|rules` + functions/secrets commands,
+with the critical prerequisite: set the owner's `users/{uid}` doc to
+`role:"admin"` BEFORE the rules deploy or [[0007-remove-owner-email-admin-backdoor]]
+locks admin out; and merge PR #40 first (deploy from main, not the branch). The
+three one-time deploys (indexes/rules/functions) remain pending on the user.
+
+## Round 7 executed (Firestore rules-test coverage)
+Backlog section F. Workflow (4 parallel writers → emulator gate → adversarial
+false-coverage review, 0 findings): coverage went 6/22 → 22/22 collections via
+124 new emulator-verified tests in 4 isolated files (unique projectIds; glob-
+picked by vitest.config.rules.ts). Security-critical focus: the `if false`
+write-locks on payments/userQuotas/translationCache/archivedLots, the alerts
+"update may only change dismissedAt" diff rule, recipes' 50-component boundary,
+and the deny-by-default catch-all. Verified independently: full suite 159 pass
+(35 existing + 124 new), and a live MUTATION CHECK — weakening payments
+`if false`→`if true` failed exactly 4 tests, proving the assertions have teeth
+(not false coverage). firestore.rules unchanged; no rules bug surfaced. Commit
+`63b7fec`.
+
 ## Files touched
 - notes: `memory/architecture/project-backlog.md` (new),
   `memory/architecture/refactor-backlog.md` (link added), this log.

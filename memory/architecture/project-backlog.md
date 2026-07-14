@@ -257,11 +257,14 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 - [ ] [P2][S] handleFirestoreError/firebase.ts, culinary/yield.ts, server.ts
   endpoints untested.
 - [ ] [P2][L] Component/page rendering coverage ~3/56 and 1/18.
-- [ ] [P1][M] **Rules tests cover only 6 of 22 collections.** Highest value
-  uncovered: payments/alerts CF-only-write rules (alerts has the most complex
-  rule in the file), userQuotas (tampering bypasses the Gemini rate limit),
-  recipes validation (isValidRecipe, 50-component cap, admin-only delete), and
-  the default-deny catch-all itself.
+- [x] [P1][M] **Rules tests cover only 6 of 22 collections.** ✅ done (`63b7fec`):
+  now all 22 covered — added 124 emulator-verified tests in 4 isolated files
+  (securityCfOnly, recipesAndCatalog, inventoryOps, expensesAndDefaultDeny). The
+  security-critical ones are done: payments/userQuotas/translationCache/
+  archivedLots `if false` write-locks, the alerts dismissedAt-only diff rule,
+  recipes 50-component boundary, and the default-deny catch-all. Full suite 159
+  pass; adversarial review found no false coverage; a mutation check
+  (payments `if false`→`if true` fails 4 tests) confirms the assertions bite.
 - [ ] [P2][S] Emulator-level trigger tests (onTransactionCreate/onLotUpdate touch
   only extracted pure functions); resolveVendor wrapper; adminRecipients.
 - [ ] [P3][M] 8 maintenance/migration scripts (~1,280 LOC, run against prod
