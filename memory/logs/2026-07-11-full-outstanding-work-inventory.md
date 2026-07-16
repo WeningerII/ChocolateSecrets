@@ -172,3 +172,21 @@ and the deny-by-default catch-all. Verified independently: full suite 159 pass
 
 ## Related
 - [[project-backlog]] · [[refactor-backlog]] · [[system-overview]]
+
+## Round 8 executed (app shell + deploy automation)
+Two increments after PR #41 merged. (a) App shell (`024ab9c`): self-hosted
+Fraunces/Inter variable fonts via @fontsource (CDN links removed — works
+offline in the kitchen), chocolate SVG favicon + manifest + robots.txt
+(Disallow: /) in new public/, full head meta (description/OG/twitter/
+theme-color), and a CI bundle-size budget (check-bundle-size.mjs, largest
+chunk <=300 kB gzip). (b) Deploy automation (round 8 proper): user pushback —
+rightly — on manual terminal deploys ("why so many blockers?"). Root cause: we
+never built the deploy pipeline flagged in the audit (C-6/C-7). Fixed:
+`.github/workflows/deploy-firestore.yml` auto-deploys rules+indexes on merge,
+gated on the 159-test emulator suite, using the FIREBASE_SERVICE_ACCOUNT
+secret; firebase-hosting.yml flipped to push-on-main. The user's remaining
+one-time work is browser-only: set users/{uid} role=admin, generate the
+service-account key (Firebase console → Project settings → Service accounts),
+paste it as the repo secret, run the workflow once. Deploy guide artifact
+rewritten accordingly. Functions deploy (Send-to-Chef) stays deferred by user
+choice ("skip email & SMS for now").
