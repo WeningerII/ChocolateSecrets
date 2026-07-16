@@ -71,6 +71,17 @@ jobs:
           SA_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/firebase-sa.json"
 
+      # ADR-0007 removed the email admin backdoor, so admin comes only from the
+      # owner's users/{uid} doc. Guarantee that doc says role: "admin" BEFORE
+      # the rules deploy (idempotent; fails the run rather than lock the owner
+      # out). See scripts/ensure-owner-admin.mjs.
+      - name: Ensure owner admin role
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
+          OWNER_EMAIL: weningerii@gmail.com
+          FIRESTORE_DATABASE_ID: ai-studio-b87bb121-f3a6-4594-bf8b-d104e1bc3903
+        run: node scripts/ensure-owner-admin.mjs
+
       - name: Deploy rules + indexes
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-sa.json
