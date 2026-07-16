@@ -19,10 +19,13 @@
     "check:locale-parity": "node scripts/check-locale-parity.mjs",
     "check:hardcoded-strings": "node scripts/check-hardcoded-strings.mjs",
     "check:functions-secrets": "node scripts/check-functions-secrets.mjs",
+    "check:bundle-size": "node scripts/check-bundle-size.mjs",
     "seed:expense-categories": "node scripts/seed-expense-categories.mjs",
     "test:functions": "npm --prefix functions run test"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource-variable/inter": "^5.2.8",
     "@google/genai": "^1.29.0",
     "@phosphor-icons/react": "^2.1.7",
     "@tailwindcss/vite": "^4.1.14",

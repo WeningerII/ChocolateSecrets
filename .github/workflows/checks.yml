@@ -49,6 +49,9 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Bundle-size budget
+        run: npm run check:bundle-size
+
   rules-tests:
     runs-on: ubuntu-latest
     steps:

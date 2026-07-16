@@ -118,8 +118,9 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## C. CI/CD & deploy pipeline
 
-- [~] [P1][S] **Run `npm run build` on PRs + add a bundle-size budget.**
-  ✅ build step landed (`bb4ad42`); bundle-size budget still open (see I-4). The
+- [x] [P1][S] **Run `npm run build` on PRs + add a bundle-size budget.**
+  ✅ fully done: build step (`bb4ad42`) + bundle budget (`024ab9c`:
+  scripts/check-bundle-size.mjs in CI, largest chunk <=300 kB gzip, now 249). The
   production build first runs post-merge in deploy-pages.yml; a broken bundle
   merges green. (checks.yml)
 - [ ] [P2][S] **Gate deploy-pages on checks.** It triggers on push to main
@@ -133,10 +134,15 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
   seed script for required staging data; e2e README's retarget instructions are
   unfollowable (config hard-imported from firebase-applet-config.json, no
   VITE_FIREBASE_* env path).
-- [ ] [P2][M] **Enable hosting auto-deploy.** firebase-hosting.yml is manual-only
+- [x] [P2][M] **Enable hosting auto-deploy.** ✅ push-on-main trigger enabled
+  (round 8); activates once the `FIREBASE_SERVICE_ACCOUNT` secret is added
+  (one-time browser task — see deploy guide). Was: firebase-hosting.yml manual-only
   pending the `FIREBASE_SERVICE_ACCOUNT` secret; Google sign-in only fully works
   on Hosting (Pages serves the auth handler cross-origin).
-- [ ] [P2][M] **Automate rules/indexes/functions deploys.** No workflow runs
+- [~] [P2][M] **Automate rules/indexes/functions deploys.** ✅ rules+indexes done
+  (round 8): `.github/workflows/deploy-firestore.yml` deploys on merge, gated on
+  the 159-test emulator suite, targeting the named DB. Functions deploy remains
+  manual (needs Resend/Twilio secrets — deferred with Send-to-Chef). Was: no workflow runs
   `firebase deploy --only firestore|functions`; drift risk is aggravated by the
   named database (a mistargeted manual deploy updates `(default)` silently).
 - [ ] [P2][S] **Wire up check:functions-secrets.** Gated on
@@ -335,14 +341,21 @@ skipped tests; routes/nav all real; food-science core exceptionally well tested.
 
 ## I. App shell & delivery
 
-- [ ] [P1][S] Favicon: none exists (no public/ dir, no link tag) — blank tab icon
+- [x] [P1][S] Favicon ✅ done (`024ab9c`): brand-copper chocolate-bar SVG in new
+  public/ + link tags. (PNG apple-touch still a nice-to-have — no raster tooling
+  in-sandbox.) Was: none exists — blank tab icon
   + 404 on /favicon.ico on every load.
-- [ ] [P1][S] Self-host fonts (Fraunces/Inter via Google CDN today):
+- [x] [P1][S] Self-host fonts ✅ done (`024ab9c`): @fontsource-variable Fraunces
+  + Inter bundled via main.tsx; CDN links removed; tailwind families updated.
+  Was: (Fraunces/Inter via Google CDN):
   render-blocking third party, breaks offline kitchen use, GDPR exposure; also
   move `<meta charset>` first.
-- [ ] [P2][S] Meta description/OG/twitter/theme-color; robots.txt (likely
+- [x] [P2][S] Meta description/OG/twitter/theme-color; robots.txt ✅ done
+  (`024ab9c`): full head meta + theme-color #B87333, robots.txt Disallow: /,
+  manifest.webmanifest. Was: missing (likely
   `Disallow: /` for an internal dashboard); apple-touch-icon.
-- [ ] [P2][M] Main entry chunk 725 kB min / 253 kB gzip (trips Vite's warning) —
+- [ ] [P2][M] Main entry chunk 725 kB min / ~249 kB gzip (now guarded by the CI
+  budget at 300; splitting it further still open) —
   analyze with visualizer, split eager imports.
 - [ ] [P3][M] Per-page (and localized) `document.title` — one static English
   title for all routes today.
