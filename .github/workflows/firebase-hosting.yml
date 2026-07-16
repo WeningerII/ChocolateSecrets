@@ -10,9 +10,11 @@ name: firebase-hosting
 #   variables -> Actions). Until then, deploy manually:
 #     npm run build && firebase deploy --only hosting
 #
-# Manual trigger only for now; add `push: { branches: [main] }` once the secret
-# exists if you want auto-deploy on every merge to main.
+# Auto-deploys on every merge to main (requires the secret above; the run
+# no-ops with a clear error until it exists). Manual trigger kept for reruns.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
