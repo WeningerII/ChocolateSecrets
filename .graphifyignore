@@ -42,3 +42,6 @@ firestore.indexes.json
 .mcp.json
 scripts/setup-memory.sh
 scripts/memory-session-start.sh
+
+# Static shell assets (favicon etc.) — not code; keeps CI extraction key-free
+public/
